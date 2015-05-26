@@ -5,7 +5,7 @@ cap=cv2.VideoCapture()
 vidPath="rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp"
 cap.open(vidPath)
 count =-1
-skip=5 #Minimum
+skip=3 #Minimum
 while(cap.isOpened()):
     ret,frame=cap.read()
     count=count+1
