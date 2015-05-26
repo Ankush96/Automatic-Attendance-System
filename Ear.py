@@ -13,7 +13,7 @@ def main():
         ret,frame0=cap.read()
         count=count+1
         if count%skip==0:
-            #frame0=cv2.GaussianBlur(frame0,(3,3),0)
+            #frame0=cv2.GaussianBlur(frame,(3,3),0)
             gray = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY) #scale down image
             gray1=clahe.apply(gray)
             #gray=cv2.equalizeHist(gray)
