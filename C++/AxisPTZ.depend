@@ -3,7 +3,8 @@
 	<opencv2/opencv.hpp>
 	<iostream>
 
-1432709203 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
+1432744297 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
+	<stdio.h>
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"
 	"opencv2/highgui/highgui.hpp"
@@ -25,7 +26,7 @@
 	<sstream>
 	<vector>
 
-1432722146 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/lbp.cpp
+1432744220 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/lbp.cpp
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"
 	"opencv2/highgui/highgui.hpp"

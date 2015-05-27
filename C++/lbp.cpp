@@ -1,4 +1,4 @@
-
+/*
 #include "opencv2/core/core.hpp"
 #include "opencv2/contrib/contrib.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -31,7 +31,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 int main()
 {
 
-    string fn_csv = "samples.txt";
+    string fn_csv = "samples.csv";
 
     vector<Mat> images;
     vector<int> labels;
@@ -43,26 +43,27 @@ int main()
         exit(1);
     }
 
+
     if(images.size() <= 1) {
         string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
         CV_Error(CV_StsError, error_message);
     }
 
-    int height = images[0].rows;
 
-    Mat testSample = images[images.size() - 1];
-    int testLabel = labels[labels.size() - 1];
-    images.pop_back();
-    labels.pop_back();
 
 
      Ptr<FaceRecognizer> model = createLBPHFaceRecognizer(1,8,8,8,123.0);
-     //Ptr<FaceRecognizer> model = createFisherFaceRecognizer();
+   //  cvNamedWindow("Face",WINDOW_NORMAL);
+    // imshow("Face",images[1]);
+    // cvWaitKey(0);
+
     model->train(images, labels);
+
     model->save("lbp.xml");
     // The following line predicts the label of a given
     // test image:
-    int predictedLabel = model->predict(testSample);
+
+
     //
     // To get the confidence of a prediction call the model with:
     //
@@ -70,8 +71,8 @@ int main()
     //      double confidence = 0.0;
     //      model->predict(testSample, predictedLabel, confidence);
     //
-    string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
-    cout << result_message << endl;
+  //  string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
+  //  cout << result_message << endl;
     // Sometimes you'll need to get/set internal model data,
     // which isn't exposed by the public cv::FaceRecognizer.
     // Since each cv::FaceRecognizer is derived from a
@@ -85,8 +86,8 @@ int main()
     // Now the threshold of this model is set to 0.0. A prediction
     // now returns -1, as it's impossible to have a distance below
     // it
-    predictedLabel = model->predict(testSample);
-    cout << "Predicted class = " << predictedLabel << endl;
+    //predictedLabel = model->predict(testSample);
+    //cout << "Predicted class = " << predictedLabel << endl;
     // Show some informations about the model, as there's no cool
     // Model data to display as in Eigenfaces/Fisherfaces.
     // Due to efficiency reasons the LBP images are not stored
@@ -103,7 +104,8 @@ int main()
     vector<Mat> histograms = model->getMatVector("histograms");
     // But should I really visualize it? Probably the length is interesting:
     cout << "Size of the histograms: " << histograms[0].total() << endl;
+
     return 0;
 }
 
-
+*/

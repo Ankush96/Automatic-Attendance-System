@@ -1,4 +1,4 @@
-/*#include <stdio.h>
+#include <stdio.h>
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/contrib/contrib.hpp"
@@ -69,6 +69,18 @@ Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
 
 }
 
+string prediction_name(int prediction)
+{
+    switch(prediction)
+    {
+        case -1:return "Unknown";
+                break;
+        case 1: return "Ankush";
+                break;
+
+    }
+}
+
 int main(int, char**) {
     VideoCapture vcap;
     Mat img,gray;
@@ -88,7 +100,9 @@ int main(int, char**) {
    // double width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
    // cv::Size frameSize(static_cast<int>(width),static_cast<int>(height));
    // cv::VideoWriter MyVid("/home/student/Documents/MyVideo1.avi",CV_FOURCC('P','I','M','1'),30,frameSize,true);
-    cvNamedWindow("Face",WINDOW_NORMAL);
+    //cvNamedWindow("Face",WINDOW_NORMAL);
+    Ptr<FaceRecognizer> model = createLBPHFaceRecognizer(1,8,8,8,123.0);
+    model->load("lbp.xml");
     while(1)
         {
             vcap.read(img);
@@ -97,16 +111,22 @@ int main(int, char**) {
             {
                // cv::imshow("Output Window1", img);
                 img=clahe(img);
+                Mat original =img.clone();
                 cvtColor(img, gray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;
                 haar_cascade.detectMultiScale(gray,faces);
                 for(int i=0;i<faces.size();i++)
                 {
                     Rect crop=faces[i];
-                    Mat instance=img(crop);
-                    //int prediction=model->predict(instance);
+                    Mat instance=gray(crop);
+                    int prediction=model->predict(instance);
+                    //if(prediction==-1) continue;
                     rectangle(img,crop,CV_RGB(0,255,0),2);
-                    cv::imshow("Face", instance);
+                    string box_text = prediction_name(prediction);
+                    //cv::imshow("Face", instance);
+                    int pos_x = std::max(crop.tl().x - 10, 0);
+                    int pos_y = std::max(crop.tl().y - 10, 0);
+                    putText(img, box_text, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
                 }
                 cv::imshow("Output Window2", img);
 
@@ -119,4 +139,4 @@ int main(int, char**) {
         }
 
 }
-*/
+

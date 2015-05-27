@@ -27,6 +27,7 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-g" />
 			<Add option="`opencv-config --cxxflags`" />
 			<Add directory="../../../../../usr/local/include/opencv" />
 			<Add directory="../../../../../usr/local/include/opencv2" />
@@ -35,6 +36,7 @@
 			<Add option="`opencv-config --ldstaticflags`" />
 			<Add option="/usr/local/lib/libopencv_calib3d.so" />
 			<Add option="/usr/local/lib/libopencv_core.so" />
+			<Add option="/usr/local/lib/libopencv_contrib.so.2.4" />
 			<Add option="/usr/local/lib/libopencv_features2d.so" />
 			<Add option="/usr/local/lib/libopencv_flann.so" />
 			<Add option="/usr/local/lib/libopencv_highgui.so" />
