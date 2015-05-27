@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1432660781 source:/home/student/Documents/AxisPTZ/AxisPTZ/main.cpp
+	<opencv2/opencv.hpp>
+	<iostream>
+
