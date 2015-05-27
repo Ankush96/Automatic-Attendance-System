@@ -50,6 +50,7 @@
 		<Unit filename="../../Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Face-extract.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lbp.cpp" />
 		<Unit filename="lena.jpg" />
 		<Unit filename="main.cpp" />
 		<Extensions>

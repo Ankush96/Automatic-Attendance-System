@@ -73,7 +73,7 @@ int main(int, char**) {
     VideoCapture vcap;
     Mat img,gray;
     char key,name[20];
-    int i=0,count=-1,skip=4;
+    int i=0,count=-1,skip=10,k=0;
     const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
     CascadeClassifier haar_cascade;
     haar_cascade.load("../Cascades/front_alt2.xml");
@@ -83,11 +83,6 @@ int main(int, char**) {
             std::cout << "Error opening video stream or file" << std::endl;
             return -1;
         }
-    //vcap.read(gray);
-   // double height = vcap.get(CV_CAP_PROP_FRAME_HEIGHT);
-   // double width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
-   // cv::Size frameSize(static_cast<int>(width),static_cast<int>(height));
-   // cv::VideoWriter MyVid("/home/student/Documents/MyVideo1.avi",CV_FOURCC('P','I','M','1'),30,frameSize,true);
     cvNamedWindow("Face",WINDOW_NORMAL);
     while(1)
         {
@@ -95,7 +90,6 @@ int main(int, char**) {
             count++;
             if(count%skip==0)
             {
-               // cv::imshow("Output Window1", img);
                 img=clahe(img);
                 cvtColor(img, gray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;
@@ -104,7 +98,10 @@ int main(int, char**) {
                 {
                     Rect crop=faces[i];
                     Mat instance=img(crop);
-                    //int prediction=model->predict(instance);
+                    char filename[100];
+                    sprintf(filename,"../Faces/s2/img%d.jpg",k);
+                    k++;
+                    imwrite(filename,instance);
                     rectangle(img,crop,CV_RGB(0,255,0),2);
                     cv::imshow("Face", instance);
                 }
@@ -118,5 +115,5 @@ int main(int, char**) {
 
         }
 
-}
-*/
+}*/
+
