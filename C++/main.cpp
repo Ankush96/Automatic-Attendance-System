@@ -71,10 +71,12 @@ Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
 
 int main(int, char**) {
     VideoCapture vcap;
-    Mat img,gray,;
+    Mat img,gray;
     char key,name[20];
     int i=0,count=-1,skip=4;
     const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
+    CascadeClassifier haar_cascade;
+    haar_cascade.load("../Cascades/front_alt2.xml");
 
     if(!vcap.open(videoStreamAddress))
         {
@@ -87,7 +89,7 @@ int main(int, char**) {
    // cv::Size frameSize(static_cast<int>(width),static_cast<int>(height));
    // cv::VideoWriter MyVid("/home/student/Documents/MyVideo1.avi",CV_FOURCC('P','I','M','1'),30,frameSize,true);
 
-    for(;;)
+    while(1)
         {
             vcap.read(img);
             count++;
@@ -96,9 +98,16 @@ int main(int, char**) {
                 cv::imshow("Output Window1", img);
                 img=clahe(img);
                 cvtColor(img, gray, CV_BGR2GRAY);
+                vector< Rect_<int> > faces;
+                haar_cascade.detectMultiScale(gray,faces);
+                for(int i=0;i<faces.size();i++)
+                {
+                    Rect crop=faces[i];
+                    Mat instance=gray(crop);
+                    //int prediction=model->predict(instance);
+                    rectangle(img,crop,CV_RGB(0,255,0),2);
 
-                //cvtColor(img, gray, CV_BGR2GRAY);
-                // MyVid.write(gray);
+                }
                 cv::imshow("Output Window2", img);
                 key = cv::waitKey(30);
                 cam_movement(key,img);
