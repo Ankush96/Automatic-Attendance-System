@@ -1,3 +1,5 @@
+
+///*
 #include <stdio.h>
 
 #include "opencv2/core/core.hpp"
@@ -73,10 +75,13 @@ string prediction_name(int prediction)
 {
     switch(prediction)
     {
+        case 0 : return "Rahul";
         case -1:return "Unknown";
-                break;
-        case 1: return "Ankush";
-                break;
+        case 4: return "Ankush";
+        case 2: return "Srishty";
+        case 1: return "Achammal";
+        case 3: return "Jaymanyu";
+
 
     }
 }
@@ -101,8 +106,13 @@ int main(int, char**) {
    // cv::Size frameSize(static_cast<int>(width),static_cast<int>(height));
    // cv::VideoWriter MyVid("/home/student/Documents/MyVideo1.avi",CV_FOURCC('P','I','M','1'),30,frameSize,true);
     //cvNamedWindow("Face",WINDOW_NORMAL);
-    Ptr<FaceRecognizer> model = createLBPHFaceRecognizer(1,8,8,8,123.0);
-    model->load("lbp.xml");
+    Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer(1,8,8,8,123.0);
+    Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
+    Ptr<FaceRecognizer> ff =createFisherFaceRecognizer();
+    lbp->load("lbp.xml");
+    ef->load("ef.xml");
+    ff->load("ff.xml");
+
     while(1)
         {
             vcap.read(img);
@@ -119,14 +129,25 @@ int main(int, char**) {
                 {
                     Rect crop=faces[i];
                     Mat instance=gray(crop);
-                    int prediction=model->predict(instance);
-                    //if(prediction==-1) continue;
+                    if ( ! instance.isContinuous() )
+                        {
+                            instance = instance.clone();
+                        }
+                    resize(instance,instance, Size(120,120), 1.0, 1.0, INTER_CUBIC);
+                    int plbp=lbp->predict(instance);
+                    int pef=ef->predict(instance);
+                    int pff=ff->predict(instance);
+
+
                     rectangle(img,crop,CV_RGB(0,255,0),2);
-                    string box_text = prediction_name(prediction);
-                    //cv::imshow("Face", instance);
+                    string lbp ="lbp: "+ prediction_name(plbp);
+                    string ef = "ef: "+prediction_name(pef);
+                    string ff = "ff: "+prediction_name(pff);
                     int pos_x = std::max(crop.tl().x - 10, 0);
                     int pos_y = std::max(crop.tl().y - 10, 0);
-                    putText(img, box_text, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                    putText(img, lbp, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                    putText(img, ef, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                    putText(img, ff, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
                 }
                 cv::imshow("Output Window2", img);
 
@@ -138,5 +159,7 @@ int main(int, char**) {
 
         }
 
+return 0;
 }
 
+//*/

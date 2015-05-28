@@ -1,4 +1,7 @@
-/*#include <stdio.h>
+/*
+
+//change the folder name
+#include <stdio.h>
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/contrib/contrib.hpp"
@@ -99,7 +102,7 @@ int main(int, char**) {
                     Rect crop=faces[i];
                     Mat instance=img(crop);
                     char filename[100];
-                    sprintf(filename,"../Faces/s2/img%d.jpg",k);
+                    sprintf(filename,"../Faces/s5/img%d.jpg",k);
                     k++;
                     imwrite(filename,instance);
                     rectangle(img,crop,CV_RGB(0,255,0),2);
@@ -115,5 +118,7 @@ int main(int, char**) {
 
         }
 
-}*/
+}
 
+
+*/
