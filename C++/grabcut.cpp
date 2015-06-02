@@ -1,3 +1,4 @@
+/*
 #include "opencv2/opencv.hpp"
 #include <iostream>
 
@@ -8,7 +9,7 @@ int main( )
 {
     // Open another image
     Mat image;
-    image = cv::imread("../Faces/s1/img3.jpg");
+    image = cv::imread("../Faces/s7/2.jpeg");
 
     if(! image.data ) // Check for invalid input
     {
@@ -36,11 +37,11 @@ int main( )
 
     // draw rectangle on original image
     cv::rectangle(image, rectangle, cv::Scalar(255,255,255),1);
-    cv::namedWindow("Image");
+    cv::namedWindow("Image",WINDOW_AUTOSIZE);
     cv::imshow("Image",image);
 
     // display result
-    cv::namedWindow("Segmented Image");
+    cv::namedWindow("Segmented Image",WINDOW_AUTOSIZE);
     cv::imshow("Segmented Image",foreground);
 
 
@@ -48,4 +49,4 @@ int main( )
     return 0;
 
 }
-
+*/
