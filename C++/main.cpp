@@ -1,5 +1,5 @@
 
-///*
+/*
 #include <stdio.h>
 
 #include "opencv2/core/core.hpp"
@@ -95,6 +95,7 @@ int main(int, char**) {
     CascadeClassifier haar_cascade;
     haar_cascade.load("../Cascades/front_alt2.xml");
 
+
     if(!vcap.open(videoStreamAddress))
         {
             std::cout << "Error opening video stream or file" << std::endl;
@@ -162,4 +163,4 @@ int main(int, char**) {
 return 0;
 }
 
-//*/
+*/

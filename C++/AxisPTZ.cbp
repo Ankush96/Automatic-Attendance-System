@@ -52,9 +52,11 @@
 		<Unit filename="../../Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Face-extract.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="Sampler.cpp" />
 		<Unit filename="lbp.cpp" />
 		<Unit filename="lena.jpg" />
 		<Unit filename="main.cpp" />
+		<Unit filename="model.cpp" />
 		<Extensions>
 			<envvars />
 			<code_completion />
