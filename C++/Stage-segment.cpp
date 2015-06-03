@@ -3,13 +3,15 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
+#include <vector>
+#include "math.h"
 
 using namespace cv;
 
 using std::cout;
 using std::endl;
 
-int cr_min=128,cr_max=164,cb_min=115,cb_max=160;
+int cr_min=128,cr_max=164,cb_min=115,cb_max=160,kernel=8;
 
 Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
 {
@@ -98,7 +100,6 @@ Mat dilate(Mat const &src,int thresh=2)
 }
 
 
-
 Mat erode_dilate(Mat const &src)
 {
     int i,j;
@@ -123,6 +124,8 @@ Mat erode_dilate(Mat const &src)
             if(dst.at<uchar>(i,j)<255) dst.at<uchar>(i,j)=0;
         }
     }
+    namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
+    imshow("erode_dilate stage 2",dst);
     return dst;
 
 }
@@ -164,10 +167,10 @@ Mat stage1(Mat const &src) {
     // cover the whole value range of [0,255], so there's
     // no need to scale the values:
     cvtColor(src, src_ycrcb, CV_BGR2YCrCb);
-    vector<Mat> planes;
-    split( src_ycrcb, planes );
-    imshow("cr",planes[1]);
-    imshow("cb",planes[2]);
+    //vector<Mat> planes;
+    //split( src_ycrcb, planes );
+    //imshow("cr",planes[1]);
+    //imshow("cb",planes[2]);
     // OpenCV scales the Hue Channel to [0,180] for
     // 8bit images, so make sure we are operating on
     // the full spectrum from [0,360] by using floating
@@ -216,7 +219,7 @@ Mat stage1(Mat const &src) {
     return dst;
 }
 
-Mat stage2(Mat const &Csrc,int kernel=8)
+Mat stage2(Mat const &Csrc)
 {
     Mat src;
     cvtColor(Csrc,src,CV_BGR2GRAY);
@@ -260,6 +263,49 @@ Mat stage2(Mat const &Csrc,int kernel=8)
     return erode_dilate(dst);
 }
 
+float stddev(Vector<int> w)
+{
+    int i;
+    float mean=0,sum=0;
+    for(i=0;i<w.size();i++) sum+=w[i];
+    mean=sum/w.size();
+    sum=0;
+    for(i=0;i<w.size();i++) sum+=(w[i]-mean)*(w[i]-mean);
+    return sqrt((sum/w.size()));
+
+
+}
+Mat stage3(Mat const &src,Mat const &img,int thresh=2)
+{
+    int i,j,k,l;
+    Mat gray;
+    cvtColor(src,gray,CV_BGR2GRAY);
+    Mat dst=img.clone();
+    for(i=0;i<img.rows;i++)
+    {
+        for(j=0;j<img.cols;j++)
+        {
+            if(img.at<uchar>(i,j)==255)
+            {
+                Vector<int> w;
+                for(l=0;l<min(kernel,gray.rows-kernel*i);l++)
+                {
+                    for(k=0;k<min(kernel,gray.cols-kernel*j);k++)
+                    {
+                        w.push_back(gray.at<uchar>(i*kernel+l,j*kernel+k));
+                    }
+                }
+                if(stddev(w)<=thresh)dst.at<uchar>(i,j)=0;
+            }
+        }
+
+    }
+    namedWindow("stddev_stage 3",WINDOW_NORMAL);
+    imshow("stddev_stage 3",dst);
+    return dst;
+}
+
+
 Mat GetSkin(Mat const &src)
 {
     return stage2(stage1(src));
@@ -269,10 +315,10 @@ Mat GetSkin(Mat const &src)
 int main()
  {
 
-    // Load image & get skin proportions:
+  /*  // Load image & get skin proportions:
     Mat image = cv::imread("b15.jpeg");
     namedWindow("original");
-    namedWindow("skin",WINDOW_NORMAL);
+    //namedWindow("skin",WINDOW_NORMAL);
     image=clahe(image);
     imshow("original", image);
 
@@ -280,12 +326,12 @@ int main()
 
     // Show the results:
 
-    imshow("skin", skin);
+    //imshow("skin", skin);
 
     waitKey(0);
+*/
 
-
-  /*
+  ///*
     VideoCapture vcap;
     Mat img,gray;
     char key,name[20];
@@ -297,7 +343,7 @@ int main()
             return -1;
         }
     namedWindow("original");
-    namedWindow("skin");
+    namedWindow("skin",WINDOW_NORMAL);
     createTrackbar("cr min ","skin",&cr_min,255);
     createTrackbar("cr max ","skin",&cr_max,255);
     createTrackbar("cb min ","skin",&cb_min,255);
@@ -322,7 +368,8 @@ int main()
             }
 
         }
-     */
+    //*/
+
 
     return 0;
 }
