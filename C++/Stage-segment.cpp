@@ -28,6 +28,105 @@ Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
 
 }
 
+Mat erode(Mat const &src,int thresh=5)
+{
+    int i,j,l,k,count;
+    Mat dst=src.clone();
+    for(i=1;i<src.rows;i++)
+    {
+        for(j=1;j<src.cols;j++)
+        {
+            if(src.at<uchar>(i,j)==255)
+            {
+                count=0;
+                 for(l=i-1;l<=i+1;l++)
+                 {
+                    for(k=j-1;k<=j+1;k++)
+                        {
+                            if(!(i==l&&j==k)&&src.at<uchar>(l,k)==255)
+                            {
+                                count ++;
+                            }
+
+                        }
+
+                 }
+                 if(count<thresh) dst.at<uchar>(i,j)=0;
+            }
+
+        }
+    }
+
+    namedWindow("erode",WINDOW_NORMAL);
+    imshow("erode",dst);
+    return dst;
+}
+
+
+Mat dilate(Mat const &src,int thresh=2)
+{
+    int i,j,l,k,count;
+    Mat dst=src.clone();
+    for(i=1;i<src.rows;i++)
+    {
+        for(j=1;j<src.cols;j++)
+        {
+            if(src.at<uchar>(i,j)<255)
+            {
+                count=0;
+                 for(l=i-1;l<=i+1;l++)
+                 {
+                    for(k=j-1;k<=j+1;k++)
+                        {
+                            if(!(i==l&&j==k)&&src.at<uchar>(l,k)==255)
+                            {
+                                count ++;
+                            }
+
+                        }
+
+                 }
+                 if(count>thresh) dst.at<uchar>(i,j)=255;
+            }
+
+        }
+    }
+
+    namedWindow("dilate",WINDOW_NORMAL);
+    imshow("dilate",dst);
+    return dst;
+}
+
+
+
+Mat erode_dilate(Mat const &src)
+{
+    int i,j;
+    Mat dst=src.clone();
+    for(i=0;i<dst.rows;i++)
+    {
+        dst.at<uchar>(i,0)=0;
+        dst.at<uchar>(i,src.cols-1)=0;
+
+    }
+    for(i=0;i<dst.cols;i++)
+    {
+        dst.at<uchar>(0,i)=0;
+        dst.at<uchar>(src.rows-1,i)=0;
+
+    }
+    dst=(dilate(erode(dst)));
+    for(i=0;i<dst.rows;i++)
+    {
+        for(j=0;j<dst.cols;j++)
+        {
+            if(dst.at<uchar>(i,j)<255) dst.at<uchar>(i,j)=0;
+        }
+    }
+    return dst;
+
+}
+
 bool R1(int R, int G, int B) {
     bool e1 = (R>95) && (G>40) && (B>20) && ((max(R,max(G,B)) - min(R, min(G,B)))>15) && (abs(R-G)>15) && (R>G) && (R>B);
     bool e2 = (R>220) && (G>210) && (B>170) && (abs(R-G)<=15) && (R>B) && (G>B);
@@ -49,7 +148,8 @@ bool R2(float Y, float Cr, float Cb) {
     return e3 && e4 && e5 && e6;
 }
 
-bool R3(float H, float S, float V) {
+bool R3(float H, float S, float V)
+{
     return (H<25) || (H > 230);
 }
 
@@ -111,6 +211,8 @@ Mat stage1(Mat const &src) {
                 dst.ptr<Vec3b>(i)[j] = cwhite;
         }
     }
+    namedWindow("Stage1",WINDOW_NORMAL);
+    imshow("Stage1",dst);
     return dst;
 }
 
@@ -152,7 +254,10 @@ Mat stage2(Mat const &Csrc,int kernel=8)
         }
 
     }
-    return dst;
+
+    namedWindow("density map",WINDOW_NORMAL);
+    imshow("density map",dst);
+    return erode_dilate(dst);
 }
 
 Mat GetSkin(Mat const &src)
