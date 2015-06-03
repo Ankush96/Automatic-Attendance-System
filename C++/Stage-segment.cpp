@@ -9,6 +9,8 @@ using namespace cv;
 using std::cout;
 using std::endl;
 
+int cr_min=128,cr_max=164,cb_min=115,cb_max=160;
+
 Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
 {
     Mat tmp;
@@ -40,10 +42,10 @@ bool R2(float Y, float Cr, float Cb) {
     bool e7 = Cr <= -2.2857*Cb+432.85;
     return e3 && e4 && e5 && e6 && e7;
     */
-    bool e3= Cr>=132;
-    bool e4= Cr<=174;
-    bool e5= Cb>=75;
-    bool e6= Cb<=128;
+    bool e3= Cr>=cr_min;
+    bool e4= Cr<=cr_max;
+    bool e5= Cb>=cb_min;
+    bool e6= Cb<=cb_max;
     return e3 && e4 && e5 && e6;
 }
 
@@ -51,10 +53,9 @@ bool R3(float H, float S, float V) {
     return (H<25) || (H > 230);
 }
 
-Mat GetSkin(Mat const &src) {
+Mat stage1(Mat const &src) {
     // allocate the result matrix
     Mat dst = src.clone();
-
     Vec3b cwhite = Vec3b::all(255);
     Vec3b cblack = Vec3b::all(0);
 
@@ -65,18 +66,18 @@ Mat GetSkin(Mat const &src) {
     cvtColor(src, src_ycrcb, CV_BGR2YCrCb);
     vector<Mat> planes;
     split( src_ycrcb, planes );
-      imshow("cr",planes[1]);
-     imshow("cb",planes[2]);
+    imshow("cr",planes[1]);
+    imshow("cb",planes[2]);
     // OpenCV scales the Hue Channel to [0,180] for
     // 8bit images, so make sure we are operating on
     // the full spectrum from [0,360] by using floating
     // point precision:
     src.convertTo(src_hsv, CV_32FC3);
     cvtColor(src_hsv, src_hsv, CV_BGR2HSV);
-    vector<Mat> planes2;
-    split( src_hsv, planes2 );
-      imshow("h",planes2[0]);
-     imshow("s",planes2[1]);
+    //vector<Mat> planes2;
+    //split( src_hsv, planes2 );
+     // imshow("h",planes2[0]);
+     //imshow("s",planes2[1]);
     // Now scale the values between [0,255]:
     normalize(src_hsv, src_hsv, 0.0, 255.0, NORM_MINMAX, CV_32FC3);
 
@@ -106,19 +107,67 @@ Mat GetSkin(Mat const &src) {
 
             if(!(b))
                 dst.ptr<Vec3b>(i)[j] = cblack;
+            else
+                dst.ptr<Vec3b>(i)[j] = cwhite;
         }
     }
     return dst;
 }
 
+Mat stage2(Mat const &Csrc,int kernel=8)
+{
+    Mat src;
+    cvtColor(Csrc,src,CV_BGR2GRAY);
+    int i,j,k,l,density;
+    Mat dst(src.rows/kernel,src.cols/kernel,CV_8UC1,Scalar(0));
+    for(i=0;i<src.rows;i=i+kernel)
+    {
+        for(j=0;j<src.cols;j=j+kernel)
+        {
+            density=0;
+            for(l=0;l<min(kernel,src.rows-i+1);l++)
+            {
+                for(k=0;k<min(kernel,src.cols-j+1);k++)
+                {
+                    density+=src.at<uchar>(i+l,j+k);
+
+                }
+
+            }
+            density=density/(kernel*kernel);
+            dst.at<uchar>(i/kernel,j/kernel)=density;
+
+            /*
+            for(l=0;l<min(kernel,src.rows-i+1);l++)
+            {
+                for(k=0;k<min(kernel,src.cols-j+1);k++)
+                {
+                    dst.at<uchar>(i+l,j+k)=density;
+
+                }
+
+            }
+            */
+
+        }
+
+    }
+    return dst;
+}
+
+Mat GetSkin(Mat const &src)
+{
+    return stage2(stage1(src));
+    //return stage1(src);
+}
 
 int main()
  {
-/*
+
     // Load image & get skin proportions:
     Mat image = cv::imread("b15.jpeg");
     namedWindow("original");
-    namedWindow("skin");
+    namedWindow("skin",WINDOW_NORMAL);
     image=clahe(image);
     imshow("original", image);
 
@@ -129,6 +178,46 @@ int main()
     imshow("skin", skin);
 
     waitKey(0);
-  */
+
+
+  /*
+    VideoCapture vcap;
+    Mat img,gray;
+    char key,name[20];
+    int i=0,count=-1,skip=2;
+    const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
+     if(!vcap.open(videoStreamAddress))
+        {
+            std::cout << "Error opening video stream or file" << std::endl;
+            return -1;
+        }
+    namedWindow("original");
+    namedWindow("skin");
+    createTrackbar("cr min ","skin",&cr_min,255);
+    createTrackbar("cr max ","skin",&cr_max,255);
+    createTrackbar("cb min ","skin",&cb_min,255);
+    createTrackbar("cb max ","skin",&cb_max,255);
+
+
+    while(1)
+        {
+            vcap.read(img);
+            count++;
+            if(count%skip==0)
+            {
+               // cv::imshow("Output Window1", img);
+                img=clahe(img);
+                imshow("original", img);
+
+                Mat skin = GetSkin(img);
+                imshow("skin", skin);
+                key = cv::waitKey(30);
+               // cam_movement(key,img);
+
+            }
+
+        }
+     */
+
     return 0;
 }
