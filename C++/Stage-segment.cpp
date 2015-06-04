@@ -27,7 +27,6 @@ Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
     merge(planes,tmp);
     cvtColor(tmp,img,CV_Lab2BGR);
     return img;
-
 }
 
 Mat erode(Mat const &src,int thresh=5)
@@ -59,8 +58,8 @@ Mat erode(Mat const &src,int thresh=5)
         }
     }
 
-    namedWindow("erode",WINDOW_NORMAL);
-    imshow("erode",dst);
+    //namedWindow("erode",WINDOW_NORMAL);
+    //imshow("erode",dst);
     return dst;
 }
 
@@ -94,8 +93,8 @@ Mat dilate(Mat const &src,int thresh=2)
         }
     }
 
-    namedWindow("dilate",WINDOW_NORMAL);
-    imshow("dilate",dst);
+    // namedWindow("dilate",WINDOW_NORMAL);
+    // imshow("dilate",dst);
     return dst;
 }
 
@@ -126,10 +125,34 @@ Mat erode_dilate(Mat const &src)
     }
     namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
     imshow("erode_dilate stage 2",dst);
+    waitKey(0);
     return dst;
-
 }
 
+
+float stddev(Vector<int> w)
+{
+    int i;
+    float mean=0,sum=0;
+    for(i=0;i<w.size();i++) sum+=w[i];
+    mean=sum/w.size();
+    sum=0;
+    for(i=0;i<w.size();i++) sum+=(w[i]-mean)*(w[i]-mean);
+    return sqrt((sum/w.size()));
+}
+
+bool isBoundary(Mat const &src,int i,int j)
+{
+    int k,l;
+    for(k=i-1;k<=i+1;k++)
+    {
+        for(l=j-1;l<=j+1;l++)
+        {
+            if((src.at<uchar>(i,j)!=src.at<uchar>(k,l))&&(k>=0)&&(l>=0)&&(k<src.rows)&&(l<src.cols)&&(i!=k&&j!=l)) return 1;
+        }
+    }
+    return 0;
+}
 bool R1(int R, int G, int B) {
     bool e1 = (R>95) && (G>40) && (B>20) && ((max(R,max(G,B)) - min(R, min(G,B)))>15) && (abs(R-G)>15) && (R>G) && (R>B);
     bool e2 = (R>220) && (G>210) && (B>170) && (abs(R-G)<=15) && (R>B) && (G>B);
@@ -216,6 +239,7 @@ Mat stage1(Mat const &src) {
     }
     namedWindow("Stage1",WINDOW_NORMAL);
     imshow("Stage1",dst);
+    waitKey(0);
     return dst;
 }
 
@@ -260,21 +284,10 @@ Mat stage2(Mat const &Csrc)
 
     namedWindow("density map",WINDOW_NORMAL);
     imshow("density map",dst);
+    waitKey(0);
     return erode_dilate(dst);
 }
 
-float stddev(Vector<int> w)
-{
-    int i;
-    float mean=0,sum=0;
-    for(i=0;i<w.size();i++) sum+=w[i];
-    mean=sum/w.size();
-    sum=0;
-    for(i=0;i<w.size();i++) sum+=(w[i]-mean)*(w[i]-mean);
-    return sqrt((sum/w.size()));
-
-
-}
 Mat stage3(Mat const &src,Mat const &img,int thresh=2)
 {
     int i,j,k,l;
@@ -302,20 +315,171 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
     }
     namedWindow("stddev_stage 3",WINDOW_NORMAL);
     imshow("stddev_stage 3",dst);
+    waitKey(0);
     return dst;
 }
 
 
+Mat stage4(Mat const &img,int thresh=4)
+{
+    Mat dst=img.clone();
+
+    int i,j,start,k,l,count;
+
+    for(i=1;i<dst.rows-1;i++)
+    {
+        for(j=1;j<dst.cols-1;j++)
+        {
+            if(dst.at<uchar>(i,j)==255)
+            {
+                 count=0;
+                 for(l=i-1;l<=i+1;l++)
+                 {
+                    for(k=j-1;k<=j+1;k++)
+                        {
+
+                            if(!(i==l&&j==k)&&dst.at<uchar>(l,k)==255)
+                            {
+                                count ++;
+                            }
+
+                        }
+
+                 }
+                 if(count>3) dst.at<uchar>(i,j)=255;
+            }
+
+        }
+
+    }
+    for(i=1;i<dst.rows-1;i++)
+    {
+        for(j=1;j<dst.cols-1;j++)
+        {
+            if(dst.at<uchar>(i,j)==0)
+            {
+                 count=0;
+                 for(l=i-1;l<=i+1;l++)
+                 {
+                    for(k=j-1;k<=j+1;k++)
+                        {
+
+                            if(!(i==l&&j==k)&&dst.at<uchar>(l,k)==255)
+                            {
+                                count ++;
+                            }
+
+                        }
+
+                 }
+                 if(count>5) dst.at<uchar>(i,j)=255;
+            }
+
+        }
+
+    }
+
+
+    Mat dst2=dst.clone();
+    for(i=0;i<dst.rows;i++)
+    {
+        for(j=0;j<dst.cols;j++)
+        {
+            if(dst.at<uchar>(i,j)==255)
+            {
+                start=j;
+                while(dst.at<uchar>(i,j)==255&&j<dst.cols)j++;
+                if((j-start)<thresh)
+                    for(k=start;k<j;k++)
+                    {
+                        dst2.at<uchar>(i,k)=0;
+                    }
+
+            }
+        }
+    }
+
+     for(i=0;i<dst.cols;i++)
+    {
+        for(j=0;j<dst.rows;j++)
+        {
+            if(dst.at<uchar>(j,i)==255)
+            {
+                start=j;
+                while(dst.at<uchar>(j,i)==255&&j<dst.rows)j++;
+                if((j-start)<thresh)
+                    for(k=start;k<j;k++)
+                    {
+                        dst2.at<uchar>(k,i)=0;
+                    }
+
+            }
+        }
+    }
+    namedWindow("Stage4 geo correct",WINDOW_NORMAL);
+    imshow("Stage4 geo correct",dst2);
+    waitKey(0);
+    return dst2;
+
+}
+
+Mat stage5(Mat const &s1,Mat const &s4)
+{
+    Mat dst(s1.rows,s1.cols,CV_8UC1,Scalar(0));
+
+    int i,j,k,l;
+    for(i=0;i<s4.rows;i++)
+    {
+        for(j=0;j<s4.cols;j++)
+        {
+
+                if(isBoundary(s4,i,j))
+                {
+                    //dst.at<uchar>(i*kernel,j*kernel)=255;
+
+
+                    for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
+                    {
+                        for(l=0;l<min(kernel,s1.cols-j*kernel);l++)
+                        {
+                            //cout<<i*kernel+k<<" "<<j*kernel+l<<" "<<s1.at<uchar>(i*kernel+k,j*kernel+l)<<endl;
+                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
+                            dst.at<uchar>(i*kernel+k,j*kernel+l)=255-k*l*4;
+                        }
+                    }
+
+                }
+                else
+                {   ///*
+                    for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
+                    {
+                        for(l=0;l<min(kernel,s1.cols-j*kernel);l++)
+                        {
+                            dst.at<uchar>(i*kernel+k,j*kernel+l)=s4.at<uchar>(i,j);
+                        }
+                    }//*/
+                }
+
+        }
+    }
+    namedWindow("contour stage 5",WINDOW_NORMAL);
+    imshow("contour stage 5",dst);
+
+    waitKey(0);
+    //cout<<dst.rows<<" " <<dst.cols;
+    return dst;
+}
+
 Mat GetSkin(Mat const &src)
 {
-    return stage2(stage1(src));
-    //return stage1(src);
+    Mat s1=stage1(src);
+    return stage5(s1,stage4(stage2(s1)));
 }
 
 int main()
  {
 
-  /*  // Load image & get skin proportions:
+  ///*  // Load image & get skin proportions:
     Mat image = cv::imread("b15.jpeg");
     namedWindow("original");
     //namedWindow("skin",WINDOW_NORMAL);
@@ -329,9 +493,9 @@ int main()
     //imshow("skin", skin);
 
     waitKey(0);
-*/
+//*/
 
-  ///*
+  /*
     VideoCapture vcap;
     Mat img,gray;
     char key,name[20];
