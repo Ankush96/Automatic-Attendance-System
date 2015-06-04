@@ -419,50 +419,94 @@ Mat stage4(Mat const &img,int thresh=4)
     namedWindow("Stage4 geo correct",WINDOW_NORMAL);
     imshow("Stage4 geo correct",dst2);
     waitKey(0);
+    //cout<<"sTAGE 4 EXIT"<<dst2.rows<<" "<<dst2.cols<<endl;
     return dst2;
 
 }
 
-Mat stage5(Mat const &s1,Mat const &s4)
+Mat stage5(Mat const &cs1,Mat const &s4)
 {
-    Mat dst(s1.rows,s1.cols,CV_8UC1,Scalar(0));
+    //Mat dst(cs1.rows,cs1.cols,CV_8UC1,Scalar(0));
+    //cout<<"stage1"<<s1.rows<<" "<<s1.cols<<endl;
+    //cout<<"stage4"<<s4.rows<<" "<<s4.cols<<endl;
+    //cout<<" channels of s1"<<s1.channels()<<endl;
+    //Mat s1(cs1.rows,cs1.cols,CV_8UC1,Scalar(0));
+    //Mat s4(cs4.rows,cs4.cols,CV_8UC1,Scalar(0));
+    //cvtColor(cs1,s1,CV_BGR2GRAY);
+    //cvtColor(cs4,s4,CV_BGR2GRAY);
+    Mat dst=cs1.clone();
+    Mat s1=cs1.clone();
+    //Mat s4=cs4.clone();
 
+    cvtColor(dst,dst,CV_BGR2GRAY);
+
+    cvtColor(s1,s1,CV_BGR2GRAY);
+    //cvtColor(s4,s4,CV_BGR2GRAY);
+    cout<<"s1<<"<<s1.channels()<<" "<<s1.depth()<<endl;
+    cout<<"s4<<"<<s4.channels()<<" "<<s4.depth()<<endl;
     int i,j,k,l;
+    for(i=0;i<dst.rows;i++)
+    {
+        for(j=0;j<dst.cols;j++)
+        {
+            dst.at<uchar>(i,j)=0;
+        }
+    }
+    //imshow("dst",dst);
+    //imshow(" s1" ,s1);
+
     for(i=0;i<s4.rows;i++)
     {
         for(j=0;j<s4.cols;j++)
         {
 
-                if(isBoundary(s4,i,j))
+            //for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
+          /*
+                for(k=0;k<kernel;k++)
+                    {
+                        for(l=0;l<kernel;l++)
+                        {
+                            //cout<<i*kernel+k<<" "<<j*kernel+l<<" "<<s1.at<uchar>(i*kernel+k,j*kernel+l)<<endl;
+                            //cout<<i*kernel+k<<" "<<j*kernel+l<<" \t";
+                            dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
+                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=(255*j*kernel+l)/(1+s4.cols*kernel+kernel);
+                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=255-k*l*4;
+                        }
+                    }*/
+               if(isBoundary(s4,i,j))
                 {
                     //dst.at<uchar>(i*kernel,j*kernel)=255;
-
+                    
 
                     for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
                     {
                         for(l=0;l<min(kernel,s1.cols-j*kernel);l++)
                         {
                             //cout<<i*kernel+k<<" "<<j*kernel+l<<" "<<s1.at<uchar>(i*kernel+k,j*kernel+l)<<endl;
-                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
-                            dst.at<uchar>(i*kernel+k,j*kernel+l)=255-k*l*4;
+                            dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
+                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=255-k*l*4;
                         }
                     }
 
                 }
                 else
-                {   ///*
+                {
                     for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
                     {
                         for(l=0;l<min(kernel,s1.cols-j*kernel);l++)
                         {
                             dst.at<uchar>(i*kernel+k,j*kernel+l)=s4.at<uchar>(i,j);
+                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
                         }
-                    }//*/
+                    }
                 }
 
         }
     }
-    namedWindow("contour stage 5",WINDOW_NORMAL);
+
+    //cout<<s1.rows-dst.rows<<" "<<s1.cols-dst.cols;
+    cout<<"dst"<<dst.rows<<" "<<dst.cols<<endl;
+    //namedWindow("contour stage 5",WINDOW_AUTOSIZE);
     imshow("contour stage 5",dst);
 
     waitKey(0);
@@ -490,7 +534,7 @@ int main()
 
     // Show the results:
 
-    //imshow("skin", skin);
+    imshow("skin", skin);
 
     waitKey(0);
 //*/
