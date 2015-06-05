@@ -102,11 +102,14 @@ Mat dilate(Mat const &src,int thresh=2)
 Mat erode_dilate(Mat const &src)
 {
     int i,j;
-    Mat dst=src.clone();
+    cout<<"inside erode_dilate "<<endl;
+    cout<<" "<<src.rows<<" "<<src.cols<<endl;
+    Mat dst(src.rows,src.cols,CV_8UC1,Scalar(0));
+    cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
     for(i=0;i<dst.rows;i++)
     {
         dst.at<uchar>(i,0)=0;
-        dst.at<uchar>(i,src.cols-1)=0;
+        dst.at<uchar>(i,dst.cols-1)=0;
 
     }
     for(i=0;i<dst.cols;i++)
@@ -115,7 +118,8 @@ Mat erode_dilate(Mat const &src)
         dst.at<uchar>(src.rows-1,i)=0;
 
     }
-    dst=(dilate(erode(dst)));
+    cout<<"erode_dilate starts"<<endl;
+    dst=(dilate(erode(src)));
     for(i=0;i<dst.rows;i++)
     {
         for(j=0;j<dst.cols;j++)
@@ -123,9 +127,9 @@ Mat erode_dilate(Mat const &src)
             if(dst.at<uchar>(i,j)<255) dst.at<uchar>(i,j)=0;
         }
     }
-    namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
-    imshow("erode_dilate stage 2",dst);
-    waitKey(0);
+    //namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
+    //imshow("erode_dilate stage 2",dst);
+    //waitKey(0);
     return dst;
 }
 
@@ -160,13 +164,6 @@ bool R1(int R, int G, int B) {
 }
 
 bool R2(float Y, float Cr, float Cb) {
-   /* bool e3 = Cr <= 1.5862*Cb+20;
-    bool e4 = Cr >= 0.3448*Cb+76.2069;
-    bool e5 = Cr >= -4.5652*Cb+234.5652;
-    bool e6 = Cr <= -1.15*Cb+301.75;
-    bool e7 = Cr <= -2.2857*Cb+432.85;
-    return e3 && e4 && e5 && e6 && e7;
-    */
     bool e3= Cr>=cr_min;
     bool e4= Cr<=cr_max;
     bool e5= Cb>=cb_min;
@@ -174,13 +171,12 @@ bool R2(float Y, float Cr, float Cb) {
     return e3 && e4 && e5 && e6;
 }
 
-bool R3(float H, float S, float V)
-{
+bool R3(float H, float S, float V){
+
     return (H<25) || (H > 230);
 }
 
 Mat stage1(Mat const &src) {
-    // allocate the result matrix
     Mat dst = src.clone();
     Vec3b cwhite = Vec3b::all(255);
     Vec3b cblack = Vec3b::all(0);
@@ -190,20 +186,12 @@ Mat stage1(Mat const &src) {
     // cover the whole value range of [0,255], so there's
     // no need to scale the values:
     cvtColor(src, src_ycrcb, CV_BGR2YCrCb);
-    //vector<Mat> planes;
-    //split( src_ycrcb, planes );
-    //imshow("cr",planes[1]);
-    //imshow("cb",planes[2]);
     // OpenCV scales the Hue Channel to [0,180] for
     // 8bit images, so make sure we are operating on
     // the full spectrum from [0,360] by using floating
     // point precision:
     src.convertTo(src_hsv, CV_32FC3);
     cvtColor(src_hsv, src_hsv, CV_BGR2HSV);
-    //vector<Mat> planes2;
-    //split( src_hsv, planes2 );
-     // imshow("h",planes2[0]);
-     //imshow("s",planes2[1]);
     // Now scale the values between [0,255]:
     normalize(src_hsv, src_hsv, 0.0, 255.0, NORM_MINMAX, CV_32FC3);
 
@@ -239,16 +227,20 @@ Mat stage1(Mat const &src) {
     }
     namedWindow("Stage1",WINDOW_NORMAL);
     imshow("Stage1",dst);
-    waitKey(0);
+    //waitKey(0);
     return dst;
+
 }
 
 Mat stage2(Mat const &Csrc)
-{
-    Mat src;
+{cout<<"2 starts"<<endl;
+
+    Mat src(Csrc.rows,Csrc.cols,CV_8UC1,Scalar(0));
+    
     cvtColor(Csrc,src,CV_BGR2GRAY);
     int i,j,k,l,density;
-    Mat dst(src.rows/kernel,src.cols/kernel,CV_8UC1,Scalar(0));
+    Mat dst(ceil(src.rows/kernel),ceil(src.cols/kernel),CV_8UC1,Scalar(0));
+
     for(i=0;i<src.rows;i=i+kernel)
     {
         for(j=0;j<src.cols;j=j+kernel)
@@ -265,26 +257,13 @@ Mat stage2(Mat const &Csrc)
             }
             density=density/(kernel*kernel);
             dst.at<uchar>(i/kernel,j/kernel)=density;
-
-            /*
-            for(l=0;l<min(kernel,src.rows-i+1);l++)
-            {
-                for(k=0;k<min(kernel,src.cols-j+1);k++)
-                {
-                    dst.at<uchar>(i+l,j+k)=density;
-
-                }
-
-            }
-            */
-
         }
 
     }
-
+    cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
     namedWindow("density map",WINDOW_NORMAL);
     imshow("density map",dst);
-    waitKey(0);
+    //waitKey(0);
     return erode_dilate(dst);
 }
 
@@ -315,10 +294,9 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
     }
     namedWindow("stddev_stage 3",WINDOW_NORMAL);
     imshow("stddev_stage 3",dst);
-    waitKey(0);
+    //waitKey(0);
     return dst;
 }
-
 
 Mat stage4(Mat const &img,int thresh=4)
 {
@@ -418,7 +396,7 @@ Mat stage4(Mat const &img,int thresh=4)
     }
     namedWindow("Stage4 geo correct",WINDOW_NORMAL);
     imshow("Stage4 geo correct",dst2);
-    waitKey(0);
+    //waitKey(0);
     //cout<<"sTAGE 4 EXIT"<<dst2.rows<<" "<<dst2.cols<<endl;
     return dst2;
 
@@ -426,65 +404,21 @@ Mat stage4(Mat const &img,int thresh=4)
 
 Mat stage5(Mat const &cs1,Mat const &s4)
 {
-    //Mat dst(cs1.rows,cs1.cols,CV_8UC1,Scalar(0));
-    //cout<<"stage1"<<s1.rows<<" "<<s1.cols<<endl;
-    //cout<<"stage4"<<s4.rows<<" "<<s4.cols<<endl;
-    //cout<<" channels of s1"<<s1.channels()<<endl;
-    //Mat s1(cs1.rows,cs1.cols,CV_8UC1,Scalar(0));
-    //Mat s4(cs4.rows,cs4.cols,CV_8UC1,Scalar(0));
-    //cvtColor(cs1,s1,CV_BGR2GRAY);
-    //cvtColor(cs4,s4,CV_BGR2GRAY);
-    Mat dst=cs1.clone();
     Mat s1=cs1.clone();
-    //Mat s4=cs4.clone();
-
-    cvtColor(dst,dst,CV_BGR2GRAY);
-
     cvtColor(s1,s1,CV_BGR2GRAY);
-    //cvtColor(s4,s4,CV_BGR2GRAY);
-    cout<<"s1<<"<<s1.channels()<<" "<<s1.depth()<<endl;
-    cout<<"s4<<"<<s4.channels()<<" "<<s4.depth()<<endl;
+    Mat dst(s1.rows,s1.cols,CV_8UC1,Scalar(0));
     int i,j,k,l;
-    for(i=0;i<dst.rows;i++)
-    {
-        for(j=0;j<dst.cols;j++)
-        {
-            dst.at<uchar>(i,j)=0;
-        }
-    }
-    //imshow("dst",dst);
-    //imshow(" s1" ,s1);
-
     for(i=0;i<s4.rows;i++)
     {
         for(j=0;j<s4.cols;j++)
         {
-
-            //for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
-          /*
-                for(k=0;k<kernel;k++)
-                    {
-                        for(l=0;l<kernel;l++)
-                        {
-                            //cout<<i*kernel+k<<" "<<j*kernel+l<<" "<<s1.at<uchar>(i*kernel+k,j*kernel+l)<<endl;
-                            //cout<<i*kernel+k<<" "<<j*kernel+l<<" \t";
-                            dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
-                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=(255*j*kernel+l)/(1+s4.cols*kernel+kernel);
-                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=255-k*l*4;
-                        }
-                    }*/
                if(isBoundary(s4,i,j))
                 {
-                    //dst.at<uchar>(i*kernel,j*kernel)=255;
-                    
-
                     for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
                     {
                         for(l=0;l<min(kernel,s1.cols-j*kernel);l++)
                         {
-                            //cout<<i*kernel+k<<" "<<j*kernel+l<<" "<<s1.at<uchar>(i*kernel+k,j*kernel+l)<<endl;
                             dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
-                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=255-k*l*4;
                         }
                     }
 
@@ -496,34 +430,44 @@ Mat stage5(Mat const &cs1,Mat const &s4)
                         for(l=0;l<min(kernel,s1.cols-j*kernel);l++)
                         {
                             dst.at<uchar>(i*kernel+k,j*kernel+l)=s4.at<uchar>(i,j);
-                            //dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
                         }
                     }
                 }
 
         }
     }
-
-    //cout<<s1.rows-dst.rows<<" "<<s1.cols-dst.cols;
-    cout<<"dst"<<dst.rows<<" "<<dst.cols<<endl;
-    //namedWindow("contour stage 5",WINDOW_AUTOSIZE);
+    namedWindow("contour stage 5",WINDOW_AUTOSIZE);
     imshow("contour stage 5",dst);
-
-    waitKey(0);
-    //cout<<dst.rows<<" " <<dst.cols;
+    //waitKey(0);
     return dst;
 }
 
 Mat GetSkin(Mat const &src)
 {
+    Mat dst=src.clone();
+    Vec3b cblack = Vec3b::all(0);
     Mat s1=stage1(src);
-    return stage5(s1,stage4(stage2(s1)));
+    s1= stage5(s1,stage4(stage2(s1)));
+    int i,j;
+    for(i=0;i<s1.rows;i++)
+    {
+        for(j=0;j<s1.cols;j++)
+        {
+            if(s1.at<uchar>(i,j)==0)
+            {
+                dst.ptr<Vec3b>(i)[j] = cblack;
+            }
+        }
+    }
+    return dst;
 }
 
+
+/*
 int main()
  {
 
-  ///*  // Load image & get skin proportions:
+    // Load image & get skin proportions:
     Mat image = cv::imread("b15.jpeg");
     namedWindow("original");
     //namedWindow("skin",WINDOW_NORMAL);
@@ -537,9 +481,9 @@ int main()
     imshow("skin", skin);
 
     waitKey(0);
-//*/
 
-  /*
+
+  
     VideoCapture vcap;
     Mat img,gray;
     char key,name[20];
@@ -576,8 +520,10 @@ int main()
             }
 
         }
-    //*/
+    
 
 
     return 0;
 }
+
+*/
