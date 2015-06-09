@@ -33,8 +33,10 @@ Mat stage2(Mat const &Csrc);
 
 Mat stage3(Mat const &src,Mat const &img,int thresh=2);
 
-Mat stage4(Mat const &img,int thresh=4);
+Mat stage5(Mat const &img,int thresh=4);
 
-Mat stage5(Mat const &cs1,Mat const &s4);
+Mat stage6(Mat const &cs1,Mat const &s4);
+
+void cam_movement(int key,Mat img);
 
 Mat GetSkin(Mat const &src);

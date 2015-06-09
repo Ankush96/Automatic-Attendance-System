@@ -1,4 +1,4 @@
-
+///*
 
 #include <stdio.h>
 #include "Stage-segment.h"
@@ -27,55 +27,18 @@ void copy (Mat small,Mat big,Rect roi)
     }
 
 }
-void cam_movement(int key,Mat img) //Keyboard commands to generate movements of the camera
-{
-        int i=0;
-        char name[20];
-      switch(key)
-       {
-
-       case 'a':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rpan=1");
-        break;
-       case 'd':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rpan=-1");
-        break;
-       case 's':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rtilt=1");
-        break;
-       case 'w':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rtilt=-1");
-        break;
-       case 'z':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rzoom=100");
-        break;
-       case 'x':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rzoom=-100");
-        break;
-       case 'p':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?continuouspantiltmove=0,0");
-        break;
-       case 'o':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?continuouspantiltmove=-5,0");
-        break;
-       case 'i':
-       sprintf(name,"images/%i.png",i);
-        cv::imwrite(name, img);
-        i++;
-        break;
-       }
-}
 
 string prediction_name(int prediction)
 {
     switch(prediction)
     {
-        case 0 : return "Rahul";
         case -1:return "Unknown";
+        case 0 : return "Srishty";
+        case 1: return "Jayamani";
+        case 2: return "Achammal";
+        case 3: return "Manjunath";
         case 4: return "Ankush";
-        case 2: return "Srishty";
-        case 1: return "Achammal";
-        case 3: return "Jaymanyu";
+        case 5: return "Mridul";
 
 
     }
@@ -102,10 +65,10 @@ int main(int, char**) {
    // cv::Size frameSize(static_cast<int>(width),static_cast<int>(height));
    // cv::VideoWriter MyVid("/home/student/Documents/MyVideo1.avi",CV_FOURCC('P','I','M','1'),30,frameSize,true);
     //cvNamedWindow("Face",WINDOW_NORMAL);
-    Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer(1,8,8,8,123.0);
+    //Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer(1,8,8,8,123.0);
     Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
     Ptr<FaceRecognizer> ff =createFisherFaceRecognizer();
-    lbp->load("lbp.xml");
+    //lbp->load("lbp.xml");
     ef->load("ef.xml");
     ff->load("ff.xml");
     cvNamedWindow("segment",WINDOW_NORMAL);
@@ -127,30 +90,52 @@ int main(int, char**) {
                 for(int i=0;i<faces.size();i++)
                 {
                     Rect crop=faces[i];
-                    //Mat instance=gray(crop);
-                    Mat instance=sgray(crop);
+                    Mat instance=gray(crop);
+                    //Mat instance=sgray(crop);
                     if ( ! instance.isContinuous() )
                         {
                             instance = instance.clone();
                         }
-                        //copy(instance2,black,crop);   
-                    //imshow("segment",black); 
-                        imshow("face",instance);
+                    //copy(instance2,black,crop);
+                    //imshow("segment",black);
+                    imshow("face",instance);
                     resize(instance,instance, Size(120,120), 1.0, 1.0, INTER_CUBIC);
-                    int plbp=lbp->predict(instance);
-                    int pef=ef->predict(instance);
-                    int pff=ff->predict(instance);
+                    //int plbp=lbp->predict(instance);
+                    int pef=-1,pff=-1;
+                    double conf_ef=0.0,conf_ff=0.0;
+                    ef->predict(instance,pef,conf_ef);
+                    ff->predict(instance,pff,conf_ff);
+                    conf_ff*=7;
+                    char final[50];
+                    if(pef==pff)
+                    {
+                        double hyb_conf=(conf_ff+conf_ef)/2;
+                        sprintf(final," Hybrid %s Conf- %f",prediction_name(pef).c_str(),hyb_conf);
+                    }
+                    else
+                    {
+                        if(conf_ef>conf_ff)
+                        {
+                            sprintf(final," Hybrid %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
+                        }
+                        else
+                        {
+                            sprintf(final," Hybrid %s Conf- %f",prediction_name(pff).c_str(),conf_ff);
+                        }
+                    }
 
 
                     rectangle(img,crop,CV_RGB(0,255,0),2);
-                    string lbp ="lbp: "+ prediction_name(plbp);
-                    string ef = "ef: "+prediction_name(pef);
-                    string ff = "ff: "+prediction_name(pff);
+                    //string lbp ="lbp: "+ prediction_name(plbp);
+                    char ef[50];
+                    sprintf(ef," ef %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
+                    char ff[50];                    
+                    sprintf(ff," ff %s Conf- %f",prediction_name(pff).c_str(),conf_ff);
                     int pos_x = std::max(crop.tl().x - 10, 0);
                     int pos_y = std::max(crop.tl().y - 10, 0);
-                    putText(img, lbp, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-                    putText(img, ef, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-                    putText(img, ff, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                    putText(img, final, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                    putText(img, ef, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(255,0,0), 2.0);
+                    putText(img, ff, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(255,0,0), 2.0);
                 }
                 cv::imshow("Output Window2", img);
 
@@ -165,3 +150,4 @@ int main(int, char**) {
 return 0;
 }
 
+//*/

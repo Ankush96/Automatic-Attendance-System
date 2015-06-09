@@ -2,7 +2,7 @@
 
 //change the folder name
 #include <stdio.h>
-
+#include "Stage-segment.h"
 #include "opencv2/core/core.hpp"
 #include "opencv2/contrib/contrib.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -16,65 +16,11 @@
 
 using namespace cv;
 
-void cam_movement(int key,Mat img) //Keyboard commands to generate movements of the camera
-{
-        int i=0;
-        char name[20];
-      switch(key)
-       {
 
-       case 'a':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rpan=1");
-        break;
-       case 'd':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rpan=-1");
-        break;
-       case 's':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rtilt=1");
-        break;
-       case 'w':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rtilt=-1");
-        break;
-       case 'z':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rzoom=100");
-        break;
-       case 'x':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rzoom=-100");
-        break;
-       case 'p':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?continuouspantiltmove=0,0");
-        break;
-       case 'o':
-        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?continuouspantiltmove=-5,0");
-        break;
-       case 'i':
-       sprintf(name,"images/%i.png",i);
-        cv::imwrite(name, img);
-        i++;
-        break;
-       }
-}
-
-Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
-{
-    Mat tmp;
-    cvtColor(img,tmp,CV_BGR2Lab);
-    std::vector<Mat>planes(3);
-    split(tmp,planes);
-    Ptr<CLAHE> cl=createCLAHE();
-    cl->setClipLimit(4);
-    Mat dst;
-    cl->apply(planes[0],dst);
-    dst.copyTo(planes[0]);
-    merge(planes,tmp);
-    cvtColor(tmp,img,CV_Lab2BGR);
-    return img;
-
-}
 
 int main(int, char**) {
     VideoCapture vcap;
-    Mat img,gray;
+    Mat img,gray,sgray;
     char key,name[20];
     int i=0,count=-1,skip=10,k=0;
     const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
@@ -94,17 +40,33 @@ int main(int, char**) {
             if(count%skip==0)
             {
                 img=clahe(img);
+                Mat segment=img.clone();
+                segment=GetSkin(img);
+                cvtColor(segment, sgray, CV_BGR2GRAY);
                 cvtColor(img, gray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;
                 haar_cascade.detectMultiScale(gray,faces);
                 for(int i=0;i<faces.size();i++)
                 {
                     Rect crop=faces[i];
-                    Mat instance=img(crop);
+                    //Mat instance=img(crop);
+                    Mat instance=sgray(crop);
+                    Mat instance2=gray(crop);
+                    if ( ! instance.isContinuous() )
+                        {
+                            instance = instance.clone();
+                        }
+                    if ( ! instance2.isContinuous() )
+                        {
+                            instance2 = instance2.clone();
+                        }
                     char filename[100];
-                    sprintf(filename,"../Faces/s5/img%d.jpg",k);
-                    k++;
+                    sprintf(filename,"../Faces/s1/img%d.jpg",k);
                     imwrite(filename,instance);
+                    sprintf(filename,"../Faces2/s1/img%d.jpg",k);
+                    imwrite(filename,instance2);
+                    k++;
+                    
                     rectangle(img,crop,CV_RGB(0,255,0),2);
                     cv::imshow("Face", instance);
                 }

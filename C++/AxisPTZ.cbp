@@ -53,7 +53,9 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="Sampler.cpp" />
+		<Unit filename="Segment-samples.cpp" />
 		<Unit filename="Stage-segment.cpp" />
+		<Unit filename="Stage-segment.h" />
 		<Unit filename="grabcut.cpp" />
 		<Unit filename="lbp.cpp" />
 		<Unit filename="lena.jpg" />

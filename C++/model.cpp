@@ -34,7 +34,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 int main()
 {
 
-    string fn_csv = "samples.csv";
+    string fn_csv = "samples2.csv";
 
     vector<Mat> images;
     vector<int> labels;
@@ -118,4 +118,4 @@ int main()
 
     return 0;
 }
-//*/
+*/

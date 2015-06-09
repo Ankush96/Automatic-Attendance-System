@@ -130,6 +130,8 @@ Mat erode_dilate(Mat const &src)
     //namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
     //imshow("erode_dilate stage 2",dst);
     //waitKey(0);
+
+    //imwrite("s2.jpg",dst);
     return dst;
 }
 
@@ -227,13 +229,13 @@ Mat stage1(Mat const &src) {
     }
     namedWindow("Stage1",WINDOW_NORMAL);
     imshow("Stage1",dst);
+    //imwrite("s1.jpg",dst);
     //waitKey(0);
     return dst;
-
 }
 
 Mat stage2(Mat const &Csrc)
-{cout<<"2 starts"<<endl;
+{//cout<<"2 starts"<<endl;
 
     Mat src(Csrc.rows,Csrc.cols,CV_8UC1,Scalar(0));
     
@@ -260,9 +262,10 @@ Mat stage2(Mat const &Csrc)
         }
 
     }
-    cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
+    //cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
     namedWindow("density map",WINDOW_NORMAL);
     imshow("density map",dst);
+    //imwrite("density.jpg",dst);
     //waitKey(0);
     return erode_dilate(dst);
 }
@@ -294,11 +297,17 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
     }
     namedWindow("stddev_stage 3",WINDOW_NORMAL);
     imshow("stddev_stage 3",dst);
+    //imwrite("s3.jpg",dst);
     //waitKey(0);
     return dst;
 }
 
-Mat stage4(Mat const &img,int thresh=4)
+Mat stage4(Mat const &src)
+{
+
+}
+
+Mat stage5(Mat const &img,int thresh=4)
 {
     Mat dst=img.clone();
 
@@ -394,15 +403,15 @@ Mat stage4(Mat const &img,int thresh=4)
             }
         }
     }
-    namedWindow("Stage4 geo correct",WINDOW_NORMAL);
-    imshow("Stage4 geo correct",dst2);
+    namedWindow("Stage5 geo correct",WINDOW_NORMAL);
+    imshow("Stage5 geo correct",dst2);
+    //imwrite("s5.jpg",dst);
     //waitKey(0);
     //cout<<"sTAGE 4 EXIT"<<dst2.rows<<" "<<dst2.cols<<endl;
     return dst2;
-
 }
 
-Mat stage5(Mat const &cs1,Mat const &s4)
+Mat stage6(Mat const &cs1,Mat const &s4)
 {
     Mat s1=cs1.clone();
     cvtColor(s1,s1,CV_BGR2GRAY);
@@ -436,8 +445,9 @@ Mat stage5(Mat const &cs1,Mat const &s4)
 
         }
     }
-    namedWindow("contour stage 5",WINDOW_AUTOSIZE);
-    imshow("contour stage 5",dst);
+    namedWindow("contour stage 6",WINDOW_AUTOSIZE);
+    imshow("contour stage 6",dst);
+    //imwrite("s6.jpg",dst);
     //waitKey(0);
     return dst;
 }
@@ -447,7 +457,7 @@ Mat GetSkin(Mat const &src)
     Mat dst=src.clone();
     Vec3b cblack = Vec3b::all(0);
     Mat s1=stage1(src);
-    s1= stage5(s1,stage4(stage2(s1)));
+    s1= stage6(s1,stage5(stage2(s1)));
     int i,j;
     for(i=0;i<s1.rows;i++)
     {
@@ -462,9 +472,46 @@ Mat GetSkin(Mat const &src)
     return dst;
 }
 
+void cam_movement(int key,Mat img) //Keyboard commands to generate movements of the camera
+{
+        int i=0;
+        char name[20];
+      switch(key)
+       {
 
-/*
-int main()
+       case 'a':
+        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rpan=1");
+        break;
+       case 'd':
+        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rpan=-1");
+        break;
+       case 's':
+        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rtilt=1");
+        break;
+       case 'w':
+        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rtilt=-1");
+        break;
+       case 'z':
+        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rzoom=100");
+        break;
+       case 'x':
+        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?rzoom=-100");
+        break;
+       case 'p':
+        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?continuouspantiltmove=0,0");
+        break;
+       case 'o':
+        system("curl http://root:pass123@192.168.137.89/axis-cgi/com/ptz.cgi?continuouspantiltmove=-5,0");
+        break;
+       case 'i':
+       //sprintf(name,"images/%i.png",i);
+       // cv::imwrite(name, img);
+        i++;
+        break;
+       }
+}
+
+int main2()
  {
 
     // Load image & get skin proportions:
@@ -475,6 +522,7 @@ int main()
     imshow("original", image);
 
     Mat skin = GetSkin(image);
+    imwrite("skin.jpg",skin);
 
     // Show the results:
 
@@ -482,8 +530,8 @@ int main()
 
     waitKey(0);
 
+/*
 
-  
     VideoCapture vcap;
     Mat img,gray;
     char key,name[20];
@@ -515,15 +563,13 @@ int main()
                 Mat skin = GetSkin(img);
                 imshow("skin", skin);
                 key = cv::waitKey(30);
-               // cam_movement(key,img);
+                cam_movement(key,img);
 
             }
 
         }
     
 
-
+*/
     return 0;
 }
-
-*/
