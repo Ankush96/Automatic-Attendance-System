@@ -3,7 +3,7 @@
 	<opencv2/opencv.hpp>
 	<iostream>
 
-1433832020 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
+1433944728 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
 	<stdio.h>
 	"Stage-segment.h"
 	"opencv2/core/core.hpp"
@@ -37,10 +37,11 @@
 	<fstream>
 	<sstream>
 
-1433848704 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/model.cpp
+1433933939 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/model.cpp
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"
 	"opencv2/highgui/highgui.hpp"
+	"Stage-segment.h"
 	<iostream>
 	<fstream>
 	<sstream>
@@ -49,7 +50,7 @@
 	"opencv2/opencv.hpp"
 	<iostream>
 
-1433845264 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
+1433930441 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
 	<opencv2/core/core.hpp>
 	<opencv2/imgproc/imgproc.hpp>
 	<opencv2/highgui/highgui.hpp>

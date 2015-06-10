@@ -1,8 +1,8 @@
-/*
+///*
 #include "opencv2/core/core.hpp"
 #include "opencv2/contrib/contrib.hpp"
 #include "opencv2/highgui/highgui.hpp"
-
+#include "Stage-segment.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -25,16 +25,22 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
             Mat tmp1=imread(path, 0);
             Mat tmp2;
             resize(tmp1, tmp2, Size(120, 120), 1.0, 1.0, INTER_CUBIC);
+            ///tmp2=clahe(tmp2);
+            equalizeHist(tmp2,tmp2);
+            //cvNamedWindow("image",WINDOW_NORMAL);
+            //imshow("image",tmp2);
+            //waitKey(0);
+            //cvtColor(tmp2,tmp2,CV_BGR2GRAY);
             images.push_back(tmp2);
             labels.push_back(atoi(classlabel.c_str()));
         }
     }
 }
 
-int main()
+int main3()
 {
 
-    string fn_csv = "samples2.csv";
+    string fn_csv = "samples.csv";
 
     vector<Mat> images;
     vector<int> labels;
@@ -55,7 +61,7 @@ int main()
 
 
 
-     Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer(1,8,8,8,123.0);
+     Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer();
      Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
      Ptr<FaceRecognizer> ff =createFisherFaceRecognizer();
    //  cvNamedWindow("Face",WINDOW_NORMAL);
@@ -118,4 +124,4 @@ int main()
 
     return 0;
 }
-*/
+//*/

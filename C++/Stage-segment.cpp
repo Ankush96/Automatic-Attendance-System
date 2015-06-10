@@ -102,10 +102,10 @@ Mat dilate(Mat const &src,int thresh=2)
 Mat erode_dilate(Mat const &src)
 {
     int i,j;
-    cout<<"inside erode_dilate "<<endl;
-    cout<<" "<<src.rows<<" "<<src.cols<<endl;
+    //cout<<"inside erode_dilate "<<endl;
+    //cout<<" "<<src.rows<<" "<<src.cols<<endl;
     Mat dst(src.rows,src.cols,CV_8UC1,Scalar(0));
-    cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
+    //cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
     for(i=0;i<dst.rows;i++)
     {
         dst.at<uchar>(i,0)=0;
@@ -118,7 +118,7 @@ Mat erode_dilate(Mat const &src)
         dst.at<uchar>(src.rows-1,i)=0;
 
     }
-    cout<<"erode_dilate starts"<<endl;
+    //cout<<"erode_dilate starts"<<endl;
     dst=(dilate(erode(src)));
     for(i=0;i<dst.rows;i++)
     {
@@ -227,8 +227,8 @@ Mat stage1(Mat const &src) {
                 dst.ptr<Vec3b>(i)[j] = cwhite;
         }
     }
-    namedWindow("Stage1",WINDOW_NORMAL);
-    imshow("Stage1",dst);
+    //namedWindow("Stage1",WINDOW_NORMAL);
+    //imshow("Stage1",dst);
     //imwrite("s1.jpg",dst);
     //waitKey(0);
     return dst;
@@ -263,8 +263,8 @@ Mat stage2(Mat const &Csrc)
 
     }
     //cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
-    namedWindow("density map",WINDOW_NORMAL);
-    imshow("density map",dst);
+    //namedWindow("density map",WINDOW_NORMAL);
+    //imshow("density map",dst);
     //imwrite("density.jpg",dst);
     //waitKey(0);
     return erode_dilate(dst);
@@ -295,8 +295,8 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
         }
 
     }
-    namedWindow("stddev_stage 3",WINDOW_NORMAL);
-    imshow("stddev_stage 3",dst);
+    //namedWindow("stddev_stage 3",WINDOW_NORMAL);
+    //imshow("stddev_stage 3",dst);
     //imwrite("s3.jpg",dst);
     //waitKey(0);
     return dst;
@@ -403,8 +403,8 @@ Mat stage5(Mat const &img,int thresh=4)
             }
         }
     }
-    namedWindow("Stage5 geo correct",WINDOW_NORMAL);
-    imshow("Stage5 geo correct",dst2);
+    //namedWindow("Stage5 geo correct",WINDOW_NORMAL);
+    //imshow("Stage5 geo correct",dst2);
     //imwrite("s5.jpg",dst);
     //waitKey(0);
     //cout<<"sTAGE 4 EXIT"<<dst2.rows<<" "<<dst2.cols<<endl;
@@ -445,8 +445,8 @@ Mat stage6(Mat const &cs1,Mat const &s4)
 
         }
     }
-    namedWindow("contour stage 6",WINDOW_AUTOSIZE);
-    imshow("contour stage 6",dst);
+    //namedWindow("contour stage 6",WINDOW_AUTOSIZE);
+    //imshow("contour stage 6",dst);
     //imwrite("s6.jpg",dst);
     //waitKey(0);
     return dst;
