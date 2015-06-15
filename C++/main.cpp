@@ -51,7 +51,7 @@ int main(int, char**) {
     char key,name[20];
     int i=0,count=-1,skip=5,y;
     double attendance[7];
-    int frames=0;
+    int frames=-1;
     const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
     CascadeClassifier haar_cascade;
     haar_cascade.load("../Cascades/front_alt2.xml");
@@ -112,60 +112,57 @@ int main(int, char**) {
                     ef->predict(instance,pef,conf_ef);
                     ff->predict(instance,pff,conf_ff);
                     lbp->predict(instance,plbp,conf_lbp);
-                    char final[50];
+                    //char final[50];
                     if(pef==pff)
                     {
-                        double hyb_conf=(conf_ff+conf_ef)/2;
-                        sprintf(final," Hybrid %s Conf- %f",prediction_name(pef).c_str(),hyb_conf);
+                        // double hyb_conf=(conf_ff+conf_ef)/2;
+                        // sprintf(final," Hybrid %s Conf- %f",prediction_name(pef).c_str(),hyb_conf);
                         attendance[1+pef]+=5;
                     }
                     else
                     {
                         attendance[1+pef]+=1.67;
                         attendance[1+pff]+=1.67;
-                        if(conf_ef>conf_ff)
-                        {
-                            sprintf(final," Hybrid %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
-                        }
-                        else
-                        {
-                            sprintf(final," Hybrid %s Conf- %f",prediction_name(pff).c_str(),conf_ff);
-                        }
+                        // if(conf_ef>conf_ff)
+                        // {
+                        //     sprintf(final," Hybrid %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
+                        // }
+                        // else
+                        // {
+                        //     sprintf(final," Hybrid %s Conf- %f",prediction_name(pff).c_str(),conf_ff);
+                        // }
                     }
 
 
                     rectangle(img,crop,CV_RGB(0,255,0),2);
 
-                    char lbp[50];
-                    sprintf(lbp," lbp %s Conf- %f",prediction_name(plbp).c_str(),conf_lbp);
+                   // char lbp[50];
+                    //sprintf(lbp," lbp %s Conf- %f",prediction_name(plbp).c_str(),conf_lbp);
                     char ef[50];
                     sprintf(ef," ef %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
                     char ff[50];
                     sprintf(ff," ff %s Conf- %f",prediction_name(pff).c_str(),conf_ff);
                     int pos_x = std::max(crop.tl().x - 10, 0);
                     int pos_y = std::max(crop.tl().y - 10, 0);
-                    putText(img, lbp, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                  //  putText(img, lbp, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
                     putText(img, ef, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
                     putText(img, ff, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
                 }
                 cv::imshow("Output Window2", img);
 
-                /*
-                if(frames%2000!=0)
-                {
-                    key = cv::waitKey(40);
-                    cam_movement(key,img);
-                }
-                else
+                
+                
+                
+                if(frames%30==0)  
                 {   int y=10;
                     att=black.clone();
                     attendance[0]=0;
                     for(int i=1;i<7;i++)
                     {
-                        if(attendance[i]>3000)
+                        if(attendance[i]>15)
                         {
                             char present[50];
-                            sprintf(present,"%s recog rate %f",prediction_name(i-1).c_str(),attendance[i]/50);
+                            sprintf(present,"%s confidence %f",prediction_name(i-1).c_str(),attendance[i]*3.33);
                             putText(att, present, Point(10, y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
                             y=y+15;
                         }
@@ -174,14 +171,15 @@ int main(int, char**) {
                     frames=0;
 
                 }
-                */
+                
+                /*
                 key=cv::waitKey(40);
                 cam_movement(key,img);
                     y=10;
                     att=black.clone();
                     for(int i=1;i<7;i++)
                     {
-                        if((attendance[i]*100)/frames>50)
+                        if((attendance[i]*100)/frames>70)
                         {
                             char present[50];
                             sprintf(present,"%s recog rate %f",prediction_name(i-1).c_str(),(attendance[i]*100)/frames);
@@ -189,13 +187,15 @@ int main(int, char**) {
                             y=y+10;
 
                         }
-                            
-                        
-                    }
-                
-                imshow("attendance",att);
 
-                
+
+                    }
+                */
+                imshow("attendance",att);
+                key = cv::waitKey(40);
+                cam_movement(key,img);
+
+
             }
 
         }
