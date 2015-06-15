@@ -37,7 +37,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
     }
 }
 
-int main3()
+int model()
 {
 
     string fn_csv = "samples.csv";

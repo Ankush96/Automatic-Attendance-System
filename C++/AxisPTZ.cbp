@@ -56,6 +56,7 @@
 		<Unit filename="Segment-samples.cpp" />
 		<Unit filename="Stage-segment.cpp" />
 		<Unit filename="Stage-segment.h" />
+		<Unit filename="Utils.h" />
 		<Unit filename="grabcut.cpp" />
 		<Unit filename="lbp.cpp" />
 		<Unit filename="lena.jpg" />

@@ -11,9 +11,9 @@ using std::cout;
 using std::endl;
 
 Mat clahe(Mat img);
-Mat erode(Mat const &src,int thresh=5);
+Mat erode(Mat const &src,int );
 
-Mat dilate(Mat const &src,int thresh=2);
+Mat dilate(Mat const &src,int );
 
 Mat erode_dilate(Mat const &src);
 
@@ -31,9 +31,9 @@ Mat stage1(Mat const &src);
 
 Mat stage2(Mat const &Csrc);
 
-Mat stage3(Mat const &src,Mat const &img,int thresh=2);
+Mat stage3(Mat const &src,Mat const &img,int);
 
-Mat stage5(Mat const &img,int thresh=4);
+Mat stage5(Mat const &img,int);
 
 Mat stage6(Mat const &cs1,Mat const &s4);
 
