@@ -3,7 +3,7 @@
 	<opencv2/opencv.hpp>
 	<iostream>
 
-1434348063 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
+1434435371 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
 	<stdio.h>
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"
@@ -50,7 +50,7 @@
 	"opencv2/opencv.hpp"
 	<iostream>
 
-1434346806 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
+1434349134 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
 	<opencv2/core/core.hpp>
 	<opencv2/imgproc/imgproc.hpp>
 	<opencv2/highgui/highgui.hpp>
@@ -75,7 +75,7 @@
 	<vector>
 	"math.h"
 
-1434348530 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.h
+1434430369 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.h
 	<stdio.h>
 	"Stage-segment.h"
 	"opencv2/core/core.hpp"
@@ -83,8 +83,30 @@
 	"opencv2/highgui/highgui.hpp"
 	"opencv2/imgproc/imgproc.hpp"
 	"opencv2/objdetect/objdetect.hpp"
+	<dirent.h>
+	<unistd.h>
+	<sys/stat.h>
+	<sys/types.h>
 	<iostream>
 	<fstream>
 	<sstream>
 	<vector>
+
+1434435245 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.cpp
+	<stdio.h>
+	"Stage-segment.h"
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	<dirent.h>
+	<unistd.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<string>
 
