@@ -15,7 +15,6 @@
 #include <sstream>
 #include <vector>
 #include <string>
-
 using namespace cv;
 using namespace std;
 
@@ -87,7 +86,7 @@ int image_recognizer(string dir)
     vector<Mat> images;
     vector<int> labels;
 
-    
+
     // std::ifstream file(filename.c_str(), ifstream::in);
     // if (!file) {
     //     string error_message = "No valid input file was given, please check the given filename.";
@@ -113,16 +112,16 @@ int image_recognizer(string dir)
     //     }
     // }
     //
-    
+
     int correct,m;
     double sum_ef=0,sum_ff=0,sum_mix=0;
-    dir_read(dir,6,images,labels); 
+    dir_read(dir,6,images,labels);
     m=images.size();
     for(int i=images.size()-1;i>=0;i--)
     {
         cout<<images.size()<<" ";
         img=images[i];
-        images.pop_back();   
+        images.pop_back();
         switch(labels[i])
         {
             case 1:correct=4;
@@ -137,7 +136,6 @@ int image_recognizer(string dir)
             break;
             case 6:correct=5;
             break;
-            
         }
         Mat instance=img.clone();
         cvtColor(img,instance,CV_BGR2GRAY);
@@ -186,7 +184,7 @@ int image_recognizer(string dir)
         cvNamedWindow("Output Window2",WINDOW_NORMAL);
         cv::imshow("Output Window2", img);
         cv::waitKey(0);
-        
+
 
     }
     cout<<"\n\t Recognition rate"<<endl;
@@ -383,7 +381,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
     }
 }
 
-int model_main()
+int model_main(string dir)
 {
 
     //string fn_csv = "samples.csv";
@@ -399,7 +397,7 @@ int model_main()
     }
 
     */
-    dir_read("../Face",6,images,labels);
+    dir_read(dir,6,images,labels);
     if(images.size() <= 1) {
         string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
         CV_Error(CV_StsError, error_message);

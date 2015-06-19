@@ -63,6 +63,8 @@
 		<Unit filename="lena.jpg" />
 		<Unit filename="main.cpp" />
 		<Unit filename="model.cpp" />
+		<Unit filename="two_d_pca.cpp" />
+		<Unit filename="two_d_pca.h" />
 		<Extensions>
 			<envvars />
 			<code_completion />

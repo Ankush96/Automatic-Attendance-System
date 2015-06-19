@@ -26,7 +26,7 @@ int image_recognizer(string);
 
 static void read_csv(const string& , vector<Mat>& , vector<int>& , char separator);
 
-int model_main();
+int model_main(string);
 
 static void segment(const string&, char separator);
 
