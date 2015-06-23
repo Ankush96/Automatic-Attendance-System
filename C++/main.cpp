@@ -23,9 +23,10 @@ int main()
 {
     vector<Mat> images;
     vector<int> labels;
-    dir_read("../orl_faces",12,images,labels);
+    dir_read("../orl_faces",5,images,labels,0);
+
     pca2d model;
-    model.train(images,labels,0.8);
+    model.train(images,labels,0.999);
 
    //  MatrixXf ones = MatrixXf::Random(7,7);
    //  EigenSolver<MatrixXf> es(ones);

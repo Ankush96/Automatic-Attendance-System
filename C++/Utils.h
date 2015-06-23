@@ -16,7 +16,7 @@
 #include <vector>
 
 
-void dir_read(string,int,vector<Mat>&,vector<int>&);
+void dir_read(string,int,vector<Mat>&,vector<int>&,bool);
 
 string prediction_name(int);
 

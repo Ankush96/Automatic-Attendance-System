@@ -18,8 +18,8 @@
 using namespace cv;
 using namespace Eigen;
 
-#define m 120
-#define n 120
+#define m 112
+#define n 92
 
 void swap(VectorXf &arr, const int a, const int b,MatrixXf &evec)
 {
@@ -77,6 +77,7 @@ void quicksort(VectorXf &arr, const int left, const int right, const int sz,Matr
 MatrixXf pca2d::copy_cv2eigen(Mat src)
 {
     MatrixXf dst(m,n);
+    //cout<<src.rows<<"*"<<src.cols<<endl;
 	for(int i=0;i<src.rows;i++)
 	{
 		for(int j=0;j<src.cols;j++)
@@ -91,11 +92,11 @@ MatrixXf pca2d::copy_cv2eigen(Mat src)
 
 Mat pca2d::copy_eigen2cv(MatrixXf src)
 {
-    Mat dst(m,n,CV_8UC1,Scalar(0));
+    Mat dst(src.rows(),src.cols(),CV_8UC1,Scalar(0));
 
-	for(int i=0;i<m;i++)
+	for(int i=0;i<src.rows();i++)
 	{
-		for(int j=0;j<n;j++)
+		for(int j=0;j<src.cols();j++)
 		{
 			//cout<<"\nSource value is "<<(int)src.at<uchar>(i,j);
 			dst.at<uchar>(i,j)=(int)src(i,j);
@@ -106,40 +107,50 @@ Mat pca2d::copy_eigen2cv(MatrixXf src)
 }
 
 
-void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh=0.8)
+void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh=0.9)
 {
 	int num_images=images.size();
 	Mat input;
 	MatrixXf mean(m,n);
-	MatrixXf G(m,n);
+	MatrixXf G;
+    MatrixXf A;
 	mean=MatrixXf::Zero(m,n);
-	cvNamedWindow("out",WINDOW_NORMAL);
+	cvNamedWindow("mean",WINDOW_NORMAL);
 
 	//--------------Taking input images and calculating their mean------------------//
 	for(int i=images.size()-1;i>=0;i--)
 	{
 		input=images[i];
+        //cout<<input.rows<<"*"<<input.cols<<endl;
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
-		resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
-		MatrixXf A(m,n);
+		if(input.rows!=m||input.cols!=n){
+            cout<<"yes";
+            resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
+		}
+        //MatrixXf A(m,n);
 		A=copy_cv2eigen(input);
+
 		mean=mean+A;
 	}
+
 	mean=mean/num_images;
 	input=copy_eigen2cv(mean);
-	imshow("out",input);
+	imshow("mean",input);
 	waitKey(0);
 
 	//-------------Calculating covariance matrix in G-------------------//
-	G=MatrixXf::Zero(m,n);
+	G=MatrixXf::Zero(n,n);
 	for(int i=images.size()-1;i>=0;i--)
 	{
 		input=images[i];
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
-		resize(input,input, Size(m,n), 1.0, 1.0, INTER_CUBIC);
-		MatrixXf A(m,n);
+		if(input.rows!=m||input.cols!=n){
+            cout<<"yes";
+            resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
+        }
+		//MatrixXf A(m,n);
 		A=copy_cv2eigen(input);
 		A=A-mean;
 		G=G+A.transpose()*A;
@@ -165,40 +176,57 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh=0.8)
     quicksort(evals,0,evals.size()-1,evals.size(),initial_evec);
     double total_sum=evals.sum(),sum=0;
     cout<<endl<<"sum"<<total_sum;
-    int num_evecs=0;
+    int num_evecs=1;
     MatrixXf X,temp;
-   /* for(int i=0;i<evals.size();i++)
-    {
-        if(complex_eval(i).real()/sum>=e_val_thresh)
-        {
-            if(num_evecs==0)
-            {
-                X=initial_evec.col(i);
-            }
-            else
-            {
-                temp.resize(X.rows(),X.cols()+1);
-                temp<<X,initial_evec.col(i);
-                X=temp;
-            }
-            num_evecs++;
-        }
-    }*/
-    cout<<"Building X.../n Adding 1st eigen vector. eigenvalue is "<< evals(0)<<endl<<"percentage is"<<evals(0)/total_sum;    
+
+    cout<<"Building X...\nAdding 1st eigenvector. Eigenvalue is "<< evals(0)<<" percentage is"<<evals(0)/total_sum<<endl;
     X=initial_evec.col(0);
     sum+=evals(0);
     while((sum/total_sum)<e_val_thresh)
     {
-    	num_evecs++;
+
     	temp.resize(X.rows(),X.cols()+1);
         temp<<X,initial_evec.col(num_evecs);
         X=temp;
         sum+=evals(num_evecs);
-        cout<<"Adding "<<num_evecs<<"th eigenvector"<<endl<<"eigenvalue is "<<evals(num_evecs)<<endl<<"percentage is "<<sum/total_sum<<endl;
-    }    
+        num_evecs++;
+        cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
+    }
 
     cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
+    cout<<" number of eigenvectors is "<<num_evecs<<endl;
     // ********** X has been calculated*************//
+
+    //***********Visualisation of Reconstruction***********//
+    Mat src=images[1];
+    cvNamedWindow("Source",WINDOW_NORMAL);
+    imshow("Source",src);
+    cvNamedWindow("Reconstructed",WINDOW_NORMAL);
+    waitKey(0);
+    MatrixXf U,V,A_reconstruct;
+
+    A=copy_cv2eigen(src);
+    A=A-mean;
+    char text[10];
+    for(int d=1;d<=num_evecs;d++)
+    {
+        U=X.block(0,0,X.rows(),d);
+        V=A*U;
+        A_reconstruct=V*(U.transpose())+mean;
+        // cout<<endl<<" size of X is "<<X.rows()<<"*"<<X.cols()<<endl;
+        // cout<<endl<<" size of U is "<<U.rows()<<"*"<<U.cols()<<endl;
+        // cout<<endl<<" size of V is "<<V.rows()<<"*"<<V.cols()<<endl;
+
+        src=copy_eigen2cv(A_reconstruct);
+
+        //sprintf(text," d=%d ",d);
+        //cvNamedWindow(text,WINDOW_NORMAL);
+        //imshow(text,src);
+        imshow("Reconstructed",src);
+        waitKey(100);
+
+    }
+    waitKey(0);
     //*********** Calculating feature matrix *******//
     vector<MatrixXf> features;
     for(int i=images.size()-1;i>=0;i--)

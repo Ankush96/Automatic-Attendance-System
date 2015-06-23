@@ -19,8 +19,8 @@
 using namespace cv;
 using namespace std;
 
-#define m 120
-#define n 120
+#define m 92
+#define n 112
 
 
 string prediction_name(int prediction)
@@ -39,7 +39,7 @@ string prediction_name(int prediction)
     }
 }
 
-void dir_read(string root,int num,vector<Mat>& images,vector<int>& labels)
+void dir_read(string root,int num,vector<Mat>& images,vector<int>& labels,bool color)
 {
     DIR *dp;
     struct dirent *dirp;
@@ -59,7 +59,7 @@ void dir_read(string root,int num,vector<Mat>& images,vector<int>& labels)
             filepath = dir + "/" + dirp->d_name;
             if (stat( filepath.c_str(), &filestat )) continue;
             if (S_ISDIR( filestat.st_mode )) continue;
-            Mat img=imread(filepath);
+            Mat img=imread(filepath,color);
             images.push_back(img);
             labels.push_back(i);
         }
@@ -120,7 +120,7 @@ int image_recognizer(string dir)
 
     int correct,tot;
     double sum_ef=0,sum_ff=0,sum_mix=0;
-    dir_read(dir,6,images,labels);
+    dir_read(dir,6,images,labels,1);
     tot=images.size();
     for(int i=images.size()-1;i>=0;i--)
     {
@@ -402,7 +402,7 @@ int model_main(string dir)
     }
 
     */
-    dir_read(dir,6,images,labels);
+    dir_read(dir,6,images,labels,0);
     if(images.size() <= 1) {
         string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
         CV_Error(CV_StsError, error_message);
