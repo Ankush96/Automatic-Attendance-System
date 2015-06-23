@@ -15,8 +15,13 @@
 #include <sstream>
 #include <vector>
 #include <string>
+
 using namespace cv;
 using namespace std;
+
+#define m 120
+#define n 120
+
 
 string prediction_name(int prediction)
 {
@@ -100,7 +105,7 @@ int image_recognizer(string dir)
     //     if(!path.empty() && !classlabel.empty()) {
     //         Mat tmp1=imread(path, 1);
     //         Mat tmp2;
-    //         resize(tmp1, tmp2, Size(120, 120), 1.0, 1.0, INTER_CUBIC);
+    //         resize(tmp1, tmp2, Size(m, n), 1.0, 1.0, INTER_CUBIC);
     //         ///tmp2=clahe(tmp2);
     //         //equalizeHist(tmp2,tmp2);
     //         //cvNamedWindow("image",WINDOW_NORMAL);
@@ -113,10 +118,10 @@ int image_recognizer(string dir)
     // }
     //
 
-    int correct,m;
+    int correct,tot;
     double sum_ef=0,sum_ff=0,sum_mix=0;
     dir_read(dir,6,images,labels);
-    m=images.size();
+    tot=images.size();
     for(int i=images.size()-1;i>=0;i--)
     {
         cout<<images.size()<<" ";
@@ -144,7 +149,7 @@ int image_recognizer(string dir)
            {
                 instance = instance.clone();
            }
-        resize(instance,instance, Size(120,120), 1.0, 1.0, INTER_CUBIC);
+        resize(instance,instance, Size(m,n), 1.0, 1.0, INTER_CUBIC);
 
         int pef=-1,pff=-1,plbp=-1;
         double conf_ef=0.0,conf_ff=0.0,conf_lbp=0.0;
@@ -188,9 +193,9 @@ int image_recognizer(string dir)
 
     }
     cout<<"\n\t Recognition rate"<<endl;
-    cout<<"\t eigenfaces- "<<(sum_ef*100)/m<<endl;
-    cout<<"\t fisherfaces- "<<(sum_ff*100)/m<<endl;
-    cout<<"\t combined- "<<(sum_mix*100)/m<<endl;
+    cout<<"\t eigenfaces- "<<(sum_ef*100)/tot<<endl;
+    cout<<"\t fisherfaces- "<<(sum_ff*100)/tot<<endl;
+    cout<<"\t combined- "<<(sum_mix*100)/tot<<endl;
     return 0;
 }
 
@@ -257,7 +262,7 @@ int video_recognizer()
                     //copy(instance2,black,crop);
                     //imshow("segment",black);
                     //imshow("face",instance);
-                    resize(instance,instance, Size(120,120), 1.0, 1.0, INTER_CUBIC);
+                    resize(instance,instance, Size(m,n), 1.0, 1.0, INTER_CUBIC);
 
                     int pef=-1,pff=-1,plbp=-1;
                     double conf_ef=0.0,conf_ff=0.0,conf_lbp=0.0;
@@ -368,7 +373,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
         if(!path.empty() && !classlabel.empty()) {
             Mat tmp1=imread(path, 0);
             Mat tmp2;
-            resize(tmp1, tmp2, Size(120, 120), 1.0, 1.0, INTER_CUBIC);
+            resize(tmp1, tmp2, Size(m, n), 1.0, 1.0, INTER_CUBIC);
             ///tmp2=clahe(tmp2);
             equalizeHist(tmp2,tmp2);
             //cvNamedWindow("image",WINDOW_NORMAL);
