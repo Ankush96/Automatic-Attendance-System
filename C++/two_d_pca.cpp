@@ -74,40 +74,52 @@ void quicksort(VectorXf &arr, const int left, const int right, const int sz,Matr
     quicksort(arr, part + 1, right, sz,evec);
 }
 
-MatrixXf pca2d::copy_cv2eigen(Mat src)
+MatrixXf pca2d::copy_cv2eigen(Mat src,int type=0)
 {
-    MatrixXf dst(m,n);
-    //cout<<src.rows<<"*"<<src.cols<<endl;
-	for(int i=0;i<src.rows;i++)
-	{
-		for(int j=0;j<src.cols;j++)
-		{
-			//cout<<"\nSource value is "<<(int)src.at<uchar>(i,j);
-			dst(i,j)=(float)src.at<uchar>(i,j);
-			//cout<<" and matrix value becomes "<<dst(i,j)<<endl;
-		}
-	}
+    MatrixXf dst(src.rows,src.cols);
+    if(type==0)
+    {
+        for(int i=0;i<src.rows;i++)
+        {
+            for(int j=0;j<src.cols;j++)     dst(i,j)=src.at<uchar>(i,j);
+        }
+
+    }
+    else if(type==5)
+    {
+        //cout<<"Type 5 called"<<endl;
+        for(int i=0;i<src.rows;i++)
+        {
+            for(int j=0;j<src.cols;j++)     dst(i,j)=src.at<float>(i,j);
+        }
+
+    }
 	return dst;
 }
 
-Mat pca2d::copy_eigen2cv(MatrixXf src)
+Mat pca2d::copy_eigen2cv(MatrixXf src,int type=0)
 {
-    Mat dst(src.rows(),src.cols(),CV_8UC1,Scalar(0));
+    Mat dst(src.rows(),src.cols(),type,Scalar(0));
+    if(type==0)
+    {
+        for(int i=0;i<src.rows();i++)
+        {
+            for(int j=0;j<src.cols();j++)    dst.at<uchar>(i,j)=(int)src(i,j);
+        }
 
-	for(int i=0;i<src.rows();i++)
-	{
-		for(int j=0;j<src.cols();j++)
-		{
-			//cout<<"\nSource value is "<<(int)src.at<uchar>(i,j);
-			dst.at<uchar>(i,j)=(int)src(i,j);
-			//cout<<" and matrix value becomes "<<dst(i,j)<<endl;
-		}
-	}
+    }
+    else if(type==5)
+    {
+        //cout<<"Type 5 called"<<endl;
+        for(int i=0;i<src.rows();i++)
+        {
+            for(int j=0;j<src.cols();j++)    dst.at<float>(i,j)=src(i,j);
+        }
+    }
 	return dst;
 }
 
-
-void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh=0.9)
+void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,string filename)
 {
 	int num_images=images.size();
 	Mat input;
@@ -129,8 +141,8 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh=0.9)
             resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
 		}
         //MatrixXf A(m,n);
-		A=copy_cv2eigen(input);
 
+		A=copy_cv2eigen(input);
 		mean=mean+A;
 	}
 
@@ -195,6 +207,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh=0.9)
 
     cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
     cout<<" number of eigenvectors is "<<num_evecs<<endl;
+    this->eigenvectors_X=copy_eigen2cv(X,5);
     // ********** X has been calculated*************//
 
     //***********Visualisation of Reconstruction***********//
@@ -223,25 +236,128 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh=0.9)
         //cvNamedWindow(text,WINDOW_NORMAL);
         //imshow(text,src);
         imshow("Reconstructed",src);
-        waitKey(100);
+        waitKey(10);
 
     }
     waitKey(0);
+
     //*********** Calculating feature matrix *******//
-    vector<MatrixXf> features;
-    for(int i=images.size()-1;i>=0;i--)
+    this->features.clear();
+    this->classes=labels;
+    for(int i=0;i<images.size();i++)
 	{
 		input=images[i];
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
-		resize(input,input, Size(m,n), 1.0, 1.0, INTER_CUBIC);
-		MatrixXf A(m,n),B;
+		if(input.rows!=m||input.cols!=n){
+            cout<<"yes";
+            resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
+        }
+		MatrixXf A,B;
 		A=copy_cv2eigen(input);
 		A=A-mean;
 		B=A*X;
+        input=copy_eigen2cv(B,5);
+        this->features.push_back(input); //Mat type data is pushed to
 		//input=copy_eigen2cv(A);
 		//imshow("out",input);
 		//waitKey(0);
 	}
+    //***********Feature matrices pushed to a vector***********//
 
+    this->mean_img=copy_eigen2cv(mean,5);
+    //*************Writing model to Xml File******************//
+
+    FileStorage fs(filename, FileStorage::WRITE);
+    fs<<"Features"<< this->features;
+    fs<<"Labels" << labels;
+    fs<<"Mean" <<this->mean_img;
+    fs<<"X" << this->eigenvectors_X;
+
+    fs.release();
+    cout << "\nWrite Done." << endl;
+}
+
+void pca2d::load(string filename)
+{
+
+    FileStorage fs(filename, FileStorage::READ);
+    fs["Features"] >>this->features;
+    fs["Labels"] >>this->classes;
+    fs["Mean"] >>this->mean_img;
+    fs["X"] >>this->eigenvectors_X;
+    fs.release();
+    fs.release();
+    cout << "\n Model loaded" << endl;
+}
+
+
+int pca2d::predict(Mat test)
+{
+    // cout<<"\nPrediction started"<<endl<<" Number of training samples = "<<classes.size()<<endl;
+    // cout<<" Calculating Euclidean distances..."<<endl;
+    vector<distances> eucl_dist_vec;
+    distances temp={0,0,0};
+    eucl_dist_vec.push_back(temp);
+
+    int class_no=0;
+
+    MatrixXf mean=copy_cv2eigen(this->mean_img,5);
+    MatrixXf A=copy_cv2eigen(test);
+    A-=mean;
+    MatrixXf X=copy_cv2eigen(this->eigenvectors_X,5);
+    MatrixXf B;
+    //cout<<"A "<<A.rows()<<"*"<<A.cols()<<endl;
+    //cout<<"X "<<X.rows()<<"*"<<X.cols()<<endl;
+    B=A*X;
+    MatrixXf A_reconstruct=B*X.transpose()+mean;
+    imshow("Reconstructed",copy_eigen2cv(A_reconstruct));
+    waitKey(100);
+    //cout<<"\n Sum of all elements in B is "<<B.sum()<<endl;
+    MatrixXf Bclass;
+
+    for(int i=0;i<classes.size();)
+    {
+        //cout<<"class_no="<<class_no<<endl;
+        while(class_no==classes[i])
+            {
+                MatrixXf Btrain=copy_cv2eigen(features[i],5);
+                
+                Bclass+=Btrain;
+                eucl_dist_vec[class_no].class_count++;
+                i++;
+            }
+        if(class_no>0)
+        {
+            Bclass/= eucl_dist_vec[class_no].class_count;
+            Bclass-=B;
+            eucl_dist_vec[class_no].dist=Bclass.squaredNorm();
+
+        }
+        //if(class_no)cout<<" Class no-"<<class_no<<" dist "<< eucl_dist_vec[class_no].dist << "label" <<eucl_dist_vec[class_no].label <<" class_count "<<eucl_dist_vec[class_no].class_count<<endl;
+        class_no++;
+        Bclass=MatrixXf::Zero(B.rows(),B.cols());
+        //------------initialise a new node to put in vector-------------
+
+        temp.dist=0;
+        temp.label=class_no;
+        temp.class_count=0;
+        eucl_dist_vec.push_back(temp);
+
+    }
+    eucl_dist_vec.pop_back(); //An extra element is pushed at the end
+    // for(int i=1;i<eucl_dist_vec.size();i++)
+    // {
+    //     cout<<" Class " <<eucl_dist_vec[i].label <<" distance = " << eucl_dist_vec[i].dist <<" class count " << eucl_dist_vec[i].class_count<<endl;
+    // }
+    int prediction=-1;
+    int min=1;
+    for(int i=2;i<eucl_dist_vec.size();i++)
+    {
+        if (eucl_dist_vec[i].dist<eucl_dist_vec[min].dist)
+        {
+            min=i;
+        }
+    }
+    return eucl_dist_vec[min].label;
 }
