@@ -17,17 +17,17 @@ struct distances{
 class pca2d
 {
 	private:
-		vector<Mat> features;
-		vector<int> classes;
-		Mat mean_img;
-		Mat eigenvectors_X;
+		std::vector<cv::Mat> features;
+		std::vector<int> classes;
+		cv::Mat mean_img;
+		cv::Mat eigenvectors_X;
 
 	public:
-		void train(vector<Mat>,vector<int>,double,string);
-		void load(string);
-		int predict(Mat);
+		void train(std::vector<cv::Mat>,std::vector<int>,double,std::string);
+		void load(std::string);
+		int predict(cv::Mat,double distance_thresh=20000000);
 
-		Mat copy_eigen2cv(Eigen::MatrixXf src,int);
-		Eigen::MatrixXf copy_cv2eigen(Mat,int);
+		cv::Mat copy_eigen2cv(Eigen::MatrixXf src,int);
+		Eigen::MatrixXf copy_cv2eigen(cv::Mat,int);
 
 };

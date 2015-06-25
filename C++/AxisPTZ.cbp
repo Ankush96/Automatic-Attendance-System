@@ -59,10 +59,11 @@
 		<Unit filename="Utils.cpp" />
 		<Unit filename="Utils.h" />
 		<Unit filename="grabcut.cpp" />
-		<Unit filename="lbp.cpp" />
 		<Unit filename="lena.jpg" />
 		<Unit filename="main.cpp" />
 		<Unit filename="model.cpp" />
+		<Unit filename="rc2dpca.cpp" />
+		<Unit filename="rc2dpca.h" />
 		<Unit filename="two_d_pca.cpp" />
 		<Unit filename="two_d_pca.h" />
 		<Extensions>

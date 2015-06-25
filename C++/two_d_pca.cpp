@@ -127,7 +127,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 	MatrixXf G;
     MatrixXf A;
 	mean=MatrixXf::Zero(m,n);
-	cvNamedWindow("mean",WINDOW_NORMAL);
+	
 
 	//--------------Taking input images and calculating their mean------------------//
 	for(int i=images.size()-1;i>=0;i--)
@@ -148,8 +148,9 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 
 	mean=mean/num_images;
 	input=copy_eigen2cv(mean);
-	imshow("mean",input);
-	waitKey(0);
+    //cvNamedWindow("mean",WINDOW_NORMAL);
+	//imshow("mean",input);
+	//waitKey(0);
 
 	//-------------Calculating covariance matrix in G-------------------//
 	G=MatrixXf::Zero(n,n);
@@ -187,11 +188,11 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
     VectorXf evals=complex_eval.real();
     quicksort(evals,0,evals.size()-1,evals.size(),initial_evec);
     double total_sum=evals.sum(),sum=0;
-    cout<<endl<<"sum"<<total_sum;
+    //cout<<endl<<"sum"<<total_sum;
     int num_evecs=1;
     MatrixXf X,temp;
 
-    cout<<"Building X...\nAdding 1st eigenvector. Eigenvalue is "<< evals(0)<<" percentage is"<<evals(0)/total_sum<<endl;
+    //cout<<"Building X...\nAdding 1st eigenvector. Eigenvalue is "<< evals(0)<<" percentage is"<<evals(0)/total_sum<<endl;
     X=initial_evec.col(0);
     sum+=evals(0);
     while((sum/total_sum)<e_val_thresh)
@@ -202,20 +203,20 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
         X=temp;
         sum+=evals(num_evecs);
         num_evecs++;
-        cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
+        //cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
     }
 
-    cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
+    //cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
     cout<<" number of eigenvectors is "<<num_evecs<<endl;
     this->eigenvectors_X=copy_eigen2cv(X,5);
     // ********** X has been calculated*************//
 
     //***********Visualisation of Reconstruction***********//
     Mat src=images[1];
-    cvNamedWindow("Source",WINDOW_NORMAL);
-    imshow("Source",src);
-    cvNamedWindow("Reconstructed",WINDOW_NORMAL);
-    waitKey(0);
+    // cvNamedWindow("Source",WINDOW_NORMAL);
+    // imshow("Source",src);
+    // cvNamedWindow("Reconstructed",WINDOW_NORMAL);
+    // waitKey(0);
     MatrixXf U,V,A_reconstruct;
 
     A=copy_cv2eigen(src);
@@ -235,8 +236,8 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
         //sprintf(text," d=%d ",d);
         //cvNamedWindow(text,WINDOW_NORMAL);
         //imshow(text,src);
-        imshow("Reconstructed",src);
-        waitKey(10);
+        // imshow("Reconstructed",src);
+        // waitKey(10);
 
     }
     waitKey(0);
@@ -275,7 +276,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
     fs<<"X" << this->eigenvectors_X;
 
     fs.release();
-    cout << "\nWrite Done." << endl;
+    //cout << "\nWrite Done." << endl;
 }
 
 void pca2d::load(string filename)
@@ -288,18 +289,20 @@ void pca2d::load(string filename)
     fs["X"] >>this->eigenvectors_X;
     fs.release();
     fs.release();
-    cout << "\n Model loaded" << endl;
+    //cout << "\n Model loaded" << endl;
 }
 
 
-int pca2d::predict(Mat test)
+int pca2d::predict(Mat test,double distance_thresh)
 {
     // cout<<"\nPrediction started"<<endl<<" Number of training samples = "<<classes.size()<<endl;
     // cout<<" Calculating Euclidean distances..."<<endl;
-    vector<distances> eucl_dist_vec;
+    
+    if(test.channels()==3)  cvtColor(test,test,CV_BGR2GRAY);
+    if(!((test.rows==m)&&(test.cols==n)))  resize(test,test, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
+    vector<distances> eucl_dist_vec_class,eucl_dist_vec;
     distances temp={0,0,0};
-    eucl_dist_vec.push_back(temp);
-
+    eucl_dist_vec_class.push_back(temp);
     int class_no=0;
 
     MatrixXf mean=copy_cv2eigen(this->mean_img,5);
@@ -311,8 +314,9 @@ int pca2d::predict(Mat test)
     //cout<<"X "<<X.rows()<<"*"<<X.cols()<<endl;
     B=A*X;
     MatrixXf A_reconstruct=B*X.transpose()+mean;
-    imshow("Reconstructed",copy_eigen2cv(A_reconstruct));
-    waitKey(100);
+    // cvNamedWindow("Reconstructed",WINDOW_NORMAL);
+    // imshow("Reconstructed",copy_eigen2cv(A_reconstruct));
+    // waitKey(100);
     //cout<<"\n Sum of all elements in B is "<<B.sum()<<endl;
     MatrixXf Bclass;
 
@@ -324,17 +328,23 @@ int pca2d::predict(Mat test)
                 MatrixXf Btrain=copy_cv2eigen(features[i],5);
                 
                 Bclass+=Btrain;
-                eucl_dist_vec[class_no].class_count++;
+                eucl_dist_vec_class[class_no].class_count++;
+                //-------- Pushing the individual euclidean distances, irrespective of the class------------//
+                Btrain-=B;
+                temp.dist=Btrain.squaredNorm();
+                temp.label=classes[i];
+                eucl_dist_vec.push_back(temp);
+
                 i++;
             }
         if(class_no>0)
         {
-            Bclass/= eucl_dist_vec[class_no].class_count;
+            Bclass/= eucl_dist_vec_class[class_no].class_count;
             Bclass-=B;
-            eucl_dist_vec[class_no].dist=Bclass.squaredNorm();
+            eucl_dist_vec_class[class_no].dist=Bclass.squaredNorm();
 
         }
-        //if(class_no)cout<<" Class no-"<<class_no<<" dist "<< eucl_dist_vec[class_no].dist << "label" <<eucl_dist_vec[class_no].label <<" class_count "<<eucl_dist_vec[class_no].class_count<<endl;
+        //if(class_no)cout<<" Class no-"<<class_no<<" dist "<< eucl_dist_vec_class[class_no].dist << "label" <<eucl_dist_vec_class[class_no].label <<" class_count "<<eucl_dist_vec_class[class_no].class_count<<endl;
         class_no++;
         Bclass=MatrixXf::Zero(B.rows(),B.cols());
         //------------initialise a new node to put in vector-------------
@@ -342,22 +352,46 @@ int pca2d::predict(Mat test)
         temp.dist=0;
         temp.label=class_no;
         temp.class_count=0;
-        eucl_dist_vec.push_back(temp);
+        eucl_dist_vec_class.push_back(temp);
 
     }
-    eucl_dist_vec.pop_back(); //An extra element is pushed at the end
-    // for(int i=1;i<eucl_dist_vec.size();i++)
+    eucl_dist_vec_class.pop_back(); //An extra element is pushed at the end
+    // for(int i=1;i<eucl_dist_vec_class.size();i++)
     // {
-    //     cout<<" Class " <<eucl_dist_vec[i].label <<" distance = " << eucl_dist_vec[i].dist <<" class count " << eucl_dist_vec[i].class_count<<endl;
+    //     cout<<" Class " <<eucl_dist_vec_class[i].label <<" distance = " << eucl_dist_vec_class[i].dist <<" class count " << eucl_dist_vec_class[i].class_count<<endl;
     // }
-    int prediction=-1;
-    int min=1;
-    for(int i=2;i<eucl_dist_vec.size();i++)
-    {
-        if (eucl_dist_vec[i].dist<eucl_dist_vec[min].dist)
+
+    int mode=1; //Make it 0 if you want to calculate euclidean distance from the average of the classes 
+    if(mode==0)
+    {   
+        int min=1;
+        for(int i=2;i<eucl_dist_vec_class.size();i++)
         {
-            min=i;
+            if (eucl_dist_vec_class[i].dist<eucl_dist_vec_class[min].dist)
+            {
+                min=i;
+            }
         }
+        if(eucl_dist_vec_class[min].dist<distance_thresh)
+            return eucl_dist_vec_class[min].label;
+        else return -1;
     }
-    return eucl_dist_vec[min].label;
+    else
+    {
+        int min=0;
+        for(int i=1;i<eucl_dist_vec.size();i++)
+        {
+            if (eucl_dist_vec[i].dist<eucl_dist_vec[min].dist)
+            {
+                min=i;
+            }
+        }
+        //cout<<" distance is "<<eucl_dist_vec[min].dist<<endl;
+        if(eucl_dist_vec[min].dist<distance_thresh)
+            return eucl_dist_vec[min].label;
+        else return -1;
+
+    }
+    
+    
 }
