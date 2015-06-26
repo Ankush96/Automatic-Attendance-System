@@ -52,7 +52,6 @@ void dir_read(string root,int num,vector<Mat>& images,vector<int>& labels,bool c
         char sub[3];
         sprintf(sub,"%d",i);
         dir=root + "/s" + sub + "/" ;
-
         dp = opendir( dir.c_str() );
         while(dirp=readdir(dp))
         {

@@ -19,8 +19,8 @@
 using namespace cv;
 using namespace Eigen;
 
-#define m 112
-#define n 92
+#define n 120
+#define m 120
 
 
 
@@ -78,23 +78,22 @@ void rc2dpca::train(vector<Mat> images,vector<int> labels,double e_val_thresh,st
     MatrixXf G2;
     MatrixXf A;
 	mean=MatrixXf::Zero(m,n);
-	
 	//--------------Taking input images and calculating their mean------------------//
 	for(int i=images.size()-1;i>=0;i--)
 	{
 		input=images[i];
+        //cout<<" image entered. "<< input.rows<<"*"<<input.cols<< " "<< m << " * " <<n<<endl;
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n)
             resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
-
 		A=copy_cv2eigen(input);
 		mean=mean+A;
 	}
 
 	mean=mean/num_images;
-	input=copy_eigen2cv(mean);
-    //cvNamedWindow("mean",WINDOW_NORMAL);
+	// input=copy_eigen2cv(mean);
+    // cvNamedWindow("mean",WINDOW_NORMAL);
 	// imshow("mean",input);
 	// waitKey(0);
     this->mean_img=copy_eigen2cv(mean,5);
@@ -107,14 +106,13 @@ void rc2dpca::train(vector<Mat> images,vector<int> labels,double e_val_thresh,st
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n)
-            resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
+            resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
 
 		A=copy_cv2eigen(input);
 		A=A-mean;
 		G=G+A.transpose()*A;
 	}
 	G=G/num_images;
-
 	//**************Finding out the eigenvectors of G***************//
 	EigenSolver<MatrixXf> es(G);
 	//cout << "The eigenvalues of A are:\n" <<es.eigenvalues() << endl;

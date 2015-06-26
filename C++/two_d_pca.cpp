@@ -18,8 +18,8 @@
 using namespace cv;
 using namespace Eigen;
 
-#define m 112
-#define n 92
+#define n 120
+#define m 120
 
 void swap(VectorXf &arr, const int a, const int b,MatrixXf &evec)
 {
@@ -127,7 +127,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 	MatrixXf G;
     MatrixXf A;
 	mean=MatrixXf::Zero(m,n);
-	
+
 
 	//--------------Taking input images and calculating their mean------------------//
 	for(int i=images.size()-1;i>=0;i--)
@@ -137,20 +137,17 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n){
-            cout<<"yes";
-            resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
+            resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
 		}
-        //MatrixXf A(m,n);
-
 		A=copy_cv2eigen(input);
 		mean=mean+A;
 	}
 
 	mean=mean/num_images;
-	input=copy_eigen2cv(mean);
-    //cvNamedWindow("mean",WINDOW_NORMAL);
-	//imshow("mean",input);
-	//waitKey(0);
+	// input=copy_eigen2cv(mean);
+ //    cvNamedWindow("mean",WINDOW_NORMAL);
+	// imshow("mean",input);
+	// waitKey(0);
 
 	//-------------Calculating covariance matrix in G-------------------//
 	G=MatrixXf::Zero(n,n);
@@ -160,10 +157,8 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n){
-            cout<<"yes";
-            resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
+            resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
         }
-		//MatrixXf A(m,n);
 		A=copy_cv2eigen(input);
 		A=A-mean;
 		G=G+A.transpose()*A;
@@ -207,40 +202,34 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
     }
 
     //cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
-    cout<<" number of eigenvectors is "<<num_evecs<<endl;
+    cout<<" number of eigenvectors in 2dpca is "<<num_evecs<<endl;
     this->eigenvectors_X=copy_eigen2cv(X,5);
     // ********** X has been calculated*************//
 
     //***********Visualisation of Reconstruction***********//
-    Mat src=images[1];
+    //Mat src=images[1];
+    //if(src.rows!=m||src.cols!=n)     resize(src,src, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
     // cvNamedWindow("Source",WINDOW_NORMAL);
     // imshow("Source",src);
     // cvNamedWindow("Reconstructed",WINDOW_NORMAL);
     // waitKey(0);
-    MatrixXf U,V,A_reconstruct;
+    // MatrixXf U,V,A_reconstruct;
+    // A=copy_cv2eigen(src);
+    // A=A-mean;
+    // for(int d=1;d<=num_evecs;d++)
+    // {
+    //     U=X.block(0,0,X.rows(),d);
+    //     V=A*U;
+    //     A_reconstruct=V*(U.transpose())+mean;
+    //     // cout<<endl<<" size of X is "<<X.rows()<<"*"<<X.cols()<<endl;
+    //     // cout<<endl<<" size of U is "<<U.rows()<<"*"<<U.cols()<<endl;
+    //     // cout<<endl<<" size of V is "<<V.rows()<<"*"<<V.cols()<<endl;
+    //     src=copy_eigen2cv(A_reconstruct);
+    //     cvNamedWindow("Reconstructed",WINDOW_NORMAL);
+    //     imshow("Reconstructed",src);
+    //     waitKey(10);
 
-    A=copy_cv2eigen(src);
-    A=A-mean;
-    char text[10];
-    for(int d=1;d<=num_evecs;d++)
-    {
-        U=X.block(0,0,X.rows(),d);
-        V=A*U;
-        A_reconstruct=V*(U.transpose())+mean;
-        // cout<<endl<<" size of X is "<<X.rows()<<"*"<<X.cols()<<endl;
-        // cout<<endl<<" size of U is "<<U.rows()<<"*"<<U.cols()<<endl;
-        // cout<<endl<<" size of V is "<<V.rows()<<"*"<<V.cols()<<endl;
-
-        src=copy_eigen2cv(A_reconstruct);
-
-        //sprintf(text," d=%d ",d);
-        //cvNamedWindow(text,WINDOW_NORMAL);
-        //imshow(text,src);
-        // imshow("Reconstructed",src);
-        // waitKey(10);
-
-    }
-    waitKey(0);
+    // }
 
     //*********** Calculating feature matrix *******//
     this->features.clear();
@@ -251,8 +240,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n){
-            cout<<"yes";
-            resize(input,input, Size(m,n) , 1.0, 1.0, INTER_CUBIC);
+            resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
         }
 		MatrixXf A,B;
 		A=copy_cv2eigen(input);
@@ -297,7 +285,7 @@ int pca2d::predict(Mat test,double distance_thresh)
 {
     // cout<<"\nPrediction started"<<endl<<" Number of training samples = "<<classes.size()<<endl;
     // cout<<" Calculating Euclidean distances..."<<endl;
-    
+
     if(test.channels()==3)  cvtColor(test,test,CV_BGR2GRAY);
     if(!((test.rows==m)&&(test.cols==n)))  resize(test,test, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
     vector<distances> eucl_dist_vec_class,eucl_dist_vec;
@@ -326,7 +314,7 @@ int pca2d::predict(Mat test,double distance_thresh)
         while(class_no==classes[i])
             {
                 MatrixXf Btrain=copy_cv2eigen(features[i],5);
-                
+
                 Bclass+=Btrain;
                 eucl_dist_vec_class[class_no].class_count++;
                 //-------- Pushing the individual euclidean distances, irrespective of the class------------//
@@ -361,9 +349,9 @@ int pca2d::predict(Mat test,double distance_thresh)
     //     cout<<" Class " <<eucl_dist_vec_class[i].label <<" distance = " << eucl_dist_vec_class[i].dist <<" class count " << eucl_dist_vec_class[i].class_count<<endl;
     // }
 
-    int mode=1; //Make it 0 if you want to calculate euclidean distance from the average of the classes 
+    int mode=1; //Make it 0 if you want to calculate euclidean distance from the average of the classes
     if(mode==0)
-    {   
+    {
         int min=1;
         for(int i=2;i<eucl_dist_vec_class.size();i++)
         {
@@ -392,6 +380,6 @@ int pca2d::predict(Mat test,double distance_thresh)
         else return -1;
 
     }
-    
-    
+
+
 }

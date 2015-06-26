@@ -24,9 +24,9 @@ int main()
     // vector<int> labels;
     // dir_read("../orl_faces/Train",40,images,labels,0);
 
-    // rc2dpca model;
-    // //model.train(images,labels,0.7,"rc2dpca.xml");
-    // model.load("rc2dpca.xml");
+    // 2dpca model;
+    // model.train(images,labels,0.75,"2dpca.xml");
+    // model.load("2dpca.xml");
 
     // //*-*-*-*-*-*-*- FIX ALL THE RESIZES TO SIZE(n,m)*-*-*-*-*-*-*-*-//
 
@@ -42,27 +42,27 @@ int main()
     // }
     // sum*=100;
     // cout<<" accuracy is "<<sum/labels.size()<<endl;
-    // cout<<"here"<<endl;
 
-    //plot("../orl_faces/Train","../orl_faces/Test");
-    string dir_train="../orl_faces/Train",dir_test="../orl_faces/Test";
+
+    string dir_train="../Faces/Train",dir_test="../Faces/Test";
     vector<Mat> images_train,images_test;
     vector<int> labels_train,labels_test;
-    dir_read(dir_train,40,images_train,labels_train,0);
-    dir_read(dir_test,40,images_test,labels_test,0);
+    dir_read(dir_train,6,images_train,labels_train,0);
+    dir_read(dir_test,6,images_test,labels_test,0);
+    cout<<"Train = "<< images_train.size()<<" test= "<<images_test.size()<<endl;
     rc2dpca model1;
     pca2d model2;
-    const int bins=15;
+    const int bins=21;
     float accuracy1[bins];
     float accuracy2[bins];
     cout<<" Percentage of information \t rc2dpca \t 2dpca "<<endl;
     for(int i=0;i<bins;i++)
     {
-        model1.train(images_train,labels_train,(30+i*5)/100.0,"rc2dpca.xml");
-        model2.train(images_train,labels_train,(30+i*5)/100.0,"2dpca.xml");
+        model1.train(images_train,labels_train,(70+i)/100.0,"rc2dpca.xml");
+        model2.train(images_train,labels_train,(70+i)/100.0,"2dpca.xml");
 
         double sum1=0,sum2=0;
-        for(int j=0;j<images_test.size();j++)
+        for(int j=0;j<images_test.size();j=j+6)
         {
           int prediction1=  model1.predict(images_test[j]);
           sum1+=(prediction1==labels_test[j]);
@@ -73,8 +73,11 @@ int main()
         sum2*=100;
         accuracy1[i]=sum1/labels_test.size();
         accuracy2[i]=sum2/labels_test.size();
-        cout<<"\t\t"<<30+i*5<<"\t\t"<<accuracy1[i]<<"\t\t"<<accuracy2[i]<<endl;
+        cout<<"\t\t"<<70+i<<"\t\t"<<accuracy1[i]*6<<"\t\t"<<accuracy2[i]*6<<endl;
+        //waitKey(500);
     }
+
+
     return 0;
 }
 
