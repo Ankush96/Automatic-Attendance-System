@@ -28,8 +28,4 @@ static void read_csv(const string& , vector<Mat>& , vector<int>& , char separato
 
 int model_main(string);
 
-static void segment(const string&, char separator);
-
-int segment_samples_main();
-
 int sampler_main();

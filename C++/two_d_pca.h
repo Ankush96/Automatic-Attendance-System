@@ -25,7 +25,7 @@ class pca2d
 	public:
 		void train(std::vector<cv::Mat>,std::vector<int>,double,std::string);
 		void load(std::string);
-		int predict(cv::Mat,double distance_thresh=20000000);
+		int predict(cv::Mat,double distance_thresh=200000000); //keep one zero less
 
 		cv::Mat copy_eigen2cv(Eigen::MatrixXf src,int);
 		Eigen::MatrixXf copy_cv2eigen(cv::Mat,int);

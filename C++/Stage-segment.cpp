@@ -234,11 +234,10 @@ Mat stage1(Mat const &src) {
     return dst;
 }
 
-Mat stage2(Mat const &Csrc)
-{//cout<<"2 starts"<<endl;
+Mat stage2(Mat const &Csrc){
 
     Mat src(Csrc.rows,Csrc.cols,CV_8UC1,Scalar(0));
-    
+
     cvtColor(Csrc,src,CV_BGR2GRAY);
     int i,j,k,l,density;
     Mat dst(ceil(src.rows/kernel),ceil(src.cols/kernel),CV_8UC1,Scalar(0));
@@ -302,12 +301,7 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
     return dst;
 }
 
-Mat stage4(Mat const &src)
-{
-
-}
-
-Mat stage5(Mat const &img,int thresh=4)
+Mat stage4(Mat const &img,int thresh=4)
 {
     Mat dst=img.clone();
 
@@ -411,7 +405,7 @@ Mat stage5(Mat const &img,int thresh=4)
     return dst2;
 }
 
-Mat stage6(Mat const &cs1,Mat const &s4)
+Mat stage5(Mat const &cs1,Mat const &s4)
 {
     Mat s1=cs1.clone();
     cvtColor(s1,s1,CV_BGR2GRAY);
@@ -452,12 +446,16 @@ Mat stage6(Mat const &cs1,Mat const &s4)
     return dst;
 }
 
-Mat GetSkin(Mat const &src)
+Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=115,int cb_max_arg=160)
 {
+    ::cr_min=cr_min_arg;
+    ::cr_max=cr_max_arg;
+    ::cb_min=cb_min_arg;
+    ::cb_max=cb_max_arg;
     Mat dst=src.clone();
     Vec3b cblack = Vec3b::all(0);
     Mat s1=stage1(src);
-    s1= stage6(s1,stage5(stage2(s1)));
+    s1= stage5(s1,stage4(stage2(s1)));
     int i,j;
     for(i=0;i<s1.rows;i++)
     {
@@ -568,7 +566,7 @@ int main2()
             }
 
         }
-    
+
 
 */
     return 0;

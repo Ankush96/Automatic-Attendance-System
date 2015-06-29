@@ -243,7 +243,7 @@ int video_recognizer()
                 img=clahe(img);
                 //Mat black(img.rows,img.cols,CV_8UC3,Scalar(0,0,0));
                 Mat segment=img.clone();
-                segment=GetSkin(img);
+                segment=GetSkin(img,128,164,115,160);
                 cvtColor(img, gray, CV_BGR2GRAY);
                 cvtColor(segment, sgray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;
@@ -474,40 +474,6 @@ int model_main(string dir)
 }
 //---------------------------------------//
 
-//-------------segment-samples------------//
-static void segment(const string& filename, char separator = ';') {
-    std::ifstream file(filename.c_str(), ifstream::in);
-    if (!file) {
-        string error_message = "No valid input file was given, please check the given filename.";
-        CV_Error(CV_StsBadArg, error_message);
-    }
-    string line, path, classlabel;
-    while (getline(file, line)) {
-        stringstream liness(line);
-        getline(liness, path, separator);
-        getline(liness, classlabel);
-        if(!path.empty() && !classlabel.empty()) {
-            Mat tmp1=imread(path);
-            imshow("img",tmp1);
-            waitKey(0);
-            imwrite(path,GetSkin(tmp1));
-        }
-    }
-}
-
-int segment_samples_main()
-{
-    string fn_csv = "samples.csv";
-    try {
-        segment(fn_csv);
-    } catch (cv::Exception& e) {
-        cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
-        exit(1);
-    }
-	return 0;
-}
-//------------------------------------------//
-
 //-------------sampler------------------//
 int sampler_main() {
     VideoCapture vcap;
@@ -532,7 +498,7 @@ int sampler_main() {
             {
                 img=clahe(img);
                 Mat segment=img.clone();
-                segment=GetSkin(img);
+                segment=GetSkin(img,128,164,115,160);
                 cvtColor(segment, sgray, CV_BGR2GRAY);
                 cvtColor(img, gray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;

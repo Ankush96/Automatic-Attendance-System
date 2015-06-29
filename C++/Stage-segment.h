@@ -10,6 +10,8 @@ using namespace cv;
 using std::cout;
 using std::endl;
 
+
+
 Mat clahe(Mat img);
 Mat erode(Mat const &src,int );
 
@@ -33,10 +35,10 @@ Mat stage2(Mat const &Csrc);
 
 Mat stage3(Mat const &src,Mat const &img,int);
 
-Mat stage5(Mat const &img,int);
+Mat stage4(Mat const &img,int);
 
-Mat stage6(Mat const &cs1,Mat const &s4);
+Mat stage5(Mat const &cs1,Mat const &s4);
 
 void cam_movement(int key,Mat img);
 
-Mat GetSkin(Mat const &src);
+Mat GetSkin(Mat const &src,int,int,int,int);

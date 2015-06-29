@@ -7,6 +7,7 @@
  #include "Utils.h"
  #include "rc2dpca.h"
  #include "two_d_pca.h"
+ #include "Stage-segment.h"
 
  #include <iostream>
  #include <fstream>
@@ -20,16 +21,92 @@ using namespace std;
 
 int main()
 {
+    //--------------Code to check if segmentation is working fine--------------------//
+     int cr_min=138,cr_max=175,cb_min=99,cb_max=130;
     // vector<Mat> images;
     // vector<int> labels;
-    // dir_read("../orl_faces/Train",40,images,labels,0);
+    // dir_read("../cvl",5,images,labels,1);
+    // cvNamedWindow("src",WINDOW_NORMAL);
+    // cvNamedWindow("dst",WINDOW_NORMAL);
+    // createTrackbar("cr min ","dst",&cr_min,255);
+    // createTrackbar("cr max ","dst",&cr_max,255);
+    // createTrackbar("cb min ","dst",&cb_min,255);
+    // createTrackbar("cb max ","dst",&cb_max,255);
+    // for(int i=0;i<images.size();i++)
+    // {
+    //   Mat src=images[i];
+    //   imshow("src",src);
+    //     while(1)
+    //         {
+    //             Mat dst=GetSkin(src,cr_min,cr_max,cb_min,cb_max);
+    //             imshow("dst",dst);
+    //             int key = cv::waitKey(30);
+    //             if(key==27) break;
+    //         }
 
-    // 2dpca model;
-    // model.train(images,labels,0.75,"2dpca.xml");
-    // model.load("2dpca.xml");
+    // }
+    //------------------Testing segmentation-----------------------------------------------//
 
-    // //*-*-*-*-*-*-*- FIX ALL THE RESIZES TO SIZE(n,m)*-*-*-*-*-*-*-*-//
 
+     // change m and n in 2dpca
+     //try to crop in segmentation
+     remove black background
+    vector<Mat> images;
+    vector<int> labels;
+    dir_read("../cvl",5,images,labels,0);
+    pca2d model;
+    // for(int i=0;i<images.size();i++)
+    // {
+    //   Mat src=images[i];
+    //   cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);
+    // }
+    std::vector<Mat> images_test,images_train;
+    std::vector<int> labels_train,labels_test;
+    double accuracy[7];
+
+    cvNamedWindow("src",WINDOW_NORMAL);
+    for(int k=0;k<7;k++)
+    {
+        cout<<" K= "<<k<<endl;
+        accuracy[k]=0;
+        images_train.clear();
+        images_test.clear();
+        labels_train.clear();
+        labels_test.clear();
+        for(int i=0;i<images.size();i++)
+        {
+            if(i%7==k)  // Put in test set
+            {
+                images_test.push_back(images[i]);
+                labels_test.push_back(labels[i]);
+            }
+            else        // Put in training set
+            {
+                images_train.push_back(images[i]);
+                labels_train.push_back(labels[i]);
+            }
+        }
+        model.train(images_train,labels_train,0.89,"2dpca.xml");
+        for(int j=0;j<images_test.size();j++)
+        {
+            int prediction=  model.predict(images_test[j]);
+            imshow("src",images_test[j]);
+            cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
+            waitKey(100);
+            accuracy[k]+=(prediction==labels_test[j]);
+        }
+
+        cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
+
+
+    }
+    for(int k=1;k<7;k++)
+    {
+        accuracy[k]+=accuracy[k-1];
+    }
+    cout<<" final accuracy is "<<(accuracy[6]*100)/(7*5)<<endl;
+    //-------------------------------------------------------------------------------------//
+    //------------------------------------------------------------------//
     // double sum=0;
     // images.clear();
     // labels.clear();
@@ -44,38 +121,38 @@ int main()
     // cout<<" accuracy is "<<sum/labels.size()<<endl;
 
 
-    string dir_train="../Faces/Train",dir_test="../Faces/Test";
-    vector<Mat> images_train,images_test;
-    vector<int> labels_train,labels_test;
-    dir_read(dir_train,6,images_train,labels_train,0);
-    dir_read(dir_test,6,images_test,labels_test,0);
-    cout<<"Train = "<< images_train.size()<<" test= "<<images_test.size()<<endl;
-    rc2dpca model1;
-    pca2d model2;
-    const int bins=21;
-    float accuracy1[bins];
-    float accuracy2[bins];
-    cout<<" Percentage of information \t rc2dpca \t 2dpca "<<endl;
-    for(int i=0;i<bins;i++)
-    {
-        model1.train(images_train,labels_train,(70+i)/100.0,"rc2dpca.xml");
-        model2.train(images_train,labels_train,(70+i)/100.0,"2dpca.xml");
+    // string dir_train="../Faces/Train",dir_test="../Faces/Test";
+    // vector<Mat> images_train,images_test;
+    // vector<int> labels_train,labels_test;
+    // dir_read(dir_train,6,images_train,labels_train,0);
+    // dir_read(dir_test,6,images_test,labels_test,0);
+    // cout<<"Train = "<< images_train.size()<<" test= "<<images_test.size()<<endl;
+    // rc2dpca model1;
+    // pca2d model2;
+    // const int bins=21;
+    // float accuracy1[bins];
+    // float accuracy2[bins];
+    // cout<<" Percentage of information \t rc2dpca \t 2dpca "<<endl;
+    // for(int i=0;i<bins;i++)
+    // {
+    //     model1.train(images_train,labels_train,(70+i)/100.0,"rc2dpca.xml");
+    //     model2.train(images_train,labels_train,(70+i)/100.0,"2dpca.xml");
 
-        double sum1=0,sum2=0;
-        for(int j=0;j<images_test.size();j=j+6)
-        {
-          int prediction1=  model1.predict(images_test[j]);
-          sum1+=(prediction1==labels_test[j]);
-          int prediction2=  model2.predict(images_test[j]);
-          sum2+=(prediction2==labels_test[j]);
-        }
-        sum1*=100;
-        sum2*=100;
-        accuracy1[i]=sum1/labels_test.size();
-        accuracy2[i]=sum2/labels_test.size();
-        cout<<"\t\t"<<70+i<<"\t\t"<<accuracy1[i]*6<<"\t\t"<<accuracy2[i]*6<<endl;
-        //waitKey(500);
-    }
+    //     double sum1=0,sum2=0;
+    //     for(int j=0;j<images_test.size();j=j+6)
+    //     {
+    //       int prediction1=  model1.predict(images_test[j]);
+    //       sum1+=(prediction1==labels_test[j]);
+    //       int prediction2=  model2.predict(images_test[j]);
+    //       sum2+=(prediction2==labels_test[j]);
+    //     }
+    //     sum1*=100;
+    //     sum2*=100;
+    //     accuracy1[i]=sum1/labels_test.size();
+    //     accuracy2[i]=sum2/labels_test.size();
+    //     cout<<"\t\t"<<70+i<<"\t\t"<<accuracy1[i]*6<<"\t\t"<<accuracy2[i]*6<<endl;
+    //     //waitKey(500);
+    // }
 
 
     return 0;
