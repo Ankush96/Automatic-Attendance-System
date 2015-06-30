@@ -50,16 +50,22 @@ int main()
 
      // change m and n in 2dpca
      //try to crop in segmentation
-     remove black background
+     //remove black background
     vector<Mat> images;
     vector<int> labels;
-    dir_read("../cvl",5,images,labels,0);
+    int num_dir=11;
+    int color=1;
+    dir_read("../cvl",num_dir,images,labels,color);
     pca2d model;
-    // for(int i=0;i<images.size();i++)
-    // {
-    //   Mat src=images[i];
-    //   cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);
-    // }
+    if(color)
+    {
+      for(int i=0;i<images.size();i++)
+        {
+            Mat src=images[i];
+            cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);
+        }
+    }
+
     std::vector<Mat> images_test,images_train;
     std::vector<int> labels_train,labels_test;
     double accuracy[7];
@@ -92,7 +98,7 @@ int main()
             int prediction=  model.predict(images_test[j]);
             imshow("src",images_test[j]);
             cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
-            waitKey(100);
+            waitKey(10);
             accuracy[k]+=(prediction==labels_test[j]);
         }
 
@@ -104,7 +110,7 @@ int main()
     {
         accuracy[k]+=accuracy[k-1];
     }
-    cout<<" final accuracy is "<<(accuracy[6]*100)/(7*5)<<endl;
+    cout<<" final accuracy is "<<(accuracy[6]*100)/(7*num_dir)<<endl;
     //-------------------------------------------------------------------------------------//
     //------------------------------------------------------------------//
     // double sum=0;

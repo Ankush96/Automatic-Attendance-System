@@ -49,9 +49,6 @@
 			<Add option="/usr/local/lib/libopencv_videostab.so" />
 			<Add directory="../../../../../usr/local/lib" />
 		</Linker>
-		<Unit filename="../../Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Face-extract.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
 		<Unit filename="Sampler.cpp" />
 		<Unit filename="Segment-samples.cpp" />
 		<Unit filename="Stage-segment.cpp" />
