@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include "math.h"
+#include <Eigen/Dense>
+
 
 using namespace cv;
 
@@ -18,6 +20,8 @@ Mat erode(Mat const &src,int );
 Mat dilate(Mat const &src,int );
 
 Mat erode_dilate(Mat const &src);
+
+Mat remove_blobs(Mat const &src);
 
 float stddev(Vector<int> w);
 
@@ -35,10 +39,11 @@ Mat stage2(Mat const &Csrc);
 
 Mat stage3(Mat const &src,Mat const &img,int);
 
-Mat stage4(Mat const &img,int);
+Mat stage4(Mat const &img,int,int);
 
 Mat stage5(Mat const &cs1,Mat const &s4);
 
 void cam_movement(int key,Mat img);
 
-Mat GetSkin(Mat const &src,int,int,int,int);
+Mat GetSkin(Mat const &src,int,int,int,int,int);
+

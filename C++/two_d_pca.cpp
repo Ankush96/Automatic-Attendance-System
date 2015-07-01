@@ -202,7 +202,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
     }
 
     //cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
-    cout<<" number of eigenvectors in 2dpca is "<<num_evecs<<endl;
+    //cout<<" number of eigenvectors in 2dpca is "<<num_evecs<<endl;
     this->eigenvectors_X=copy_eigen2cv(X,5);
     // ********** X has been calculated*************//
 
@@ -288,11 +288,8 @@ int pca2d::predict(Mat test,double distance_thresh)
 
     if(test.channels()==3)  cvtColor(test,test,CV_BGR2GRAY);
     if(!((test.rows==m)&&(test.cols==n)))  resize(test,test, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
-    vector<distances> eucl_dist_vec_class,eucl_dist_vec;
+    vector<distances>eucl_dist_vec;
     distances temp={0,0,0};
-    eucl_dist_vec_class.push_back(temp);
-    int class_no=0;
-
     MatrixXf mean=copy_cv2eigen(this->mean_img,5);
     MatrixXf A=copy_cv2eigen(test);
     A-=mean;
@@ -307,79 +304,26 @@ int pca2d::predict(Mat test,double distance_thresh)
     // waitKey(100);
     //cout<<"\n Sum of all elements in B is "<<B.sum()<<endl;
     MatrixXf Bclass;
-
-    for(int i=0;i<classes.size();)
-    {
-        //cout<<"class_no="<<class_no<<endl;
-        while(class_no==classes[i])
-            {
-                MatrixXf Btrain=copy_cv2eigen(features[i],5);
-
-                Bclass+=Btrain;
-                eucl_dist_vec_class[class_no].class_count++;
-                //-------- Pushing the individual euclidean distances, irrespective of the class------------//
-                Btrain-=B;
-                temp.dist=Btrain.squaredNorm();
-                temp.label=classes[i];
-                eucl_dist_vec.push_back(temp);
-
-                i++;
-            }
-        if(class_no>0)
-        {
-            Bclass/= eucl_dist_vec_class[class_no].class_count;
-            Bclass-=B;
-            eucl_dist_vec_class[class_no].dist=Bclass.squaredNorm();
-
-        }
-        //if(class_no)cout<<" Class no-"<<class_no<<" dist "<< eucl_dist_vec_class[class_no].dist << "label" <<eucl_dist_vec_class[class_no].label <<" class_count "<<eucl_dist_vec_class[class_no].class_count<<endl;
-        class_no++;
-        Bclass=MatrixXf::Zero(B.rows(),B.cols());
-        //------------initialise a new node to put in vector-------------
-
-        temp.dist=0;
-        temp.label=class_no;
-        temp.class_count=0;
-        eucl_dist_vec_class.push_back(temp);
-
+    for(int i=0;i<classes.size();i++)
+    {       MatrixXf Btrain=copy_cv2eigen(features[i],5);
+            Btrain-=B;
+            temp.dist=Btrain.squaredNorm();
+            temp.label=classes[i];
+            eucl_dist_vec.push_back(temp);
     }
-    eucl_dist_vec_class.pop_back(); //An extra element is pushed at the end
-    // for(int i=1;i<eucl_dist_vec_class.size();i++)
-    // {
-    //     cout<<" Class " <<eucl_dist_vec_class[i].label <<" distance = " << eucl_dist_vec_class[i].dist <<" class count " << eucl_dist_vec_class[i].class_count<<endl;
-    // }
-
-    int mode=1; //Make it 0 if you want to calculate euclidean distance from the average of the classes
-    if(mode==0)
+    
+    int min=0;
+    for(int i=1;i<eucl_dist_vec.size();i++)
     {
-        int min=1;
-        for(int i=2;i<eucl_dist_vec_class.size();i++)
-        {
-            if (eucl_dist_vec_class[i].dist<eucl_dist_vec_class[min].dist)
+        if (eucl_dist_vec[i].dist<eucl_dist_vec[min].dist)
             {
                 min=i;
             }
-        }
-        if(eucl_dist_vec_class[min].dist<distance_thresh)
-            return eucl_dist_vec_class[min].label;
-        else return -1;
     }
-    else
-    {
-        int min=0;
-        for(int i=1;i<eucl_dist_vec.size();i++)
-        {
-            if (eucl_dist_vec[i].dist<eucl_dist_vec[min].dist)
-            {
-                min=i;
-            }
-        }
-        //cout<<" distance is "<<eucl_dist_vec[min].dist<<endl;
-        if(eucl_dist_vec[min].dist<distance_thresh)
-            return eucl_dist_vec[min].label;
-        else return -1;
+    //cout<<" distance is "<<eucl_dist_vec[min].dist<<endl;
+    if(eucl_dist_vec[min].dist<distance_thresh)
+        return eucl_dist_vec[min].label;
+    else return -1;
 
-    }
-
-
+    
 }

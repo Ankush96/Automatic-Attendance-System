@@ -3,7 +3,7 @@
 	<opencv2/opencv.hpp>
 	<iostream>
 
-1435643274 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
+1435742573 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
 	<stdio.h>
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"
@@ -54,13 +54,15 @@
 	"opencv2/opencv.hpp"
 	<iostream>
 
-1435565647 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
+1435742473 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
 	<opencv2/core/core.hpp>
 	<opencv2/imgproc/imgproc.hpp>
 	<opencv2/highgui/highgui.hpp>
 	<iostream>
 	<vector>
+	<queue>
 	"math.h"
+	<Eigen/Dense>
 
 1433493024 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Segment-samples.cpp
 	"opencv2/core/core.hpp"
@@ -71,13 +73,14 @@
 	<fstream>
 	<sstream>
 
-1435565658 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.h
+1435730513 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.h
 	<opencv2/core/core.hpp>
 	<opencv2/imgproc/imgproc.hpp>
 	<opencv2/highgui/highgui.hpp>
 	<iostream>
 	<vector>
 	"math.h"
+	<Eigen/Dense>
 
 1435560766 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.h
 	<stdio.h>
@@ -96,7 +99,7 @@
 	<sstream>
 	<vector>
 
-1435565763 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.cpp
+1435661319 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.cpp
 	<stdio.h>
 	"Stage-segment.h"
 	"opencv2/core/core.hpp"
@@ -119,7 +122,7 @@
 	<Eigen/Dense>
 	<Eigen/Eigenvalues>
 
-1435316588 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/two_d_pca.cpp
+1435654884 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/two_d_pca.cpp
 	<stdio.h>
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"

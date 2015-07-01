@@ -243,7 +243,7 @@ int video_recognizer()
                 img=clahe(img);
                 //Mat black(img.rows,img.cols,CV_8UC3,Scalar(0,0,0));
                 Mat segment=img.clone();
-                segment=GetSkin(img,128,164,115,160);
+                segment=GetSkin(img,128,164,115,160,0);  //change the thresholds
                 cvtColor(img, gray, CV_BGR2GRAY);
                 cvtColor(segment, sgray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;
@@ -498,7 +498,7 @@ int sampler_main() {
             {
                 img=clahe(img);
                 Mat segment=img.clone();
-                segment=GetSkin(img,128,164,115,160);
+                segment=GetSkin(img,128,164,115,160,0);
                 cvtColor(segment, sgray, CV_BGR2GRAY);
                 cvtColor(img, gray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;

@@ -4,12 +4,16 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <vector>
+#include <queue>
 #include "math.h"
+#include <Eigen/Dense>
 
+using namespace Eigen;
 using namespace cv;
 
 using std::cout;
 using std::endl;
+using std::queue;
 
 int cr_min=128,cr_max=164,cb_min=115,cb_max=160,kernel=8;
 
@@ -133,6 +137,108 @@ Mat erode_dilate(Mat const &src)
 
     //imwrite("s2.jpg",dst);
     return dst;
+}
+
+int bfs(Mat image,int x,int y,int** visited,int num_blobs)  //Detects the connected components of a pixel and returns the sum of all pixels in the blob
+{
+    //cout<<" new blob "<< num_blobs<<endl; 
+    queue<Point> q;
+    Point p2,p(x,y);
+    q.push(p);
+    visited[x][y]=0;
+    int i,j;
+    int sum=1; //Denotes the sum of all pixels in the blob. Initialised as 1 because it contains the point (x,y)
+    while(!q.empty())
+    {
+        for(i=p.x-1;i<=p.x+1;i++)
+        {
+            for(j=p.y-1;j<=p.y+1;j++)
+            {
+                if(visited[i][j]==-1&&image.at<uchar>(i,j)!=0)
+                {
+                    if(i>0&&i<image.rows-1&&j>0&&j<image.cols-1)
+                    {
+                        sum++;  // new pixel in the blob. sum updated
+                        p2.x=i;
+                        p2.y=j;
+                        q.push(p2);
+                        visited[i][j]=0;    
+                    }
+                }
+            }
+        }
+        visited[p.x][p.y]=num_blobs;
+        q.pop();
+        p=q.front();
+    }
+    return sum;
+}
+
+//Change the 0 to 255 and vice versa
+Mat remove_blobs(Mat const &img)
+{
+    Mat src=img.clone();
+    if(src.channels()>1)
+        cvtColor(src,src,CV_BGR2GRAY);
+
+    //------------------Initialising visted array----------------------//
+    int **visited=new int*[(src.rows*sizeof(int*))];
+
+    for(int i=0;i<src.rows;i++)
+    {
+        visited[i]=new int[src.cols*sizeof(int)];
+        for(int j=0;j<src.cols;j++) visited[i][j]=-1;
+    }
+
+    //-------------------------------------------------------------------//
+    vector<int> blob_sizes;
+    blob_sizes.push_back(-1);   //  The vector contains the size of all the blobs detected in the image. We want the indexing to start from 1. Hence we push -1 in the 0th position
+    int num_blobs=0;
+
+     for (int i = 1; i < src.rows-1; i++)
+     {
+        for (int j = 1; j < src.cols-1; j++)
+        {
+                                            //A new blob has been found
+            if((src.at<uchar>(i,j)!=0)&&(visited[i][j]==-1)) // if node is not visited and not black
+             {
+                //cout<<" i j = "<<i<<" "<<j<<endl;
+                num_blobs++;
+                blob_sizes.push_back(bfs(src,i,j,visited,num_blobs));
+             }
+
+        }
+     }
+     cout<<num_blobs<<" "<<src.rows*src.cols<<endl;
+
+     //---------Once we have the visited array we can use the information to manipulation the image contained in src-------------//
+
+     //---------We first check for the largest blob by using the vector blob_sizes----------------//
+
+     int max=1;
+     for(int i=max;i<blob_sizes.size();i++)
+     {
+        if(blob_sizes[i]>blob_sizes[max])
+        {
+            max=i;
+        }
+     }
+
+    //----------- Now keep only the largest blob. Delete all the other blobs by making them black--------------//
+     for (int i = 1; i < src.rows-1; i++)
+     {
+        for (int j = 1; j < src.cols-1; j++)
+        {
+            if(visited[i][j]!=max)
+            {
+                src.at<uchar>(i,j)=0;
+            }
+                
+        }
+     }      
+     
+    return src;
+
 }
 
 
@@ -301,7 +407,7 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
     return dst;
 }
 
-Mat stage4(Mat const &img,int thresh=4)
+Mat stage4(Mat const &img,int thresh=4,int remove=0)
 {
     Mat dst=img.clone();
 
@@ -402,7 +508,10 @@ Mat stage4(Mat const &img,int thresh=4)
     //imwrite("s5.jpg",dst);
     //waitKey(0);
     //cout<<"sTAGE 4 EXIT"<<dst2.rows<<" "<<dst2.cols<<endl;
-    return dst2;
+    if(remove)
+        return remove_blobs(dst2);
+    else
+        return dst2;
 }
 
 Mat stage5(Mat const &cs1,Mat const &s4)
@@ -446,7 +555,7 @@ Mat stage5(Mat const &cs1,Mat const &s4)
     return dst;
 }
 
-Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=115,int cb_max_arg=160)
+Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=115,int cb_max_arg=160,int remove_in_stage4=0)
 {
     ::cr_min=cr_min_arg;
     ::cr_max=cr_max_arg;
@@ -455,7 +564,7 @@ Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=
     Mat dst=src.clone();
     Vec3b cblack = Vec3b::all(0);
     Mat s1=stage1(src);
-    s1= stage5(s1,stage4(stage2(s1)));
+    s1= stage5(s1,stage4(stage2(s1),remove_in_stage4));
     int i,j;
     for(i=0;i<s1.rows;i++)
     {

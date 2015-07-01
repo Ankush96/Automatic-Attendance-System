@@ -22,95 +22,99 @@ using namespace std;
 int main()
 {
     //--------------Code to check if segmentation is working fine--------------------//
-     int cr_min=138,cr_max=175,cb_min=99,cb_max=130;
-    // vector<Mat> images;
-    // vector<int> labels;
-    // dir_read("../cvl",5,images,labels,1);
-    // cvNamedWindow("src",WINDOW_NORMAL);
-    // cvNamedWindow("dst",WINDOW_NORMAL);
-    // createTrackbar("cr min ","dst",&cr_min,255);
-    // createTrackbar("cr max ","dst",&cr_max,255);
-    // createTrackbar("cb min ","dst",&cb_min,255);
-    // createTrackbar("cb max ","dst",&cb_max,255);
-    // for(int i=0;i<images.size();i++)
-    // {
-    //   Mat src=images[i];
-    //   imshow("src",src);
-    //     while(1)
-    //         {
-    //             Mat dst=GetSkin(src,cr_min,cr_max,cb_min,cb_max);
-    //             imshow("dst",dst);
-    //             int key = cv::waitKey(30);
-    //             if(key==27) break;
-    //         }
+      int cr_min=134,cr_max=175,cb_min=99,cb_max=130;
+    vector<Mat> images;
+    vector<int> labels;
+    dir_read("../cvl",14,images,labels,1);
+    cvNamedWindow("src",WINDOW_NORMAL);
+    cvNamedWindow("dst",WINDOW_NORMAL);
+    createTrackbar("cr min ","dst",&cr_min,255);
+    createTrackbar("cr max ","dst",&cr_max,255);
+    createTrackbar("cb min ","dst",&cb_min,255);
+    createTrackbar("cb max ","dst",&cb_max,255);
+    for(int i=0;i<images.size();i++)
+    {
+      Mat src=images[i];
+      imshow("src",src);
+        while(1)
+            {
+                Mat dst=remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max,1));
+                imshow("dst",dst);
+                int key = cv::waitKey(30);
+                if(key==27) break;
+            }
 
-    // }
+    }
     //------------------Testing segmentation-----------------------------------------------//
 
 
      // change m and n in 2dpca
      //try to crop in segmentation
      //remove black background
-    vector<Mat> images;
-    vector<int> labels;
-    int num_dir=11;
-    int color=1;
-    dir_read("../cvl",num_dir,images,labels,color);
-    pca2d model;
-    if(color)
-    {
-      for(int i=0;i<images.size();i++)
-        {
-            Mat src=images[i];
-            cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);
-        }
-    }
+    // vector<Mat> images;
+    // vector<int> labels;
+    // int num_dir=13;
+    // int color=1;
+    // dir_read("../cvl",num_dir,images,labels,color);
+    // pca2d model;
+    // if(color)
+    // {
+    //   for(int i=0;i<images.size();i++)
+    //     {
+    //         Mat src=images[i];
+    //         cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);
+    //     }
+    // }
+    // std::vector<Mat> images_test,images_train;
+    // std::vector<int> labels_train,labels_test;
+    // double accuracy[7];
 
-    std::vector<Mat> images_test,images_train;
-    std::vector<int> labels_train,labels_test;
-    double accuracy[7];
+    // //cvNamedWindow("src",WINDOW_NORMAL);
+    // for(int i=77;i<78;i=i+2)
+    // {
+    //     for(int k=0;k<7;k++)
+    //     {
+    //         //cout<<" K= "<<k<<endl;
+    //         accuracy[k]=0;
+    //         images_train.clear();
+    //         images_test.clear();
+    //         labels_train.clear();
+    //         labels_test.clear();
+    //         for(int i=0;i<images.size();i++)
+    //         {
+    //             if(i%7==k)  // Put in test set
+    //             {
+    //                 images_test.push_back(images[i]);
+    //                 labels_test.push_back(labels[i]);
+    //             }
+    //             else        // Put in training set
+    //             {
+    //                 images_train.push_back(images[i]);
+    //                 labels_train.push_back(labels[i]);
+    //             }
+    //         }
+    //         model.train(images_train,labels_train,i/100.0,"2dpca.xml");
+    //         for(int j=0;j<images_test.size();j++)
+    //         {
+    //             int prediction=  model.predict(images_test[j]);
 
-    cvNamedWindow("src",WINDOW_NORMAL);
-    for(int k=0;k<7;k++)
-    {
-        cout<<" K= "<<k<<endl;
-        accuracy[k]=0;
-        images_train.clear();
-        images_test.clear();
-        labels_train.clear();
-        labels_test.clear();
-        for(int i=0;i<images.size();i++)
-        {
-            if(i%7==k)  // Put in test set
-            {
-                images_test.push_back(images[i]);
-                labels_test.push_back(labels[i]);
-            }
-            else        // Put in training set
-            {
-                images_train.push_back(images[i]);
-                labels_train.push_back(labels[i]);
-            }
-        }
-        model.train(images_train,labels_train,0.89,"2dpca.xml");
-        for(int j=0;j<images_test.size();j++)
-        {
-            int prediction=  model.predict(images_test[j]);
-            imshow("src",images_test[j]);
-            cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
-            waitKey(10);
-            accuracy[k]+=(prediction==labels_test[j]);
-        }
+    //             //imshow("src",images_test[j]);
+    //             //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
+    //             //waitKey(0);
+    //             accuracy[k]+=(prediction==labels_test[j]);
+    //         }
 
-        cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
+    //         //cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
+    //     }
 
+    //     for(int k=1;k<7;k++)
+    //     {
+    //         accuracy[k]+=accuracy[k-1];
+    //     }
 
-    }
-    for(int k=1;k<7;k++)
-    {
-        accuracy[k]+=accuracy[k-1];
-    }
-    cout<<" final accuracy is "<<(accuracy[6]*100)/(7*num_dir)<<endl;
+    //     cout<<endl<<"percentage"<<i<<" final accuracy -> "<<(accuracy[6]*100)/(7*num_dir)<<endl;
+    // }
+
     //-------------------------------------------------------------------------------------//
     //------------------------------------------------------------------//
     // double sum=0;
@@ -159,6 +163,7 @@ int main()
     //     cout<<"\t\t"<<70+i<<"\t\t"<<accuracy1[i]*6<<"\t\t"<<accuracy2[i]*6<<endl;
     //     //waitKey(500);
     // }
+    //----------------------------------------------------------------------------------//
 
 
     return 0;
