@@ -138,6 +138,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n){
             resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
+            images[i]=input;
 		}
 		A=copy_cv2eigen(input);
 		mean=mean+A;

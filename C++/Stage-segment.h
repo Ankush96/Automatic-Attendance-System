@@ -45,5 +45,6 @@ Mat stage5(Mat const &cs1,Mat const &s4);
 
 void cam_movement(int key,Mat img);
 
-Mat GetSkin(Mat const &src,int,int,int,int,int);
+Mat GetSkin(Mat const &src,int,int,int,int);
 
+Mat getBB(Mat const& src);

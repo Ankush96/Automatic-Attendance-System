@@ -19,8 +19,8 @@
 using namespace cv;
 using namespace std;
 
-#define m 92
-#define n 112
+#define m 120
+#define n 120
 
 
 string prediction_name(int prediction)
@@ -243,7 +243,7 @@ int video_recognizer()
                 img=clahe(img);
                 //Mat black(img.rows,img.cols,CV_8UC3,Scalar(0,0,0));
                 Mat segment=img.clone();
-                segment=GetSkin(img,128,164,115,160,0);  //change the thresholds
+                segment=GetSkin(img,128,164,115,160);  //change the thresholds
                 cvtColor(img, gray, CV_BGR2GRAY);
                 cvtColor(segment, sgray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;
@@ -498,7 +498,7 @@ int sampler_main() {
             {
                 img=clahe(img);
                 Mat segment=img.clone();
-                segment=GetSkin(img,128,164,115,160,0);
+                segment=GetSkin(img,128,164,115,160);
                 cvtColor(segment, sgray, CV_BGR2GRAY);
                 cvtColor(img, gray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;

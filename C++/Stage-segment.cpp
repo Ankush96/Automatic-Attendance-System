@@ -141,7 +141,7 @@ Mat erode_dilate(Mat const &src)
 
 int bfs(Mat image,int x,int y,int** visited,int num_blobs)  //Detects the connected components of a pixel and returns the sum of all pixels in the blob
 {
-    //cout<<" new blob "<< num_blobs<<endl; 
+    //cout<<" new blob "<< num_blobs<<endl;
     queue<Point> q;
     Point p2,p(x,y);
     q.push(p);
@@ -162,7 +162,7 @@ int bfs(Mat image,int x,int y,int** visited,int num_blobs)  //Detects the connec
                         p2.x=i;
                         p2.y=j;
                         q.push(p2);
-                        visited[i][j]=0;    
+                        visited[i][j]=0;
                     }
                 }
             }
@@ -174,7 +174,6 @@ int bfs(Mat image,int x,int y,int** visited,int num_blobs)  //Detects the connec
     return sum;
 }
 
-//Change the 0 to 255 and vice versa
 Mat remove_blobs(Mat const &img)
 {
     Mat src=img.clone();
@@ -209,7 +208,7 @@ Mat remove_blobs(Mat const &img)
 
         }
      }
-     cout<<num_blobs<<" "<<src.rows*src.cols<<endl;
+     //cout<<num_blobs<<" "<<src.rows*src.cols<<endl;
 
      //---------Once we have the visited array we can use the information to manipulation the image contained in src-------------//
 
@@ -233,14 +232,49 @@ Mat remove_blobs(Mat const &img)
             {
                 src.at<uchar>(i,j)=0;
             }
-                
-        }
-     }      
-     
-    return src;
 
+        }
+     }
+
+    return src;
 }
 
+//-------------Function that calculates a bounding box(having same aspect ratio as the image) on a non-black object, and returns the cropped Bounding Box-----------//
+Mat getBB(Mat const& img)
+{
+    Mat src=img.clone();
+    int left=src.cols-1,right=0,top=src.rows-1,bottom=0;
+    for(int i=0;i<src.rows;i++)
+    {
+        for(int j=0;j<src.cols;j++)
+        {
+            if(src.at<uchar>(i,j)!=0)
+            {
+                if(i<top) top=i;
+                if(i>bottom) bottom=i;
+                if(j<left) left=j;
+                if(j>right) right=j;
+            }
+        }
+    }
+    //double ratio_h2w=(src.rows*1.0)/src.cols;
+
+    //int bb_height=bottom-top, bb_width= right-left;
+    // circle(src,Point(left,top), 20 , Scalar(200) );
+    // circle(src,Point(right,top), 20 , Scalar(200) );
+    // circle(src,Point(left,bottom),20 , Scalar(200) );
+    // circle(src,Point(right,bottom), 20 , Scalar(200) );
+    //-------We include some space beacuse we dont require an exact bounding box-----------//
+    left=max(left-10,0);
+    top=max(top-10,0);
+    right=min(right+10,src.cols-1);
+    bottom=min(bottom+10,src.rows-1);
+
+    Rect roi(left,top,right-left,bottom-top);
+
+
+    return src(roi);
+}
 
 float stddev(Vector<int> w)
 {
@@ -555,7 +589,7 @@ Mat stage5(Mat const &cs1,Mat const &s4)
     return dst;
 }
 
-Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=115,int cb_max_arg=160,int remove_in_stage4=0)
+Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=115,int cb_max_arg=160)
 {
     ::cr_min=cr_min_arg;
     ::cr_max=cr_max_arg;
@@ -564,7 +598,7 @@ Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=
     Mat dst=src.clone();
     Vec3b cblack = Vec3b::all(0);
     Mat s1=stage1(src);
-    s1= stage5(s1,stage4(stage2(s1),remove_in_stage4));
+    s1= stage5(s1,stage4(stage2(s1)));
     int i,j;
     for(i=0;i<s1.rows;i++)
     {
