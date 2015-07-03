@@ -1,0 +1,4 @@
+1.txt -> x=percentage of information retained from 0 to 99
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. with segmentation and bounding box. clutter intoduced
+2.txt -> x=percentage of information retained from 0 to 99
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. without segmentation. clutter introduced

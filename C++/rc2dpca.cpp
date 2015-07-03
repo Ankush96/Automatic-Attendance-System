@@ -388,7 +388,7 @@ int rc2dpca::predict(Mat test,double distance_thresh)
            min=i;
         }
     }
-    //cout<<" distance is "<<eucl_dist_vec[min].dist<<endl;
+    cout<<" distance is "<<eucl_dist_vec[min].dist<<endl;
     if(eucl_dist_vec[min].dist<distance_thresh)
         return eucl_dist_vec[min].label;
     else return -1;

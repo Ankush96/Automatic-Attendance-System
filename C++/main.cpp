@@ -19,6 +19,9 @@ using namespace cv;
 using namespace Eigen;
 using namespace std;
 
+#define n 120
+#define m 120
+
 int main()
 {
     //--------------Code to check if segmentation is working fine--------------------//
@@ -64,7 +67,8 @@ int main()
      //remove black background
     vector<Mat> images;
     vector<int> labels;
-    int num_dir=13;
+    int num_dir=13;     //  Number of classes or unique identities
+    int examples=7;     //  Number of images per person
     int color=1;
     dir_read("../cvl",num_dir,images,labels,color);
     pca2d model;
@@ -75,28 +79,102 @@ int main()
             Mat src=images[i];
             //cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);  //GetSkin returns a color image, hence we need to convert it to grayscale
             Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
-            resize(dst,dst,Size(src.cols,src.rows),0,0,INTER_CUBIC);
+            resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
             images[i]=dst;
         }
     }
+
     std::vector<Mat> images_test,images_train;
     std::vector<int> labels_train,labels_test;
-    double accuracy[7];
+    // double* accuracy = new double[examples*sizeof( double )];     // A malloc implementation has to be done in the f
 
-    //cvNamedWindow("src",WINDOW_NORMAL);
-    for(int i=60;i<100;i=i+2)
+    // //cvNamedWindow("src",WINDOW_NORMAL);
+    // double y[101];
+    // fstream myfile("Plots/2.txt", ios::out);
+    // if (myfile.is_open()) cout<<"file exists"<<endl;
+    // for(int i=60;i<90;i++)
+    // {
+    //     for(int k=0;k<examples;k++)
+    //     {
+    //         //cout<<" K= "<<k<<endl;
+    //         accuracy[k]=0;
+    //         images_train.clear();
+    //         images_test.clear();
+    //         labels_train.clear();
+    //         labels_test.clear();
+    //         for(int i=0;i<images.size();i++)
+    //         {
+    //             if(i%examples==k)  // Put in test set
+    //             {
+    //                 images_test.push_back(images[i]);
+    //                 labels_test.push_back(labels[i]);
+    //             }
+    //             else        // Put in training set
+    //             {
+    //                 images_train.push_back(images[i]);
+    //                 labels_train.push_back(labels[i]);
+    //             }
+    //         }
+    //         model.train(images_train,labels_train,i/100.0,"2dpca.xml");
+    //         for(int j=0;j<images_test.size();j++)
+    //         {
+    //             int prediction=  model.predict(images_test[j]);
+
+    //             //imshow("src",images_test[j]);
+    //             //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
+    //             //waitKey(0);
+    //             accuracy[k]+=(prediction==labels_test[j]);
+    //         }
+
+    //         //cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
+    //     }
+
+    //     for(int k=1;k<examples;k++)
+    //     {
+    //         accuracy[k]+=accuracy[k-1];
+    //     }
+
+    //     y[i]=(accuracy[examples-1]*100)/(examples*num_dir);
+    //     cout<<endl<<"percentage"<<i<<" final accuracy -> "<<y[i]<<endl;
+    //     myfile<<y[i]<<"\n";
+    // }
+    // myfile.close();
+    //-------------------------------------------------------------------------------------//
+
+    //------------------Drawing Roc curves for all the classes-------------------------//
+
+    int roc_range=15;       //    Number of data points we want in the ROC curve
+    int trueP[num_dir][roc_range];
+    int falseP[num_dir][roc_range];
+
+    for(int i=0;i<num_dir;i++)
     {
-        for(int k=0;k<7;k++)
+        for(int j=0;j<roc_range;j++)
         {
-            //cout<<" K= "<<k<<endl;
-            accuracy[k]=0;
+            trueP[i][j]=0;
+            falseP[i][j]=0;
+        }
+    }
+
+    fstream tp("Plots/3.txt", ios::out);
+    if (tp.is_open()) cout<<"file exists"<<endl;
+    fstream fp("Plots/4.txt", ios::out);
+    if (fp.is_open()) cout<<"file exists"<<endl;
+
+    for(int class_no=0;class_no<num_dir;class_no++)       //    We find the curves for every class
+    {
+
+        cout<<" Class number -> "<<class_no+1<<endl;
+        for(int k=0;k<examples;k++)
+        {
+            //cout<<" Example number -> "<<k<<endl;
             images_train.clear();
             images_test.clear();
             labels_train.clear();
             labels_test.clear();
             for(int i=0;i<images.size();i++)
             {
-                if(i%7==k)  // Put in test set
+                if(i%examples==k)  // Put in test set
                 {
                     images_test.push_back(images[i]);
                     labels_test.push_back(labels[i]);
@@ -107,77 +185,45 @@ int main()
                     labels_train.push_back(labels[i]);
                 }
             }
-            model.train(images_train,labels_train,i/100.0,"2dpca.xml");
-            for(int j=0;j<images_test.size();j++)
-            {
-                int prediction=  model.predict(images_test[j]);
 
-                //imshow("src",images_test[j]);
-                //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
-                //waitKey(0);
-                accuracy[k]+=(prediction==labels_test[j]);
+
+            for(int t=0;t<roc_range;t++)
+            {
+
+                model.train(images_train,labels_train,(29+5*t)/100.0,"2dpca.xml");
+
+                for(int j=0;j<images_test.size();j++)
+                {
+                    int prediction=  model.predict(images_test[j]);
+                    //cout<<" actual -> "<< labels_test[j] <<" predicted -> " << prediction <<endl;
+                    if(prediction==labels_test[class_no])      //     A positive detected for that particular class
+                    {
+                        if(prediction==labels_test[j])  trueP[class_no][t]++;
+                        else falseP[class_no][t]++;
+                    }
+                }
+                if(k==examples-1)
+                {
+                    cout<<" percentage -> "<<29+5*t<<endl;
+                    cout<<" true positive -> "<< trueP[class_no][t] << endl;
+                    cout<<" false positive -> "<< falseP[class_no][t] << endl;
+                    tp<<trueP[class_no][t]<<";";
+                    fp<<falseP[class_no][t]<<";";
+                }
+
             }
 
-            //cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
-        }
 
-        for(int k=1;k<7;k++)
-        {
-            accuracy[k]+=accuracy[k-1];
-        }
 
-        cout<<endl<<"percentage"<<i<<" final accuracy -> "<<(accuracy[6]*100)/(7*num_dir)<<endl;
+
+        }
+        tp<<endl;
+        fp<<endl;
+
+
     }
 
-    //-------------------------------------------------------------------------------------//
-    //------------------------------------------------------------------//
-    // double sum=0;
-    // images.clear();
-    // labels.clear();
-    // dir_read("../orl_faces/Test",40,images,labels,0);
-    // for(int i=0;i<images.size();i++)
-    // {
-    //   int prediction=  model.predict(images[i]);
-    //   cout<<"\t"<<prediction<<"\t"<<labels[i]<<endl;
-    //   sum+=(prediction==labels[i]);
-    // }
-    // sum*=100;
-    // cout<<" accuracy is "<<sum/labels.size()<<endl;
-
-
-    // string dir_train="../Faces/Train",dir_test="../Faces/Test";
-    // vector<Mat> images_train,images_test;
-    // vector<int> labels_train,labels_test;
-    // dir_read(dir_train,6,images_train,labels_train,0);
-    // dir_read(dir_test,6,images_test,labels_test,0);
-    // cout<<"Train = "<< images_train.size()<<" test= "<<images_test.size()<<endl;
-    // rc2dpca model1;
-    // pca2d model2;
-    // const int bins=21;
-    // float accuracy1[bins];
-    // float accuracy2[bins];
-    // cout<<" Percentage of information \t rc2dpca \t 2dpca "<<endl;
-    // for(int i=0;i<bins;i++)
-    // {
-    //     model1.train(images_train,labels_train,(70+i)/100.0,"rc2dpca.xml");
-    //     model2.train(images_train,labels_train,(70+i)/100.0,"2dpca.xml");
-
-    //     double sum1=0,sum2=0;
-    //     for(int j=0;j<images_test.size();j=j+6)
-    //     {
-    //       int prediction1=  model1.predict(images_test[j]);
-    //       sum1+=(prediction1==labels_test[j]);
-    //       int prediction2=  model2.predict(images_test[j]);
-    //       sum2+=(prediction2==labels_test[j]);
-    //     }
-    //     sum1*=100;
-    //     sum2*=100;
-    //     accuracy1[i]=sum1/labels_test.size();
-    //     accuracy2[i]=sum2/labels_test.size();
-    //     cout<<"\t\t"<<70+i<<"\t\t"<<accuracy1[i]*6<<"\t\t"<<accuracy2[i]*6<<endl;
-    //     //waitKey(500);
-    // }
-    //----------------------------------------------------------------------------------//
+    //---------------------------------------------------------------------------------//
 
 
     return 0;
