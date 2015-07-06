@@ -143,85 +143,85 @@ int main()
 
     //------------------Drawing Roc curves for all the classes-------------------------//
 
-    int roc_range=15;       //    Number of data points we want in the ROC curve
-    int trueP[num_dir][roc_range];
-    int falseP[num_dir][roc_range];
+    // int roc_range=15;       //    Number of data points we want in the ROC curve
+    // int trueP[num_dir][roc_range];
+    // int falseP[num_dir][roc_range];
 
-    for(int i=0;i<num_dir;i++)
-    {
-        for(int j=0;j<roc_range;j++)
-        {
-            trueP[i][j]=0;
-            falseP[i][j]=0;
-        }
-    }
+    // for(int i=0;i<num_dir;i++)
+    // {
+    //     for(int j=0;j<roc_range;j++)
+    //     {
+    //         trueP[i][j]=0;
+    //         falseP[i][j]=0;
+    //     }
+    // }
 
-    fstream tp("Plots/3.txt", ios::out);
-    if (tp.is_open()) cout<<"file exists"<<endl;
-    fstream fp("Plots/4.txt", ios::out);
-    if (fp.is_open()) cout<<"file exists"<<endl;
+    // fstream tp("Plots/3.txt", ios::out);
+    // if (tp.is_open()) cout<<"file exists"<<endl;
+    // fstream fp("Plots/4.txt", ios::out);
+    // if (fp.is_open()) cout<<"file exists"<<endl;
 
-    for(int class_no=0;class_no<num_dir;class_no++)       //    We find the curves for every class
-    {
+    // for(int class_no=0;class_no<num_dir;class_no++)       //    We find the curves for every class
+    // {
 
-        cout<<" Class number -> "<<class_no+1<<endl;
-        for(int k=0;k<examples;k++)
-        {
-            //cout<<" Example number -> "<<k<<endl;
-            images_train.clear();
-            images_test.clear();
-            labels_train.clear();
-            labels_test.clear();
-            for(int i=0;i<images.size();i++)
-            {
-                if(i%examples==k)  // Put in test set
-                {
-                    images_test.push_back(images[i]);
-                    labels_test.push_back(labels[i]);
-                }
-                else        // Put in training set
-                {
-                    images_train.push_back(images[i]);
-                    labels_train.push_back(labels[i]);
-                }
-            }
-
-
-            for(int t=0;t<roc_range;t++)
-            {
-
-                model.train(images_train,labels_train,(29+5*t)/100.0,"2dpca.xml");
-
-                for(int j=0;j<images_test.size();j++)
-                {
-                    int prediction=  model.predict(images_test[j]);
-                    //cout<<" actual -> "<< labels_test[j] <<" predicted -> " << prediction <<endl;
-                    if(prediction==labels_test[class_no])      //     A positive detected for that particular class
-                    {
-                        if(prediction==labels_test[j])  trueP[class_no][t]++;
-                        else falseP[class_no][t]++;
-                    }
-                }
-                if(k==examples-1)
-                {
-                    cout<<" percentage -> "<<29+5*t<<endl;
-                    cout<<" true positive -> "<< trueP[class_no][t] << endl;
-                    cout<<" false positive -> "<< falseP[class_no][t] << endl;
-                    tp<<trueP[class_no][t]<<";";
-                    fp<<falseP[class_no][t]<<";";
-                }
-
-            }
+    //     cout<<" Class number -> "<<class_no+1<<endl;
+    //     for(int k=0;k<examples;k++)
+    //     {
+    //         //cout<<" Example number -> "<<k<<endl;
+    //         images_train.clear();
+    //         images_test.clear();
+    //         labels_train.clear();
+    //         labels_test.clear();
+    //         for(int i=0;i<images.size();i++)
+    //         {
+    //             if(i%examples==k)  // Put in test set
+    //             {
+    //                 images_test.push_back(images[i]);
+    //                 labels_test.push_back(labels[i]);
+    //             }
+    //             else        // Put in training set
+    //             {
+    //                 images_train.push_back(images[i]);
+    //                 labels_train.push_back(labels[i]);
+    //             }
+    //         }
 
 
+    //         for(int t=0;t<roc_range;t++)
+    //         {
+
+    //             model.train(images_train,labels_train,(29+5*t)/100.0,"2dpca.xml");
+
+    //             for(int j=0;j<images_test.size();j++)
+    //             {
+    //                 int prediction=  model.predict(images_test[j]);
+    //                 //cout<<" actual -> "<< labels_test[j] <<" predicted -> " << prediction <<endl;
+    //                 if(prediction==labels_test[class_no])      //     A positive detected for that particular class
+    //                 {
+    //                     if(prediction==labels_test[j])  trueP[class_no][t]++;
+    //                     else falseP[class_no][t]++;
+    //                 }
+    //             }
+    //             if(k==examples-1)
+    //             {
+    //                 cout<<" percentage -> "<<29+5*t<<endl;
+    //                 cout<<" true positive -> "<< trueP[class_no][t] << endl;
+    //                 cout<<" false positive -> "<< falseP[class_no][t] << endl;
+    //                 tp<<trueP[class_no][t]<<";";
+    //                 fp<<falseP[class_no][t]<<";";
+    //             }
+
+    //         }
 
 
-        }
-        tp<<endl;
-        fp<<endl;
 
 
-    }
+    //     }
+    //     tp<<endl;
+    //     fp<<endl;
+
+
+    // }
 
     //---------------------------------------------------------------------------------//
 
