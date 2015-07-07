@@ -9,8 +9,7 @@
 
 using namespace cv;
 
-using std::cout;
-using std::endl;
+using namespace std;
 
 
 

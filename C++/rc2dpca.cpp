@@ -393,6 +393,5 @@ int rc2dpca::predict(Mat test,double distance_thresh)
         return eucl_dist_vec[min].label;
     else return -1;
 
-
 }
 

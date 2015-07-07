@@ -18,12 +18,6 @@
 
 void dir_read(string,int,vector<Mat>&,vector<int>&,bool);
 
-string prediction_name(int);
-
-int video_recognizer();
-
 static void read_csv(const string& , vector<Mat>& , vector<int>& , char separator);
-
-int model_main(string);
 
 int sampler_main();

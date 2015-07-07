@@ -16,6 +16,10 @@ using std::endl;
 using std::queue;
 
 int cr_min=128,cr_max=164,cb_min=115,cb_max=160,kernel=8;
+#define n 120
+#define m 120
+
+
 
 Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
 {
@@ -293,9 +297,9 @@ Mat getBB(Mat const& img)
     bottom=min(bottom+10,src.rows-1);
 
     Rect roi(left,top,right-left,bottom-top);
+    resize(src(roi),src, Size(n,m),0,0, INTER_CUBIC);
 
-
-    return src(roi);
+    return src;
 }
 
 float stddev(Vector<int> w)
