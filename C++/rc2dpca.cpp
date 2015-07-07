@@ -151,7 +151,7 @@ void rc2dpca::train(vector<Mat> images,vector<int> labels,double e_val_thresh,st
     }
 
     //cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
-    cout<<" number of eigenvectors in X is "<<num_evecs<<endl;
+    //cout<<" number of eigenvectors in X is "<<num_evecs<<endl;
     this->eigenvectors_X=copy_eigen2cv(X,5);
     // ********** X has been calculated*************//
 
@@ -264,7 +264,7 @@ void rc2dpca::train(vector<Mat> images,vector<int> labels,double e_val_thresh,st
     }
 
     //cout<<endl<<"final U size is "<<endl<<U.rows()<<"*"<<U.cols()<<endl;
-    cout<<" number of eigenvectors in U is "<<num_evecs<<endl;
+    //cout<<" number of eigenvectors in U is "<<num_evecs<<endl;
     this->eigenvectors_U=copy_eigen2cv(U,5);
     //------------------------------------------------------------------//
 
@@ -388,7 +388,7 @@ int rc2dpca::predict(Mat test,double distance_thresh)
            min=i;
         }
     }
-    cout<<" distance is "<<eucl_dist_vec[min].dist<<endl;
+    //cout<<" distance is "<<eucl_dist_vec[min].dist<<endl;
     if(eucl_dist_vec[min].dist<distance_thresh)
         return eucl_dist_vec[min].label;
     else return -1;

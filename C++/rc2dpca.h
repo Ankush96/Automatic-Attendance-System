@@ -15,7 +15,7 @@ class rc2dpca
 	public:
 		void train(std::vector<cv::Mat>,std::vector<int>,double,std::string);
 		void load(std::string);
-		int predict(cv::Mat,double distance_thresh=5000000);
+		int predict(cv::Mat,double distance_thresh=200000000);
 
 		cv::Mat copy_eigen2cv(Eigen::MatrixXf src,int);
 		Eigen::MatrixXf copy_cv2eigen(cv::Mat,int);

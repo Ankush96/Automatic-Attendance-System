@@ -59,6 +59,8 @@ void dir_read(string root,int num,vector<Mat>& images,vector<int>& labels,bool c
             if (stat( filepath.c_str(), &filestat )) continue;
             if (S_ISDIR( filestat.st_mode )) continue;
             Mat img=imread(filepath,color);
+            // Rect crop(120,30,400,400);
+            // imwrite(filepath,img(crop));
             images.push_back(img);
             labels.push_back(i);
         }

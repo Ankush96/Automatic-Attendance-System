@@ -1,7 +1,12 @@
+-------------------2dpca---------------
 1.txt -> x=percentage of information retained from 0 to 99
 	 y=accuracy by leave one out cross validation in cvl database with 13 classes. with segmentation and bounding box. clutter intoduced
 2.txt -> x=percentage of information retained from 0 to 99
 	 y=accuracy by leave one out cross validation in cvl database with 13 classes. without segmentation. clutter introduced
+5.txt -> x=percentage of information retained from 0 to 99
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. without segmentation. without clutter.
+---------------------------------------
+
 3.txt -> the rows represent the class numbers(1 to 13)
 	the columns represent the true positives obtained for different thresholds of information retention . x varies as 29+i*5, i=0:14 .
 4.txt -> the rows represent the class numbers(1 to 13)
@@ -9,3 +14,20 @@
 for 3 and 4, we have gone to every class and trained 6 samples of each class at a time and tested 1 sample of each class. so we have only 1 image with class 1 and rest 12 are labelled as 0. this is repeated7 times, leaving one sample everytime. therefore for one class number of positives =7 and negatives = 7*12 =84 as there are 13 classes.
 
 
+-------------------rc2dpca---------------
+6.txt -> x=percentage of information retained from 0 to 99
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. with segmentation and bounding box. clutter intoduced
+7.txt -> x=percentage of information retained from 0 to 99
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. without segmentation. clutter introduced
+8.txt -> x=percentage of information retained from 0 to 99
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. without segmentation. without clutter.
+---------------------------------------
+
+------------------1dpca---------------
+9.txt -> x=number of eigenvectors retained from 1 to 100 
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. with segmentation and bounding box. clutter intoduced
+10txt -> x=percentage of information retained from 0 to 99
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. without segmentation. clutter introduced
+11.txt -> x=percentage of information retained from 0 to 99
+	 y=accuracy by leave one out cross validation in cvl database with 13 classes. without segmentation. without clutter.
+---------------------------------------

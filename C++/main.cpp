@@ -26,30 +26,30 @@ int main()
 {
     //--------------Code to check if segmentation is working fine--------------------//
       int cr_min=134,cr_max=175,cb_min=99,cb_max=130;
-    // vector<Mat> images;
-    // vector<int> labels;
-    // dir_read("../cvl",14,images,labels,1);
-    // cvNamedWindow("src",WINDOW_NORMAL);
-    // cvNamedWindow("dst",WINDOW_NORMAL);
-    // createTrackbar("cr min ","dst",&cr_min,255);
-    // createTrackbar("cr max ","dst",&cr_max,255);
-    // createTrackbar("cb min ","dst",&cb_min,255);
-    // createTrackbar("cb max ","dst",&cb_max,255);
-    // for(int i=0;i<images.size();i++)
-    // {
-    //   Mat src=images[i];
-    //   //cout<<src.size<<endl;
-    //   imshow("src",src);
-    //     while(1)
-    //         {
-    //             Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
-    //             resize(dst,dst,Size(src.cols,src.rows),0,0,INTER_CUBIC);
-    //             imshow("dst",dst);
-    //             int key = cv::waitKey(30);
-    //             if(key==27) break;
-    //         }
+    vector<Mat> images;
+    vector<int> labels;
+    dir_read("../Face_db",9,images,labels,1);
+    cvNamedWindow("src",WINDOW_NORMAL);
+    cvNamedWindow("dst",WINDOW_NORMAL);
+    createTrackbar("cr min ","dst",&cr_min,255);
+    createTrackbar("cr max ","dst",&cr_max,255);
+    createTrackbar("cb min ","dst",&cb_min,255);
+    createTrackbar("cb max ","dst",&cb_max,255);
+    for(int i=0;i<images.size();i++)
+    {
+      Mat src=images[i];
+      //cout<<src.size<<endl;
+      imshow("src",src);
+        while(1)
+            {
+                Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
+                resize(dst,dst,Size(src.cols,src.rows),0,0,INTER_CUBIC);
+                imshow("dst",dst);
+                int key = cv::waitKey(30);
+                if(key==27) break;
+            }
 
-    // }
+    }
     //----------------------------------------------------------------------------------//
 
     //---------------------------Putting a bounding box on the largest blob and resizing---------------//
@@ -65,34 +65,34 @@ int main()
      // change m and n in 2dpca
      //try to crop in segmentation
      //remove black background
-    vector<Mat> images;
-    vector<int> labels;
-    int num_dir=13;     //  Number of classes or unique identities
-    int examples=7;     //  Number of images per person
-    int color=1;
-    dir_read("../cvl",num_dir,images,labels,color);
-    pca2d model;
-    if(color)
-    {
-      for(int i=0;i<images.size();i++)
-        {
-            Mat src=images[i];
-            //cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);  //GetSkin returns a color image, hence we need to convert it to grayscale
-            Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
-            resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
-            images[i]=dst;
-        }
-    }
+    // vector<Mat> images;
+    // vector<int> labels;
+    // int num_dir=13;     //  Number of classes or unique identities
+    // int examples=7;     //  Number of images per person
+    // int color=0;
+    // dir_read("../CVL",num_dir,images,labels,color);
+    // //rc2dpca model;
+    // if(color)
+    // {
+    //   for(int i=0;i<images.size();i++)
+    //     {
+    //         Mat src=images[i];
+    //         //cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);  //GetSkin returns a color image, hence we need to convert it to grayscale
+    //         Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
+    //         resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
+    //         images[i]=dst;
+    //     }
+    // }
 
-    std::vector<Mat> images_test,images_train;
-    std::vector<int> labels_train,labels_test;
+    // std::vector<Mat> images_test,images_train;
+    // std::vector<int> labels_train,labels_test;
     // double* accuracy = new double[examples*sizeof( double )];     // A malloc implementation has to be done in the f
 
     // //cvNamedWindow("src",WINDOW_NORMAL);
     // double y[101];
-    // fstream myfile("Plots/2.txt", ios::out);
+    // fstream myfile("Plots/11.txt", ios::out);
     // if (myfile.is_open()) cout<<"file exists"<<endl;
-    // for(int i=60;i<90;i++)
+    // for(int i=0;i<100;i++)
     // {
     //     for(int k=0;k<examples;k++)
     //     {
@@ -115,10 +115,14 @@ int main()
     //                 labels_train.push_back(labels[i]);
     //             }
     //         }
-    //         model.train(images_train,labels_train,i/100.0,"2dpca.xml");
+    //         //model.train(images_train,labels_train,i/100.0,"2dpca.xml");
+    //         Ptr<FaceRecognizer> model = createEigenFaceRecognizer(4*(i+1));
+    //         model->train(images_train, labels_train);
     //         for(int j=0;j<images_test.size();j++)
     //         {
-    //             int prediction=  model.predict(images_test[j]);
+    //             //int prediction=  model.predict(images_test[j]);
+    //             int prediction=  model->predict(images_test[j]);
+
 
     //             //imshow("src",images_test[j]);
     //             //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
