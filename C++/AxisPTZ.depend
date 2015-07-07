@@ -177,3 +177,301 @@
 	<vector>
 	<Eigen/Dense>
 
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/grabcut.cpp
+	"opencv2/opencv.hpp"
+	<iostream>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/model.cpp
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"Stage-segment.h"
+	<iostream>
+	<fstream>
+	<sstream>
+
+1436285619 /home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/Stage-segment.h
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
+	<opencv2/highgui/highgui.hpp>
+	<iostream>
+	<vector>
+	"math.h"
+	<Eigen/Dense>
+
+1436285620 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/rc2dpca.cpp
+	<stdio.h>
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	"Utils.h"
+	"rc2dpca.h"
+	"two_d_pca.h"
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<Eigen/Dense>
+	<Eigen/Eigenvalues>
+
+1436285619 /home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/Utils.h
+	<stdio.h>
+	"Stage-segment.h"
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	<dirent.h>
+	<unistd.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+
+1436285620 /home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/rc2dpca.h
+	<vector>
+	<Eigen/Dense>
+	<Eigen/Eigenvalues>
+
+1436285620 /home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/two_d_pca.h
+	<vector>
+	<Eigen/Dense>
+	<Eigen/Eigenvalues>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/Sampler.cpp
+	<stdio.h>
+	"Stage-segment.h"
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/Segment-samples.cpp
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"Stage-segment.h"
+	<iostream>
+	<fstream>
+	<sstream>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/Stage-segment.cpp
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
+	<opencv2/highgui/highgui.hpp>
+	<iostream>
+	<vector>
+	<queue>
+	"math.h"
+	<Eigen/Dense>
+
+1436285620 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/two_d_pca.cpp
+	<stdio.h>
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	"Utils.h"
+	"two_d_pca.h"
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<Eigen/Dense>
+	<Eigen/Eigenvalues>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/Utils.cpp
+	<stdio.h>
+	"Stage-segment.h"
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	<dirent.h>
+	<unistd.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<string>
+
+1436285756 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/Automatic-Attendance-System/C++/main.cpp
+	<stdio.h>
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	"Utils.h"
+	"rc2dpca.h"
+	"two_d_pca.h"
+	"Stage-segment.h"
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<Eigen/Dense>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/grabcut.cpp
+	"opencv2/opencv.hpp"
+	<iostream>
+
+1436296724 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/main.cpp
+	<stdio.h>
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	"Utils.h"
+	"rc2dpca.h"
+	"two_d_pca.h"
+	"Stage-segment.h"
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<Eigen/Dense>
+
+1436285619 /home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/Utils.h
+	<stdio.h>
+	"Stage-segment.h"
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	<dirent.h>
+	<unistd.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+
+1436285619 /home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/Stage-segment.h
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
+	<opencv2/highgui/highgui.hpp>
+	<iostream>
+	<vector>
+	"math.h"
+	<Eigen/Dense>
+
+1436285620 /home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/rc2dpca.h
+	<vector>
+	<Eigen/Dense>
+	<Eigen/Eigenvalues>
+
+1436285620 /home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/two_d_pca.h
+	<vector>
+	<Eigen/Dense>
+	<Eigen/Eigenvalues>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/model.cpp
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"Stage-segment.h"
+	<iostream>
+	<fstream>
+	<sstream>
+
+1436296287 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/rc2dpca.cpp
+	<stdio.h>
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	"Utils.h"
+	"rc2dpca.h"
+	"two_d_pca.h"
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<Eigen/Dense>
+	<Eigen/Eigenvalues>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/Sampler.cpp
+	<stdio.h>
+	"Stage-segment.h"
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+
+1436285619 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/Segment-samples.cpp
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"Stage-segment.h"
+	<iostream>
+	<fstream>
+	<sstream>
+
+1436296277 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/two_d_pca.cpp
+	<stdio.h>
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	"Utils.h"
+	"two_d_pca.h"
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<Eigen/Dense>
+	<Eigen/Eigenvalues>
+
+1436296269 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/Utils.cpp
+	<stdio.h>
+	"Stage-segment.h"
+	"opencv2/core/core.hpp"
+	"opencv2/contrib/contrib.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/objdetect/objdetect.hpp"
+	<dirent.h>
+	<unistd.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<iostream>
+	<fstream>
+	<sstream>
+	<vector>
+	<string>
+
+1436296676 source:/home/ankush/IIST Project/Ankush Chatterjee_Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
+	<opencv2/highgui/highgui.hpp>
+	<iostream>
+	<vector>
+	<queue>
+	"math.h"
+	<Eigen/Dense>
+

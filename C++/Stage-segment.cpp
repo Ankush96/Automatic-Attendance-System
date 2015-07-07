@@ -15,9 +15,9 @@ using std::cout;
 using std::endl;
 using std::queue;
 
-int cr_min=128,cr_max=164,cb_min=115,cb_max=160,kernel=8;
-#define n 120
-#define m 120
+int cr_min=126,cr_max=175,cb_min=99,cb_max=130,kernel=8;
+#define n 160
+#define m 160
 
 
 
@@ -37,13 +37,14 @@ Mat clahe(Mat img) //Does a local histogram equalization to improve illumination
     return img;
 }
 
-Mat erode(Mat const &src,int thresh=5)
+
+Mat erode(Mat const &src,int thresh=4)
 {
     int i,j,l,k,count;
     Mat dst=src.clone();
-    for(i=1;i<src.rows;i++)
+    for(i=1;i<src.rows-1;i++)
     {
-        for(j=1;j<src.cols;j++)
+        for(j=1;j<src.cols-1;j++)
         {
             if(src.at<uchar>(i,j)==255)
             {
@@ -66,8 +67,9 @@ Mat erode(Mat const &src,int thresh=5)
         }
     }
 
-    //namedWindow("erode",WINDOW_NORMAL);
-    //imshow("erode",dst);
+    namedWindow("erode",WINDOW_NORMAL);
+    imshow("erode",dst);
+    waitKey(0);
     return dst;
 }
 
@@ -76,9 +78,9 @@ Mat dilate(Mat const &src,int thresh=2)
 {
     int i,j,l,k,count;
     Mat dst=src.clone();
-    for(i=1;i<src.rows;i++)
+    for(i=1;i<src.rows-1;i++)
     {
-        for(j=1;j<src.cols;j++)
+        for(j=1;j<src.cols-1;j++)
         {
             if(src.at<uchar>(i,j)<255)
             {
@@ -101,19 +103,31 @@ Mat dilate(Mat const &src,int thresh=2)
         }
     }
 
-    // namedWindow("dilate",WINDOW_NORMAL);
-    // imshow("dilate",dst);
+    namedWindow("dilate",WINDOW_NORMAL);
+    imshow("dilate",dst);
+    waitKey(0);
     return dst;
 }
 
 
+/*
+    ************************ Erode-Dilate ***************************
+    *   erode-dilate performs the 3 steps of noise reduction required
+    *   for Stage 2. For details read the description for Stage 2
+
+    *   Input  -> BnW density map of image
+    *   Output -> BnW bitmap of stage 2
+    *****************************************************************
+*/
 Mat erode_dilate(Mat const &src)
 {
     int i,j;
     //cout<<"inside erode_dilate "<<endl;
     //cout<<" "<<src.rows<<" "<<src.cols<<endl;
-    Mat dst(src.rows,src.cols,CV_8UC1,Scalar(0));
+    Mat dst=src.clone();
     //cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
+
+    //------------- Step 1-> Remove borders --------------//
     for(i=0;i<dst.rows;i++)
     {
         dst.at<uchar>(i,0)=0;
@@ -123,21 +137,24 @@ Mat erode_dilate(Mat const &src)
     for(i=0;i<dst.cols;i++)
     {
         dst.at<uchar>(0,i)=0;
-        dst.at<uchar>(src.rows-1,i)=0;
+        dst.at<uchar>(dst.rows-1,i)=0;
 
     }
+    //-----------------------------------------------------//
     //cout<<"erode_dilate starts"<<endl;
-    dst=(dilate(erode(src)));
+
+    dst=(dilate(erode(dst)));                                   //  Step 2 and 3 are performed using the two functions
+
     for(i=0;i<dst.rows;i++)
     {
         for(j=0;j<dst.cols;j++)
         {
-            if(dst.at<uchar>(i,j)<255) dst.at<uchar>(i,j)=0;
+            if(dst.at<uchar>(i,j)<255) dst.at<uchar>(i,j)=0;    //  Converting the density map to a final bitmap
         }
     }
-    //namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
-    //imshow("erode_dilate stage 2",dst);
-    //waitKey(0);
+    namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
+    imshow("erode_dilate stage 2",dst);
+    waitKey(0);
 
     //imwrite("s2.jpg",dst);
     return dst;
@@ -178,6 +195,13 @@ int bfs(Mat image,int x,int y,int** visited,int num_blobs)  //Detects the connec
     return sum;
 }
 
+/*
+    ***************************    Remove_Blobs   ************************************
+    *   The output of GetSkin is fed as an input to this function. This method employs
+    *   a Breadth First Search to find the largest blob and retains only that blob.
+    *   All other blobs are discared, i.e., assigned 0.
+    **********************************************************************************
+*/
 Mat remove_blobs(Mat const &img)
 {
     Mat src=img.clone();
@@ -195,26 +219,27 @@ Mat remove_blobs(Mat const &img)
 
     //-------------------------------------------------------------------//
     vector<int> blob_sizes;
-    blob_sizes.push_back(-1);   //  The vector contains the size of all the blobs detected in the image. We want the indexing to start from 1. Hence we push -1 in the 0th position
-    int num_blobs=0;
+    blob_sizes.push_back(-1);                                           //  The vector contains the size of all the blobs detected in the image.
+                                                                        //  We want the indexing to start from 1. Hence we push -1 in the 0th position
+    int num_blobs=0;                                                    //  Initially there are no blobs
 
      for (int i = 1; i < src.rows-1; i++)
      {
         for (int j = 1; j < src.cols-1; j++)
         {
-                                            //A new blob has been found
-            if((src.at<uchar>(i,j)!=0)&&(visited[i][j]==-1)) // if node is not visited and not black
+                                                                        //  A new blob has been found
+            if((src.at<uchar>(i,j)!=0)&&(visited[i][j]==-1))            //  if node is not visited and not black
              {
                 //cout<<" i j = "<<i<<" "<<j<<endl;
-                num_blobs++;
-                blob_sizes.push_back(bfs(src,i,j,visited,num_blobs));
+                num_blobs++;                                            //  Increase the number of blobs
+                blob_sizes.push_back(bfs(src,i,j,visited,num_blobs));   //  Perform BFS and get the number of connected components in the blob
              }
 
         }
      }
      //cout<<num_blobs<<" "<<src.rows*src.cols<<endl;
 
-     //---------Once we have the visited array we can use the information to manipulation the image contained in src-------------//
+     //---------Once we have the visited array we can use the information to manipulate the image contained in src-------------//
 
      //---------We first check for the largest blob by using the vector blob_sizes----------------//
 
@@ -241,19 +266,30 @@ Mat remove_blobs(Mat const &img)
                if(visited[i][j]!=max)
                 {
                     src.at<uchar>(i,j)=0;
-                } 
+                }
             }
-            
+
 
         }
      }
-
+    namedWindow("Remove_blobs",WINDOW_NORMAL);
+    imshow("Remove_blobs",src);
+    waitKey(0);
     return src;
 }
 
-//-------------Function that calculates a bounding box(having same aspect ratio as the image) on a non-black object, and returns the cropped Bounding Box-----------//
+/*
+    ******************************  Get Bounding box   *********************************
+    *   After obtaining the largest blob in an image, which likely represents the face,
+    *   we want to crop only the facial part and ignore the rest. This is done by the
+    *   getBB function in an effective way. It calculates the 4 corner points of a
+    *   Bounding Box on the face, stretches the rectangle by 10 pixel on all sides,
+    *   crops the new Bounding Box out of the image, and resizes the BB to m*n dimension
+    ************************************************************************************
+*/
 Mat getBB(Mat const& img)
 {
+    cout<<"GetBB here "<<img.rows-1<<" "<<img.cols-1<<endl;
     Mat src=img.clone();
     int left=src.cols-1,right=0,top=src.rows-1,bottom=0;
     for(int i=0;i<src.rows;i++)
@@ -278,10 +314,10 @@ Mat getBB(Mat const& img)
                     // imshow("circle",src2);
                     // waitKey(0);
                     //----------------------------------------------------------------//
-                }    
+                }
                 if(j<left) left=j;
                 if(j>right) right=j;
-                
+
 
             }
         }
@@ -289,13 +325,14 @@ Mat getBB(Mat const& img)
     //double ratio_h2w=(src.rows*1.0)/src.cols;
 
     //int bb_height=bottom-top, bb_width= right-left;
-    
+
     //-------We include some space beacuse we dont require an exact bounding box-----------//
+    cout<<left<<" "<<right<<" "<<top<<" "<<bottom<<endl;
     left=max(left-10,0);
     top=max(top-10,0);
     right=min(right+10,src.cols-1);
     bottom=min(bottom+10,src.rows-1);
-
+    cout<<left<<" "<<right<<" "<<top<<" "<<bottom<<endl;
     Rect roi(left,top,right-left,bottom-top);
     resize(src(roi),src, Size(n,m),0,0, INTER_CUBIC);
 
@@ -344,6 +381,20 @@ bool R3(float H, float S, float V){
     return (H<25) || (H > 230);
 }
 
+
+/*
+
+    ******************************   Stage 1 of segmentation *****************************
+    *   The first step converts an input image into the YCrCb colorspace.
+    *   Options for converting into other color spaces are available (uncomment accordingly)
+    *   If a pixel lies within the thresholds of the given colorspace, it is mapped
+    *   to a white pixel, else it is mapped to a black pixel.
+
+    *   Input  -> A color image that needs to be segmented
+    *   Output -> A bitmap(3-channel) of facial region.
+    **************************************************************************************
+
+*/
 Mat stage1(Mat const &src) {
     Mat dst = src.clone();
     Vec3b cwhite = Vec3b::all(255);
@@ -358,62 +409,106 @@ Mat stage1(Mat const &src) {
     // 8bit images, so make sure we are operating on
     // the full spectrum from [0,360] by using floating
     // point precision:
-    src.convertTo(src_hsv, CV_32FC3);
-    cvtColor(src_hsv, src_hsv, CV_BGR2HSV);
+
+    //src.convertTo(src_hsv, CV_32FC3);
+    //cvtColor(src_hsv, src_hsv, CV_BGR2HSV);
+
     // Now scale the values between [0,255]:
-    normalize(src_hsv, src_hsv, 0.0, 255.0, NORM_MINMAX, CV_32FC3);
+    //normalize(src_hsv, src_hsv, 0.0, 255.0, NORM_MINMAX, CV_32FC3);
 
     for(int i = 0; i < src.rows; i++) {
         for(int j = 0; j < src.cols; j++) {
 
-            Vec3b pix_bgr = src.ptr<Vec3b>(i)[j];
-            int B = pix_bgr.val[0];
-            int G = pix_bgr.val[1];
-            int R = pix_bgr.val[2];
-            // apply rgb rule
-            bool a = R1(R,G,B);
+            //  Uncomment the following section for using RGB thresholds
+
+            // Vec3b pix_bgr = src.ptr<Vec3b>(i)[j];
+            // int B = pix_bgr.val[0];
+            // int G = pix_bgr.val[1];
+            // int R = pix_bgr.val[2];
+            // // apply rgb rule
+            // bool a = R1(R,G,B);
+
+            //----------------------------------------//
+
+            //  The following section is for YCrCb thresholding
 
             Vec3b pix_ycrcb = src_ycrcb.ptr<Vec3b>(i)[j];
             int Y = pix_ycrcb.val[0];
             int Cr = pix_ycrcb.val[1];
             int Cb = pix_ycrcb.val[2];
-            // apply ycrcb rule
+            //  Apply ycrcb rule
             bool b = R2(Y,Cr,Cb);
 
-            Vec3f pix_hsv = src_hsv.ptr<Vec3f>(i)[j];
-            float H = pix_hsv.val[0];
-            float S = pix_hsv.val[1];
-            float V = pix_hsv.val[2];
-            // apply hsv rule
-            bool c = R3(H,S,V);
+            //  Uncomment the following section for using HSV thresholds
 
-            if(!(b))
-                dst.ptr<Vec3b>(i)[j] = cblack;
+            // Vec3f pix_hsv = src_hsv.ptr<Vec3f>(i)[j];
+            // float H = pix_hsv.val[0];
+            // float S = pix_hsv.val[1];
+            // float V = pix_hsv.val[2];
+            // // apply hsv rule
+            // bool c = R3(H,S,V);
+
+            //----------------------------------------//
+
+            if(!(b))                                    //  If values not within thresholds
+                dst.ptr<Vec3b>(i)[j] = cblack;          //  Appoint black color
             else
-                dst.ptr<Vec3b>(i)[j] = cwhite;
+                dst.ptr<Vec3b>(i)[j] = cwhite;          //  Else white
         }
     }
-    //namedWindow("Stage1",WINDOW_NORMAL);
-    //imshow("Stage1",dst);
+    namedWindow("Stage1",WINDOW_NORMAL);
+    imshow("Stage1",dst);
     //imwrite("s1.jpg",dst);
-    //waitKey(0);
-    return dst;
+    waitKey(0);
+    return dst;                                         //  Return Bitmap of facial region
 }
 
+
+/*
+
+    ******************************   Stage 2 of segmentation *****************************
+
+    *   The first step of the second stage of this algorithm is to calculate a density map.
+    *   Given an M*N image we calculate an M/8 * N/8 density map by the following algorithm.
+    *   D(x,y)= (1/64)sum_{i=0}^7 sum_{j=0}^7 O_1 (8x+i,8y+j)
+    *   This gives us a gray scale image in a reduced dimension representing the density
+    *   of pixel intensities in 8*8 sub-matrices of the Stage 1 output. We perform a series
+    *   of noise reduction techniques on this density map which are jotted down as follows-
+
+    *       All points lying at the borderline of the density map is set to 0, i.e.
+    *       D(0,y)=D(M/8-1,y)=D(x,0)=D(x,N/8-1)=0  for x=0,1,....,M/8-1 & y=0,1,...N/8-1
+
+    *       Any white point(255) is set to 0 if it is surrounded by less than 5 full
+    *       density(255) points in its 3*3 neighborhood.
+
+    *       Any point of density<255 is assigned to 255 if there are more than 2
+    *       full-density(255) points in its local 3*3 neighborhood.
+
+    *   After this process, a bitmap of stage two is obtained which can be mathematically
+    *   represented as:-
+    *   O_2(x,y)={  255, if D(x,y)=255
+    *            {  0,   otherwise
+
+    *   Input  -> A noisy bitmap of facial region( Dimensions -> M*N )
+    *   Output -> A bitmap of density map.( Dimensions -> M/8*N/8 )
+
+    **************************************************************************************
+
+*/
 Mat stage2(Mat const &Csrc){
-
-    Mat src(Csrc.rows,Csrc.cols,CV_8UC1,Scalar(0));
-
-    cvtColor(Csrc,src,CV_BGR2GRAY);
+    cout<<"Stage 2 starts"<<endl;
+    Mat src;
+    cvtColor(Csrc,src,CV_BGR2GRAY);                                             //  Converting the colour bitmap to BnW
     int i,j,k,l,density;
-    Mat dst(ceil(src.rows/kernel),ceil(src.cols/kernel),CV_8UC1,Scalar(0));
+    Mat dst(ceil(src.rows/kernel),ceil(src.cols/kernel),CV_8UC1,Scalar(0));     //  Initializing the density map of proper dimensions
 
+    //  Calculating the density map //
     for(i=0;i<src.rows;i=i+kernel)
     {
         for(j=0;j<src.cols;j=j+kernel)
         {
             density=0;
-            for(l=0;l<min(kernel,src.rows-i+1);l++)
+            for(l=0;l<min(kernel,src.rows-i+1);l++)             //  We have to check so that l and k do not go out of bounds
             {
                 for(k=0;k<min(kernel,src.cols-j+1);k++)
                 {
@@ -422,19 +517,23 @@ Mat stage2(Mat const &Csrc){
                 }
 
             }
-            density=density/(kernel*kernel);
-            dst.at<uchar>(i/kernel,j/kernel)=density;
+            density=density/(kernel*kernel);                    //  Normalising tto (0,255)
+            dst.at<uchar>(i/kernel,j/kernel)=density;           //  We ignore the boundaries as they will be black by default
         }
 
     }
+    //------------------------------//
+
     //cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
-    //namedWindow("density map",WINDOW_NORMAL);
-    //imshow("density map",dst);
+    namedWindow("density map",WINDOW_NORMAL);
+    imshow("density map",dst);
     //imwrite("density.jpg",dst);
-    //waitKey(0);
-    return erode_dilate(dst);
+    waitKey(0);
+    return erode_dilate(dst);                                   //  We call a function to perform the noise reduction steps
 }
 
+
+//  Stage 3 is not required now
 Mat stage3(Mat const &src,Mat const &img,int thresh=2)
 {
     int i,j,k,l;
@@ -467,8 +566,28 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
     return dst;
 }
 
+
+/*
+    *******************************   Stage 4    ***********************************
+    *   We will attempt to further remove any more noise by using a technique
+    *   similar to that initially introduced in stage 2. Therefore, a pixel in
+    *   with the value of 255 will remain as a detected pixel if there are more
+    *   than three other pixels, in its local 3*3 neighborhood, with the same value.
+    *   At the same time, a pixel in with a value of zero will be reconverted to a
+    *   value of 255 (i.e., as a potential pixel of the facial region) if it is
+    *   surrounded by more than five pixels, in its local 3*3 neighborhood, with
+    *   a value of 255.
+    *
+    *   We search for any short continuous run of pixels that are assigned with the
+    *   value of one. Therefore, any group of less than four horizontally connected
+    *   pixels with the value of one will be eliminated and assigned to zero. A
+    *   similar process is then performed in the vertical direction.
+    ********************************************************************************
+
+*/
 Mat stage4(Mat const &img,int thresh=4,int remove=0)
 {
+    cout<<"Stage 4 starts"<<endl;
     Mat dst=img.clone();
 
     int i,j,start,k,l,count;
@@ -493,7 +612,7 @@ Mat stage4(Mat const &img,int thresh=4,int remove=0)
                         }
 
                  }
-                 if(count>3) dst.at<uchar>(i,j)=255;
+                 if(count<=3) dst.at<uchar>(i,j)=0;
             }
 
         }
@@ -563,10 +682,10 @@ Mat stage4(Mat const &img,int thresh=4,int remove=0)
             }
         }
     }
-    //namedWindow("Stage5 geo correct",WINDOW_NORMAL);
-    //imshow("Stage5 geo correct",dst2);
+    namedWindow("Stage4 geo correct",WINDOW_NORMAL);
+    imshow("Stage4 geo correct",dst2);
     //imwrite("s5.jpg",dst);
-    //waitKey(0);
+    waitKey(0);
     //cout<<"sTAGE 4 EXIT"<<dst2.rows<<" "<<dst2.cols<<endl;
     if(remove)
         return remove_blobs(dst2);
@@ -574,6 +693,19 @@ Mat stage4(Mat const &img,int thresh=4,int remove=0)
         return dst2;
 }
 
+
+/*
+    ******************************* Stage 5 ****************************************
+    *
+    *   In this stage, we use the output of stage 1 and 4 to get a contour image
+    *   of M*N dimensions. We iterate through the pixels of the stage 4 bitmap.
+    *   If a pixel is not on the boundary of black and white, it will be mapped into
+    *   a corresponding 8*8 sub-matrix with the same pixel value as in the stage 4
+    *   bitmap. But for the pixels on the boundary, they are mapped into the
+    *   corresponding 8*8 sub-matrix with the value of each pixel being the same
+    *   as the corresponding pixel intensities of stage 1.
+    ********************************************************************************
+*/
 Mat stage5(Mat const &cs1,Mat const &s4)
 {
     Mat s1=cs1.clone();
@@ -584,47 +716,61 @@ Mat stage5(Mat const &cs1,Mat const &s4)
     {
         for(j=0;j<s4.cols;j++)
         {
-               if(isBoundary(s4,i,j))
+               if(isBoundary(s4,i,j))                                                                   //   If it is a point on the edge/boundary
                 {
                     for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
                     {
                         for(l=0;l<min(kernel,s1.cols-j*kernel);l++)
                         {
-                            dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);
+                            dst.at<uchar>(i*kernel+k,j*kernel+l)=s1.at<uchar>(i*kernel+k,j*kernel+l);   //  Map to original bitmap pixel intensity of Stage 1
                         }
                     }
 
                 }
-                else
+                else                                                                                    //   If it is not a point on the edge/boundary
                 {
                     for(k=0;k<min(kernel,s1.rows-i*kernel);k++)
                     {
                         for(l=0;l<min(kernel,s1.cols-j*kernel);l++)
                         {
-                            dst.at<uchar>(i*kernel+k,j*kernel+l)=s4.at<uchar>(i,j);
+                            dst.at<uchar>(i*kernel+k,j*kernel+l)=s4.at<uchar>(i,j);                     //Map it to the same colour as stage 4 pixel
                         }
                     }
                 }
 
         }
     }
-    //namedWindow("contour stage 6",WINDOW_AUTOSIZE);
-    //imshow("contour stage 6",dst);
+    namedWindow("contour stage 5",WINDOW_AUTOSIZE);
+    imshow("contour stage 5",dst);
     //imwrite("s6.jpg",dst);
-    //waitKey(0);
+    waitKey(0);
     return dst;
 }
 
+
+
+/*  **************************  GetSkin **************************
+
+    *   Function to get a segmented color image.
+    *   Input - > Colour image, Min Cr threshold,Max Cr threshold,
+    *   Min Cb threshold,Max Cb threshold
+    *   Output - > Coloured image with background portions blackened
+    ***************************************************************
+*/
+
 Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=115,int cb_max_arg=160)
 {
+    //  Update the global thresholds as passed by the arguments of this function
     ::cr_min=cr_min_arg;
     ::cr_max=cr_max_arg;
     ::cb_min=cb_min_arg;
     ::cb_max=cb_max_arg;
-    Mat dst=src.clone();
-    Vec3b cblack = Vec3b::all(0);
-    Mat s1=stage1(src);
-    s1= stage5(s1,stage4(stage2(s1)));
+    //  ---------------------------//
+
+    Mat dst=src.clone();                                //  Destination Mat file
+    Vec3b cblack = Vec3b::all(0);                       //  Vector representing black colour
+    Mat s1=stage1(src);                                 //  Output of Stage 1 (which is a noisy bitmap of facial region) is stored
+    s1= stage5(s1,stage4(stage2(s1)));                  //  Stage 3 is ignored since it doesn't help much
     int i,j;
     for(i=0;i<s1.rows;i++)
     {
@@ -632,10 +778,13 @@ Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=
         {
             if(s1.at<uchar>(i,j)==0)
             {
-                dst.ptr<Vec3b>(i)[j] = cblack;
-            }
+                dst.ptr<Vec3b>(i)[j] = cblack;          //  We are putting a layer of black on top of the input image
+            }                                           //  The layer of black is derived from the contour given by stage 5
         }
     }
+    namedWindow("GetSkin",WINDOW_NORMAL);
+    imshow("GetSkin",dst);
+    waitKey(0);
     return dst;
 }
 

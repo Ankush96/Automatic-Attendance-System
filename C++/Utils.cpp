@@ -19,8 +19,8 @@
 using namespace cv;
 using namespace std;
 
-#define m 120
-#define n 120
+#define m 160
+#define n 160
 
 
 

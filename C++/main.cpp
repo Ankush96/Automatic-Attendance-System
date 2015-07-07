@@ -21,8 +21,8 @@ using namespace cv;
 using namespace Eigen;
 using namespace std;
 
-#define n 120
-#define m 120
+#define n 160
+#define m 160
 
 string prediction_name(int prediction)
 {
@@ -48,7 +48,7 @@ string prediction_name(int prediction)
 int main()
 {
 
-    int cr_min=126,cr_max=175,cb_min=99,cb_max=130;
+    int cr_min=126,cr_max=175,cb_min=99,cb_max=130;    //   A change in these values should be updated in Stage-segment.cpp
 
     //--------------Code to update parameters of segmentation--------------------//
 {
@@ -247,7 +247,7 @@ int main()
     haar_cascade.load("../Cascades/front_alt2.xml");
 
 
-    if(!vcap.open(videoStreamAddress))
+    if(!vcap.open(0))
         {
             std::cout << "Error opening video stream or file" << std::endl;
             return -1;
@@ -289,7 +289,7 @@ int main()
                     if(faces[i].width<50||faces[i].height<50)   continue;                                   //  Ignore small rectangles. They are probably false positives
 
 
-                    faces[i].x=max(faces[i].x-20,0);                                                //  Stretch the image        
+                    faces[i].x=max(faces[i].x-20,0);                                                //  Stretch the image
                     faces[i].y=max(faces[i].y-30,0);
                     int bottom=min(faces[i].y+faces[i].height+30,img.rows-1);
                     int right=min(faces[i].x+faces[i].width+20,img.cols-1);
@@ -309,10 +309,13 @@ int main()
                     //imshow("face",instance);
 
                     resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  Resize the facial region to dimensions n*m. This is required for all models
+                    cout<<1<<endl;
                     instance=getBB(remove_blobs(GetSkin(instance,cr_min,cr_max,cb_min,cb_max)));
+                    cout<<2<<endl;
+
                     //cvtColor(instance,instance,CV_BGR2GRAY);
                     int pef=-1,p2d=-1,prc=-1;                                                       //  The predictions of 3 models are returned
-            
+
                     pef=ef->predict(instance);
                     p2d=model2d.predict(instance);
                     prc=modelrc.predict(instance);
