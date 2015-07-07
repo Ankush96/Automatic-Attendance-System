@@ -22,8 +22,6 @@ string prediction_name(int);
 
 int video_recognizer();
 
-int image_recognizer(string);
-
 static void read_csv(const string& , vector<Mat>& , vector<int>& , char separator);
 
 int model_main(string);

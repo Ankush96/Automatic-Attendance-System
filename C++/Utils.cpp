@@ -28,12 +28,15 @@ string prediction_name(int prediction)
     switch(prediction)
     {
         case -1:return "Unknown";
-        case 0 : return "Srishty";
-        case 1: return "Jayamani";
-        case 2: return "Achammal";
-        case 3: return "Manjunath";
-        case 4: return "Ankush";
-        case 5: return "Mridul";
+        case 1: return "Ankush";
+        case 2: return "Harsh";
+        case 3: return "Mayur";
+        case 4: return "Jayamani";
+        case 5: return "Srishty";
+        case 6: return "Satish";
+        case 7: return "Narpender";
+        case 8: return "Acchamal";
+        case 9: return "Mridul";
 
 
     }
@@ -68,148 +71,20 @@ void dir_read(string root,int num,vector<Mat>& images,vector<int>& labels,bool c
     }
 }
 
-//------------main.cpp----------------//
-
-
-int image_recognizer(string dir)
-{
-    Mat img,gray,sgray;
-    //Mat black(500,500,CV_8UC3,Scalar(0,0,0));
-    //Mat att=black.clone();
-    char key,name[20];
-    CascadeClassifier haar_cascade;
-    haar_cascade.load("../Cascades/front_alt2.xml");
-    Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer(1,8,8,8,123.0);
-    Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
-    Ptr<FaceRecognizer> ff =createFisherFaceRecognizer();
-    lbp->load("lbp.xml");
-    ef->load("ef.xml");
-    ff->load("ff.xml");
-
-    //string filename = "samples.csv";
-    //char separator = ';';
-
-    vector<Mat> images;
-    vector<int> labels;
-
-
-    // std::ifstream file(filename.c_str(), ifstream::in);
-    // if (!file) {
-    //     string error_message = "No valid input file was given, please check the given filename.";
-    //     CV_Error(CV_StsBadArg, error_message);
-    // }
-    // string line, path, classlabel;
-    // while (getline(file, line)) {
-    //     stringstream liness(line);
-    //     getline(liness, path, separator);
-    //     getline(liness, classlabel);
-    //     if(!path.empty() && !classlabel.empty()) {
-    //         Mat tmp1=imread(path, 1);
-    //         Mat tmp2;
-    //         resize(tmp1, tmp2, Size(m, n), 1.0, 1.0, INTER_CUBIC);
-    //         ///tmp2=clahe(tmp2);
-    //         //equalizeHist(tmp2,tmp2);
-    //         //cvNamedWindow("image",WINDOW_NORMAL);
-    //         //imshow("image",tmp2);
-    //         //waitKey(0);
-    //         //cvtColor(tmp2,tmp2,CV_BGR2GRAY);
-    //         images.push_back(tmp2);
-    //         labels.push_back(atoi(classlabel.c_str()));
-    //     }
-    // }
-    //
-
-    int correct,tot;
-    double sum_ef=0,sum_ff=0,sum_mix=0;
-    dir_read(dir,6,images,labels,1);
-    tot=images.size();
-    for(int i=images.size()-1;i>=0;i--)
-    {
-        cout<<images.size()<<" ";
-        img=images[i];
-        images.pop_back();
-        switch(labels[i])
-        {
-            case 1:correct=4;
-            break;
-            case 2:correct=1;
-            break;
-            case 3:correct=2;
-            break;
-            case 4:correct=0;
-            break;
-            case 5:correct=3;
-            break;
-            case 6:correct=5;
-            break;
-        }
-        Mat instance=img.clone();
-        cvtColor(img,instance,CV_BGR2GRAY);
-        equalizeHist(instance,instance);
-        if ( ! instance.isContinuous() )
-           {
-                instance = instance.clone();
-           }
-        resize(instance,instance, Size(m,n), 1.0, 1.0, INTER_CUBIC);
-
-        int pef=-1,pff=-1,plbp=-1;
-        double conf_ef=0.0,conf_ff=0.0,conf_lbp=0.0;
-        ef->predict(instance,pef,conf_ef);
-        ff->predict(instance,pff,conf_ff);
-        lbp->predict(instance,plbp,conf_lbp);
-        //----------------Error metrics calculated -----------------
-        if(pef==correct&&pff==correct)
-        {
-            sum_ff+=1;
-            sum_ef+=1;
-            sum_mix+=1;
-        }
-        else if(pef==correct)
-        {
-            sum_ef+=1;
-            sum_mix+=(conf_ef/(conf_ef+conf_ff));
-        }
-        else if(pff==correct)
-        {
-            sum_ff+=1;
-            sum_mix+=(conf_ff/(conf_ef+conf_ff));
-        }
-
-        char lbp[50];
-        sprintf(lbp," lbp %s Conf- %f",prediction_name(plbp).c_str(),conf_lbp);
-        char ef[50];
-        sprintf(ef," ef %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
-        char ff[50];
-        sprintf(ff," ff %s Conf- %f",prediction_name(pff).c_str(),conf_ff);
-        int pos_x = 10;
-        int pos_y = 10;
-        putText(img, lbp, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-        putText(img, ef, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-        putText(img, ff, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-        cout<<prediction_name(pef)<<endl;
-        cvNamedWindow("Output Window2",WINDOW_NORMAL);
-        cv::imshow("Output Window2", img);
-        cv::waitKey(0);
-
-
-    }
-    cout<<"\n\t Recognition rate"<<endl;
-    cout<<"\t eigenfaces- "<<(sum_ef*100)/tot<<endl;
-    cout<<"\t fisherfaces- "<<(sum_ff*100)/tot<<endl;
-    cout<<"\t combined- "<<(sum_mix*100)/tot<<endl;
-    return 0;
-}
 
 int video_recognizer()
 {
-	VideoCapture vcap;
+	VideoCapture vcap; 
     Mat img,gray,sgray;
-    Mat black(500,500,CV_8UC3,Scalar(0,0,0));
+    
+    Mat black(500,500,CV_8UC3,Scalar(0,0,0));       //  Mat image to display final attendance
     Mat att=black.clone();
+
     char key,name[20];
     int i=0,count=-1,skip=5,y;
-    double attendance[7];
+    double attendance[9];
     int frames=-1;
+
     const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
     CascadeClassifier haar_cascade;
     haar_cascade.load("../Cascades/front_alt2.xml");
@@ -226,13 +101,11 @@ int video_recognizer()
    // cv::Size frameSize(static_cast<int>(width),static_cast<int>(height));
    // cv::VideoWriter MyVid("/home/student/Documents/MyVideo1.avi",CV_FOURCC('P','I','M','1'),30,frameSize,true);
     //cvNamedWindow("Face",WINDOW_NORMAL);
-    Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer(1,8,8,8,123.0);
+
     Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
-    Ptr<FaceRecognizer> ff =createFisherFaceRecognizer();
-    lbp->load("lbp.xml");
     ef->load("ef.xml");
-    ff->load("ff.xml");
-    //img=imread("../Faces2/s2/img3.jpg");
+
+
 
     while(1)
         {
@@ -249,6 +122,8 @@ int video_recognizer()
                 cvtColor(img, gray, CV_BGR2GRAY);
                 cvtColor(segment, sgray, CV_BGR2GRAY);
                 vector< Rect_<int> > faces;
+                
+                //--------------Start detecting the faces in a frame------------------//
                 haar_cascade.detectMultiScale(gray,faces);
                 for(int i=0;i<faces.size();i++)
                 {
@@ -268,43 +143,29 @@ int video_recognizer()
                     int pef=-1,pff=-1,plbp=-1;
                     double conf_ef=0.0,conf_ff=0.0,conf_lbp=0.0;
                     ef->predict(instance,pef,conf_ef);
-                    ff->predict(instance,pff,conf_ff);
-                    lbp->predict(instance,plbp,conf_lbp);
-                    //char final[50];
+                    
                     if(pef==pff)
                     {
-                        // double hyb_conf=(conf_ff+conf_ef)/2;
-                        // sprintf(final," Hybrid %s Conf- %f",prediction_name(pef).c_str(),hyb_conf);
                         attendance[1+pef]+=5;
                     }
                     else
                     {
                         attendance[1+pef]+=1.67;
                         attendance[1+pff]+=1.67;
-                        // if(conf_ef>conf_ff)
-                        // {
-                        //     sprintf(final," Hybrid %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
-                        // }
-                        // else
-                        // {
-                        //     sprintf(final," Hybrid %s Conf- %f",prediction_name(pff).c_str(),conf_ff);
-                        // }
                     }
 
 
                     rectangle(img,crop,CV_RGB(0,255,0),2);
 
-                   // char lbp[50];
-                    //sprintf(lbp," lbp %s Conf- %f",prediction_name(plbp).c_str(),conf_lbp);
+                   
                     char ef[50];
                     sprintf(ef," ef %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
-                    char ff[50];
-                    sprintf(ff," ff %s Conf- %f",prediction_name(pff).c_str(),conf_ff);
+                    
                     int pos_x = std::max(crop.tl().x - 10, 0);
                     int pos_y = std::max(crop.tl().y - 10, 0);
                   //  putText(img, lbp, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
                     putText(img, ef, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-                    putText(img, ff, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                    
                 }
                 cv::imshow("Output Window2", img);
 

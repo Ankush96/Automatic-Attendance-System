@@ -224,14 +224,22 @@ Mat remove_blobs(Mat const &img)
      }
 
     //----------- Now keep only the largest blob. Delete all the other blobs by making them black--------------//
-     for (int i = 1; i < src.rows-1; i++)
+     for (int i = 0; i < src.rows; i++)
      {
-        for (int j = 1; j < src.cols-1; j++)
+        for (int j = 0; j < src.cols; j++)
         {
-            if(visited[i][j]!=max)
+            if(i==0||j==0||i==src.rows-1||j==src.cols-1)
             {
                 src.at<uchar>(i,j)=0;
             }
+            else
+            {
+               if(visited[i][j]!=max)
+                {
+                    src.at<uchar>(i,j)=0;
+                } 
+            }
+            
 
         }
      }
@@ -251,19 +259,33 @@ Mat getBB(Mat const& img)
             if(src.at<uchar>(i,j)!=0)
             {
                 if(i<top) top=i;
-                if(i>bottom) bottom=i;
+                if(i>bottom)
+                {
+
+                    bottom=i;
+                    //----------The commented code is a visualization of how the points move when bottom gets updated------------//
+
+                    // cv::namedWindow("circle",WINDOW_NORMAL);
+                    // Mat src2=img.clone();
+                    // circle(src2,Point(left,top), 20 , Scalar(200) );
+                    // circle(src2,Point(right,top), 20 , Scalar(200) );
+                    // circle(src2,Point(left,bottom),20 , Scalar(200) );
+                    // circle(src2,Point(right,bottom), 20 , Scalar(200) );
+                    // imshow("circle",src2);
+                    // waitKey(0);
+                    //----------------------------------------------------------------//
+                }    
                 if(j<left) left=j;
                 if(j>right) right=j;
+                
+
             }
         }
     }
     //double ratio_h2w=(src.rows*1.0)/src.cols;
 
     //int bb_height=bottom-top, bb_width= right-left;
-    // circle(src,Point(left,top), 20 , Scalar(200) );
-    // circle(src,Point(right,top), 20 , Scalar(200) );
-    // circle(src,Point(left,bottom),20 , Scalar(200) );
-    // circle(src,Point(right,bottom), 20 , Scalar(200) );
+    
     //-------We include some space beacuse we dont require an exact bounding box-----------//
     left=max(left-10,0);
     top=max(top-10,0);

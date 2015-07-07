@@ -24,126 +24,129 @@ using namespace std;
 
 int main()
 {
-    //--------------Code to check if segmentation is working fine--------------------//
-      int cr_min=134,cr_max=175,cb_min=99,cb_max=130;
-    vector<Mat> images;
-    vector<int> labels;
-    dir_read("../Face_db",9,images,labels,1);
-    cvNamedWindow("src",WINDOW_NORMAL);
-    cvNamedWindow("dst",WINDOW_NORMAL);
-    createTrackbar("cr min ","dst",&cr_min,255);
-    createTrackbar("cr max ","dst",&cr_max,255);
-    createTrackbar("cb min ","dst",&cb_min,255);
-    createTrackbar("cb max ","dst",&cb_max,255);
-    for(int i=0;i<images.size();i++)
-    {
-      Mat src=images[i];
-      //cout<<src.size<<endl;
-      imshow("src",src);
-        while(1)
-            {
-                Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
-                resize(dst,dst,Size(src.cols,src.rows),0,0,INTER_CUBIC);
-                imshow("dst",dst);
-                int key = cv::waitKey(30);
-                if(key==27) break;
-            }
+    int cr_min=126,cr_max=175,cb_min=99,cb_max=130;
 
-    }
-    //----------------------------------------------------------------------------------//
+    //--------------Code to update parameters of segmentation--------------------//
 
-    //---------------------------Putting a bounding box on the largest blob and resizing---------------//
-    // Mat img=imread("binshapes.png",0);
-    // cvNamedWindow("out",WINDOW_NORMAL);
-    // Mat dst=getBB(remove_blobs(img));
-    // imshow("out",dst);
-    // cv::waitKey(0);
-
-    //------------------Testing using cross validation-----------------------------------------------//
-
-
-     // change m and n in 2dpca
-     //try to crop in segmentation
-     //remove black background
     // vector<Mat> images;
     // vector<int> labels;
-    // int num_dir=13;     //  Number of classes or unique identities
-    // int examples=7;     //  Number of images per person
-    // int color=0;
-    // dir_read("../CVL",num_dir,images,labels,color);
-    // //rc2dpca model;
-    // if(color)
+    // dir_read("../Face_db",9,images,labels,1);
+    // cvNamedWindow("src",WINDOW_NORMAL);
+    // cvNamedWindow("dst",WINDOW_NORMAL);
+    // createTrackbar("cr min ","dst",&cr_min,255);
+    // createTrackbar("cr max ","dst",&cr_max,255);
+    // createTrackbar("cb min ","dst",&cb_min,255);
+    // createTrackbar("cb max ","dst",&cb_max,255);
+    // for(int i=0;i<images.size();i++)
     // {
-    //   for(int i=0;i<images.size();i++)
-    //     {
-    //         Mat src=images[i];
-    //         //cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);  //GetSkin returns a color image, hence we need to convert it to grayscale
-    //         Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
-    //         resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
-    //         images[i]=dst;
-    //     }
-    // }
-
-    // std::vector<Mat> images_test,images_train;
-    // std::vector<int> labels_train,labels_test;
-    // double* accuracy = new double[examples*sizeof( double )];     // A malloc implementation has to be done in the f
-
-    // //cvNamedWindow("src",WINDOW_NORMAL);
-    // double y[101];
-    // fstream myfile("Plots/11.txt", ios::out);
-    // if (myfile.is_open()) cout<<"file exists"<<endl;
-    // for(int i=0;i<100;i++)
-    // {
-    //     for(int k=0;k<examples;k++)
-    //     {
-    //         //cout<<" K= "<<k<<endl;
-    //         accuracy[k]=0;
-    //         images_train.clear();
-    //         images_test.clear();
-    //         labels_train.clear();
-    //         labels_test.clear();
-    //         for(int i=0;i<images.size();i++)
+    //   Mat src=images[i];
+    //   //cout<<src.size<<endl;
+    //   imshow("src",src);
+    //     while(1)
     //         {
-    //             if(i%examples==k)  // Put in test set
-    //             {
-    //                 images_test.push_back(images[i]);
-    //                 labels_test.push_back(labels[i]);
-    //             }
-    //             else        // Put in training set
-    //             {
-    //                 images_train.push_back(images[i]);
-    //                 labels_train.push_back(labels[i]);
-    //             }
+    //             Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
+    //             resize(dst,dst,Size(src.cols,src.rows),0,0,INTER_CUBIC);
+    //             imshow("dst",dst);
+    //             int key = cv::waitKey(30);
+    //             if(key==27) break;
     //         }
-    //         //model.train(images_train,labels_train,i/100.0,"2dpca.xml");
-    //         Ptr<FaceRecognizer> model = createEigenFaceRecognizer(4*(i+1));
-    //         model->train(images_train, labels_train);
-    //         for(int j=0;j<images_test.size();j++)
-    //         {
-    //             //int prediction=  model.predict(images_test[j]);
-    //             int prediction=  model->predict(images_test[j]);
+    //
+    //}
+    //----------------------------------------------------------------------------------//
+
+     //------------------Testing using cross validation-----------------------------------------------//
+
+    {
+        // vector<Mat> images;
+        // vector<int> labels;
+        // int num_dir=9;     //  Number of classes or unique identities
+        // int examples=10;     //  Number of images per person
+        // int color=0;
+        // dir_read("../Face_db",num_dir,images,labels,color);
+        // pca2d model;
+        // if(color)
+        // {
+        //   for(int i=0;i<images.size();i++)
+        //     {
+        //         Mat src=images[i];
+        //         //cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);  //GetSkin returns a color image, hence we need to convert it to grayscale
+        //         Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
+        //         resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
+        //         images[i]=dst;
+        //     }
+        // }
+
+        // std::vector<Mat> images_test,images_train;
+        // std::vector<int> labels_train,labels_test;
+        // double* accuracy = new double[examples*sizeof( double )];
+
+        // //cvNamedWindow("src",WINDOW_NORMAL);
+        // double y[101];
+        // fstream myfile("Plots/o3.txt", ios::out);         //  Uncomment to write the accuracy values onto a file
+        // if (myfile.is_open()) cout<<"file exists"<<endl;
+        // for(int i=0;i<36;i++)
+        // {
+        //     for(int k=0;k<examples;k++)
+        //     {
+        //         //cout<<" K= "<<k<<endl;
+        //         accuracy[k]=0;
+        //         images_train.clear();
+        //         images_test.clear();
+        //         labels_train.clear();
+        //         labels_test.clear();
+        //         for(int i=0;i<images.size();i++)
+        //         {
+        //             if(i%examples==k)  // Put in test set
+        //             {
+        //                 images_test.push_back(images[i]);
+        //                 labels_test.push_back(labels[i]);
+        //             }
+        //             else        // Put in training set
+        //             {
+        //                 images_train.push_back(images[i]);
+        //                 labels_train.push_back(labels[i]);
+        //             }
+        //         }
+        //         model.train(images_train,labels_train,(29+2*i)/100.0,"2dpca.xml");
+        //         //Ptr<FaceRecognizer> model = createEigenFaceRecognizer(4*(i+1));       //  Initialise a model for Eigenfaces.If this is uncommented all corresponding code related to EF has to be uncommented
+        //         //model->train(images_train, labels_train);                             //  Train the Eigenfaces model
+        //         for(int j=0;j<images_test.size();j++)
+        //         {
+        //             int prediction=  model.predict(images_test[j]);     //  Prediction for 2DPCA or RC2DPCA
+        //             //int prediction=  model->predict(images_test[j]);  //  Prediction for eigenfaces
 
 
-    //             //imshow("src",images_test[j]);
-    //             //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
-    //             //waitKey(0);
-    //             accuracy[k]+=(prediction==labels_test[j]);
-    //         }
+        //             //imshow("src",images_test[j]);
+        //             //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
+        //             //waitKey(0);
+        //             accuracy[k]+=(prediction==labels_test[j]);
 
-    //         //cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
-    //     }
+        //             //------Uncomment the following to see the misclassified images-----------//
+        //             // if(prediction!=labels_test[j])
+        //             // {
+        //             //     cvNamedWindow("Incorrect",WINDOW_NORMAL);
+        //             //     imshow("Incorrect",images_test[j]);
+        //             //     waitKey(0);
+        //             // }
+        //         }
 
-    //     for(int k=1;k<examples;k++)
-    //     {
-    //         accuracy[k]+=accuracy[k-1];
-    //     }
+        //         //cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
+        //     }
 
-    //     y[i]=(accuracy[examples-1]*100)/(examples*num_dir);
-    //     cout<<endl<<"percentage"<<i<<" final accuracy -> "<<y[i]<<endl;
-    //     myfile<<y[i]<<"\n";
-    // }
-    // myfile.close();
+        //     for(int k=1;k<examples;k++)
+        //     {
+        //         accuracy[k]+=accuracy[k-1];
+        //     }
+
+        //     y[i]=(accuracy[examples-1]*100)/(examples*num_dir);
+        //     cout<<endl<<"percentage"<<(29+2*i)<<" final accuracy -> "<<y[i]<<endl;
+        //     myfile<<y[i]<<endl;   //  Writing the accuracy onto the file
+        // }
+        // myfile.close();  //   Close the file for writing the accuracy values
+    }
     //-------------------------------------------------------------------------------------//
+
+
 
     //------------------Drawing Roc curves for all the classes-------------------------//
 
