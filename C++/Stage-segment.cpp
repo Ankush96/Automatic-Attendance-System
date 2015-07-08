@@ -16,8 +16,8 @@ using std::endl;
 using std::queue;
 
 int cr_min=126,cr_max=175,cb_min=99,cb_max=130,kernel=8;
-#define n 160
-#define m 160
+#define n 120
+#define m 120
 
 
 
@@ -334,9 +334,11 @@ Mat getBB(Mat const& img)
     bottom=min(bottom+10,src.rows-1);
     cout<<left<<" "<<right<<" "<<top<<" "<<bottom<<endl;
     Rect roi(left,top,right-left,bottom-top);
-    resize(src(roi),src, Size(n,m),0,0, INTER_CUBIC);
+    
+    //--------We check if the rectangle is a possible rectangle or not-----------//
 
-    return src;
+    if(left>=right||top>=bottom)    return src;
+    else    return src(roi);
 }
 
 float stddev(Vector<int> w)

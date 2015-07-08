@@ -21,8 +21,8 @@ using namespace cv;
 using namespace Eigen;
 using namespace std;
 
-#define n 160
-#define m 160
+#define n 120
+#define m 120
 
 string prediction_name(int prediction)
 {
@@ -247,7 +247,7 @@ int main()
     haar_cascade.load("../Cascades/front_alt2.xml");
 
 
-    if(!vcap.open(0))
+    if(!vcap.open(videoStreamAddress))
         {
             std::cout << "Error opening video stream or file" << std::endl;
             return -1;
@@ -286,7 +286,7 @@ int main()
                 for(int i=0;i<faces.size();i++)                                                     //  Loop through every  face detected in a frame
                 {
 
-                    if(faces[i].width<50||faces[i].height<50)   continue;                                   //  Ignore small rectangles. They are probably false positives
+                    if(faces[i].width<50||faces[i].height<50)   continue;                           //  Ignore small rectangles. They are probably false positives
 
 
                     faces[i].x=max(faces[i].x-20,0);                                                //  Stretch the image
@@ -308,15 +308,16 @@ int main()
                     //imshow("segment",black);
                     //imshow("face",instance);
 
-                    resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  Resize the facial region to dimensions n*m. This is required for all models
+                    resize(instance,instance, Size(400,400),0,0, INTER_CUBIC);                      //  Resize the facial region to 400*400 for effective segmentation. This is required for all models
                     cout<<1<<endl;
                     instance=getBB(remove_blobs(GetSkin(instance,cr_min,cr_max,cb_min,cb_max)));
                     cout<<2<<endl;
-
+                    resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  This is necessary for the recognition
                     //cvtColor(instance,instance,CV_BGR2GRAY);
                     int pef=-1,p2d=-1,prc=-1;                                                       //  The predictions of 3 models are returned
 
                     pef=ef->predict(instance);
+                    cout<<3<<endl;
                     p2d=model2d.predict(instance);
                     prc=modelrc.predict(instance);
 

@@ -19,8 +19,8 @@
 using namespace cv;
 using namespace Eigen;
 
-#define n 160
-#define m 160
+#define n 120
+#define m 120
 
 
 
