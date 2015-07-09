@@ -43,9 +43,6 @@ string prediction_name(int prediction)
 
 int model_main(string dir)
 {
-
-    //string fn_csv = "samples.csv";
-
     vector<Mat> images;
     vector<int> labels;
     /*
@@ -127,6 +124,105 @@ int model_main(string dir)
     //cout << "Size of the histograms: " << histograms[0].total() << endl;
 
     return 0;
+}
+
+int image_recognizer()
+{
+    //------------------Testing using cross validation-----------------------------------------------//
+
+    // {
+
+
+
+    //     vector<Mat> images;
+    //     vector<int> labels;
+    //     int num_dir=9;     //  Number of classes or unique identities
+    //     int examples=10;     //  Number of images per person
+    //     int color=0;
+    //     dir_read("../Face_db",num_dir,images,labels,color);
+    //     pca2d model;
+    //     if(color)
+    //     {
+    //       for(int i=0;i<images.size();i++)
+    //         {
+    //             Mat src=images[i];
+    //             //cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);  //GetSkin returns a color image, hence we need to convert it to grayscale
+    //             Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
+    //             resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
+    //             images[i]=dst;
+    //         }
+    //     }
+
+    //     std::vector<Mat> images_test,images_train;
+    //     std::vector<int> labels_train,labels_test;
+    //     double* accuracy = new double[examples*sizeof( double )];
+
+    //     //cvNamedWindow("src",WINDOW_NORMAL);
+    //     double y[101];
+    //     fstream myfile("Plots/o3.txt", ios::out);         //  Uncomment to write the accuracy values onto a file
+    //     if (myfile.is_open()) cout<<"file exists"<<endl;
+    //     for(int i=0;i<36;i++)
+    //     {
+    //         for(int k=0;k<examples;k++)
+    //         {
+    //             //cout<<" K= "<<k<<endl;
+    //             accuracy[k]=0;
+    //             images_train.clear();
+    //             images_test.clear();
+    //             labels_train.clear();
+    //             labels_test.clear();
+    //             for(int i=0;i<images.size();i++)
+    //             {
+    //                 if(i%examples==k)  // Put in test set
+    //                 {
+    //                     images_test.push_back(images[i]);
+    //                     labels_test.push_back(labels[i]);
+    //                 }
+    //                 else        // Put in training set
+    //                 {
+    //                     images_train.push_back(images[i]);
+    //                     labels_train.push_back(labels[i]);
+    //                 }
+    //             }
+    //             model.train(images_train,labels_train,(29+2*i)/100.0,"2dpca.xml");
+    //             //Ptr<FaceRecognizer> model = createEigenFaceRecognizer(4*(i+1));       //  Initialise a model for Eigenfaces.If this is uncommented all corresponding code related to EF has to be uncommented
+    //             //model->train(images_train, labels_train);                             //  Train the Eigenfaces model
+    //             for(int j=0;j<images_test.size();j++)
+    //             {
+    //                 int prediction=  model.predict(images_test[j]);     //  Prediction for 2DPCA or RC2DPCA
+    //                 //int prediction=  model->predict(images_test[j]);  //  Prediction for eigenfaces
+
+
+    //                 //imshow("src",images_test[j]);
+    //                 //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
+    //                 //waitKey(0);
+    //                 accuracy[k]+=(prediction==labels_test[j]);
+
+    //                 //------Uncomment the following to see the misclassified images-----------//
+    //                 // if(prediction!=labels_test[j])
+    //                 // {
+    //                 //     cvNamedWindow("Incorrect",WINDOW_NORMAL);
+    //                 //     imshow("Incorrect",images_test[j]);
+    //                 //     waitKey(0);
+    //                 // }
+    //             }
+
+    //             //cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
+    //         }
+
+    //         for(int k=1;k<examples;k++)
+    //         {
+    //             accuracy[k]+=accuracy[k-1];
+    //         }
+
+    //         y[i]=(accuracy[examples-1]*100)/(examples*num_dir);
+    //         cout<<endl<<"percentage"<<(29+2*i)<<" final accuracy -> "<<y[i]<<endl;
+    //         myfile<<y[i]<<endl;   //  Writing the accuracy onto the file
+    //     }
+    //     myfile.close();  //   Close the file for writing the accuracy values
+    // }
+//-----------------------------------------------------------------------------------------------//
+
 }
 
 int video_recognizer()

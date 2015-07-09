@@ -5,17 +5,18 @@
  #include "opencv2/imgproc/imgproc.hpp"
  #include "opencv2/objdetect/objdetect.hpp"
 
- #include "Utils.h"
- #include "rc2dpca.h"
- #include "two_d_pca.h"
- #include "Stage-segment.h"
-
-
  #include <iostream>
  #include <fstream>
  #include <sstream>
  #include <vector>
  #include <Eigen/Dense>
+
+ #include "Utils.h"
+ #include "rc2dpca.h"
+ #include "two_d_pca.h"
+ #include "Stage-segment.h"
+ #include "attendance.h"
+
 
 using namespace cv;
 using namespace Eigen;
@@ -24,24 +25,6 @@ using namespace std;
 #define n 120
 #define m 120
 
-string prediction_name(int prediction)
-{
-    switch(prediction)
-    {
-        case -1:return "Unknown";
-        case 1: return "Ankush";
-        case 2: return "Harsh";
-        case 3: return "Mayur";
-        case 4: return "Jayamani";
-        case 5: return "Srishty";
-        case 6: return "Satish";
-        case 7: return "Narpender";
-        case 8: return "Acchamal";
-        case 9: return "Mridul";
-
-
-    }
-}
 
 
 
@@ -309,15 +292,12 @@ int main()
                     //imshow("face",instance);
 
                     resize(instance,instance, Size(400,400),0,0, INTER_CUBIC);                      //  Resize the facial region to 400*400 for effective segmentation. This is required for all models
-                    cout<<1<<endl;
                     instance=getBB(remove_blobs(GetSkin(instance,cr_min,cr_max,cb_min,cb_max)));
-                    cout<<2<<endl;
                     resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  This is necessary for the recognition
                     //cvtColor(instance,instance,CV_BGR2GRAY);
                     int pef=-1,p2d=-1,prc=-1;                                                       //  The predictions of 3 models are returned
 
                     pef=ef->predict(instance);
-                    cout<<3<<endl;
                     p2d=model2d.predict(instance);
                     prc=modelrc.predict(instance);
 

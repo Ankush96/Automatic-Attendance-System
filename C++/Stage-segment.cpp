@@ -67,9 +67,9 @@ Mat erode(Mat const &src,int thresh=4)
         }
     }
 
-    namedWindow("erode",WINDOW_NORMAL);
-    imshow("erode",dst);
-    waitKey(0);
+    // namedWindow("erode",WINDOW_NORMAL);
+    // imshow("erode",dst);
+    // waitKey(0);
     return dst;
 }
 
@@ -103,9 +103,9 @@ Mat dilate(Mat const &src,int thresh=2)
         }
     }
 
-    namedWindow("dilate",WINDOW_NORMAL);
-    imshow("dilate",dst);
-    waitKey(0);
+    // namedWindow("dilate",WINDOW_NORMAL);
+    // imshow("dilate",dst);
+    // waitKey(0);
     return dst;
 }
 
@@ -152,9 +152,9 @@ Mat erode_dilate(Mat const &src)
             if(dst.at<uchar>(i,j)<255) dst.at<uchar>(i,j)=0;    //  Converting the density map to a final bitmap
         }
     }
-    namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
-    imshow("erode_dilate stage 2",dst);
-    waitKey(0);
+    // namedWindow("erode_dilate stage 2",WINDOW_NORMAL);
+    // imshow("erode_dilate stage 2",dst);
+    // waitKey(0);
 
     //imwrite("s2.jpg",dst);
     return dst;
@@ -274,7 +274,7 @@ Mat remove_blobs(Mat const &img)
      }
     namedWindow("Remove_blobs",WINDOW_NORMAL);
     imshow("Remove_blobs",src);
-    waitKey(0);
+    waitKey(30);
     return src;
 }
 
@@ -289,7 +289,6 @@ Mat remove_blobs(Mat const &img)
 */
 Mat getBB(Mat const& img)
 {
-    cout<<"GetBB here "<<img.rows-1<<" "<<img.cols-1<<endl;
     Mat src=img.clone();
     int left=src.cols-1,right=0,top=src.rows-1,bottom=0;
     for(int i=0;i<src.rows;i++)
@@ -327,7 +326,7 @@ Mat getBB(Mat const& img)
     //int bb_height=bottom-top, bb_width= right-left;
 
     //-------We include some space beacuse we dont require an exact bounding box-----------//
-    cout<<left<<" "<<right<<" "<<top<<" "<<bottom<<endl;
+    
     left=max(left-10,0);
     top=max(top-10,0);
     right=min(right+10,src.cols-1);
@@ -458,10 +457,10 @@ Mat stage1(Mat const &src) {
                 dst.ptr<Vec3b>(i)[j] = cwhite;          //  Else white
         }
     }
-    namedWindow("Stage1",WINDOW_NORMAL);
-    imshow("Stage1",dst);
+    //namedWindow("Stage1",WINDOW_NORMAL);
+    //imshow("Stage1",dst);
     //imwrite("s1.jpg",dst);
-    waitKey(0);
+    //waitKey(0);
     return dst;                                         //  Return Bitmap of facial region
 }
 
@@ -498,7 +497,6 @@ Mat stage1(Mat const &src) {
 
 */
 Mat stage2(Mat const &Csrc){
-    cout<<"Stage 2 starts"<<endl;
     Mat src;
     cvtColor(Csrc,src,CV_BGR2GRAY);                                             //  Converting the colour bitmap to BnW
     int i,j,k,l,density;
@@ -527,10 +525,10 @@ Mat stage2(Mat const &Csrc){
     //------------------------------//
 
     //cout<<" "<<dst.rows<<" "<<dst.cols<<endl;
-    namedWindow("density map",WINDOW_NORMAL);
-    imshow("density map",dst);
+    //namedWindow("density map",WINDOW_NORMAL);
+    //imshow("density map",dst);
     //imwrite("density.jpg",dst);
-    waitKey(0);
+    //waitKey(0);
     return erode_dilate(dst);                                   //  We call a function to perform the noise reduction steps
 }
 
@@ -589,7 +587,7 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
 */
 Mat stage4(Mat const &img,int thresh=4,int remove=0)
 {
-    cout<<"Stage 4 starts"<<endl;
+    
     Mat dst=img.clone();
 
     int i,j,start,k,l,count;
@@ -684,10 +682,10 @@ Mat stage4(Mat const &img,int thresh=4,int remove=0)
             }
         }
     }
-    namedWindow("Stage4 geo correct",WINDOW_NORMAL);
-    imshow("Stage4 geo correct",dst2);
-    //imwrite("s5.jpg",dst);
-    waitKey(0);
+    // namedWindow("Stage4 geo correct",WINDOW_NORMAL);
+    // imshow("Stage4 geo correct",dst2);
+    // imwrite("s5.jpg",dst);
+    // waitKey(0);
     //cout<<"sTAGE 4 EXIT"<<dst2.rows<<" "<<dst2.cols<<endl;
     if(remove)
         return remove_blobs(dst2);
@@ -742,10 +740,10 @@ Mat stage5(Mat const &cs1,Mat const &s4)
 
         }
     }
-    namedWindow("contour stage 5",WINDOW_AUTOSIZE);
-    imshow("contour stage 5",dst);
-    //imwrite("s6.jpg",dst);
-    waitKey(0);
+    // namedWindow("contour stage 5",WINDOW_AUTOSIZE);
+    // imshow("contour stage 5",dst);
+    // imwrite("s6.jpg",dst);
+    // waitKey(0);
     return dst;
 }
 
@@ -784,9 +782,9 @@ Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=
             }                                           //  The layer of black is derived from the contour given by stage 5
         }
     }
-    namedWindow("GetSkin",WINDOW_NORMAL);
-    imshow("GetSkin",dst);
-    waitKey(0);
+    // namedWindow("GetSkin",WINDOW_NORMAL);
+    // imshow("GetSkin",dst);
+    // waitKey(0);
     return dst;
 }
 
