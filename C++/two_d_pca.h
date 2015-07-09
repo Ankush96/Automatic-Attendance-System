@@ -1,4 +1,7 @@
-#include <vector>
+#ifndef __2DPCA_H_INCLUDED__
+#define __2DPCA_H_INCLUDED__
+
+
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
@@ -31,3 +34,5 @@ class pca2d
 		Eigen::MatrixXf copy_cv2eigen(cv::Mat,int);
 
 };
+
+#endif

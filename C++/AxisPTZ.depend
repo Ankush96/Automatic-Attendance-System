@@ -3,7 +3,7 @@
 	<opencv2/opencv.hpp>
 	<iostream>
 
-1436330106 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
+1436423818 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
 	<stdio.h>
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"
@@ -54,7 +54,7 @@
 	"opencv2/opencv.hpp"
 	<iostream>
 
-1436330361 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
+1436423813 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
 	<opencv2/core/core.hpp>
 	<opencv2/imgproc/imgproc.hpp>
 	<opencv2/highgui/highgui.hpp>
@@ -73,31 +73,11 @@
 	<fstream>
 	<sstream>
 
-1436268512 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.h
-	<opencv2/core/core.hpp>
-	<opencv2/imgproc/imgproc.hpp>
-	<opencv2/highgui/highgui.hpp>
-	<iostream>
-	<vector>
-	"math.h"
-	<Eigen/Dense>
-
-1436272428 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.h
-	<stdio.h>
-	"Stage-segment.h"
+1436425006 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.h
 	"opencv2/core/core.hpp"
-	"opencv2/contrib/contrib.hpp"
-	"opencv2/highgui/highgui.hpp"
-	"opencv2/imgproc/imgproc.hpp"
-	"opencv2/objdetect/objdetect.hpp"
-	<dirent.h>
-	<unistd.h>
-	<sys/stat.h>
-	<sys/types.h>
-	<iostream>
-	<fstream>
-	<sstream>
-	<vector>
+
+1436425107 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.h
+	"opencv2/core/core.hpp"
 
 1436329656 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Utils.cpp
 	<stdio.h>
@@ -117,8 +97,7 @@
 	<vector>
 	<string>
 
-1435818805 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/two_d_pca.h
-	<vector>
+1436425181 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/two_d_pca.h
 	<Eigen/Dense>
 	<Eigen/Eigenvalues>
 
@@ -138,12 +117,12 @@
 	<Eigen/Dense>
 	<Eigen/Eigenvalues>
 
-1436250590 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/rc2dpca.h
+1436423817 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/rc2dpca.h
 	<vector>
 	<Eigen/Dense>
 	<Eigen/Eigenvalues>
 
-1436329641 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/rc2dpca.cpp
+1436423817 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/rc2dpca.cpp
 	<stdio.h>
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"

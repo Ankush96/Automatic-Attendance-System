@@ -341,7 +341,7 @@ Mat getBB(Mat const& img)
     else    return src(roi);
 }
 
-float stddev(Vector<int> w)
+float stddev(vector<int> w)
 {
     int i;
     float mean=0,sum=0;
@@ -548,7 +548,7 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
         {
             if(img.at<uchar>(i,j)==255)
             {
-                Vector<int> w;
+                vector<int> w;
                 for(l=0;l<min(kernel,gray.rows-kernel*i);l++)
                 {
                     for(k=0;k<min(kernel,gray.cols-kernel*j);k++)

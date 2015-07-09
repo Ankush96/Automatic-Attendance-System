@@ -1,49 +1,43 @@
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <iostream>
-#include <vector>
-#include "math.h"
-#include <Eigen/Dense>
 
+#ifndef __STAGE_SEGMENT_H_INCLUDED__
+#define __STAGE_SEGMENT_H_INCLUDED__
 
-using namespace cv;
+#include "opencv2/core/core.hpp"
 
-using namespace std;
+cv::Mat clahe(cv::Mat);
 
+cv::Mat erode(cv::Mat const&, int);
 
+cv::Mat dilate(cv::Mat const&, int);
 
-Mat clahe(Mat img);
-Mat erode(Mat const &src,int );
+cv::Mat erode_dilate(cv::Mat const&);
 
-Mat dilate(Mat const &src,int );
+cv::Mat remove_blobs(cv::Mat const&);
 
-Mat erode_dilate(Mat const &src);
+float stddev(std::vector<int>);
 
-Mat remove_blobs(Mat const &src);
+bool isBoundary(cv::Mat const&, int, int);
 
-float stddev(Vector<int> w);
+bool R1(int, int, int);
 
-bool isBoundary(Mat const &src,int i,int j);
+bool R2(float, float, float);
 
-bool R1(int R, int G, int B);
+bool R3(float, float, float);
 
-bool R2(float Y, float Cr, float Cb);
+cv::Mat stage1(cv::Mat const&);
 
-bool R3(float H, float S, float V);
+cv::Mat stage2(cv::Mat const&);
 
-Mat stage1(Mat const &src);
+cv::Mat stage3(cv::Mat const&, cv::Mat const&, int);
 
-Mat stage2(Mat const &Csrc);
+cv::Mat stage4(cv::Mat const&, int, int);
 
-Mat stage3(Mat const &src,Mat const &img,int);
+cv::Mat stage5(cv::Mat const&, cv::Mat const&);
 
-Mat stage4(Mat const &img,int,int);
+void cam_movement(int, cv::Mat);
 
-Mat stage5(Mat const &cs1,Mat const &s4);
+cv::Mat GetSkin(cv::Mat const&,int,int,int,int);
 
-void cam_movement(int key,Mat img);
+cv::Mat getBB(cv::Mat const&);
 
-Mat GetSkin(Mat const &src,int,int,int,int);
-
-Mat getBB(Mat const& src);
+#endif
