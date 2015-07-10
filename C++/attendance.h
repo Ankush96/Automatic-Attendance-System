@@ -3,10 +3,12 @@
 
 std::string prediction_name(int);
 
-int video_recognizer();
+void tune_seg_params(std::string, int, int, int, int, int);
+
+int video_recognizer(int, int, int, int);
 
 void model_main( std::string, int, bool, int, int, int, int);
 
-int image_recognizer();
+void image_recognizer(std::string, int, int, int, int, int, int, int);
 
 #endif

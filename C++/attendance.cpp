@@ -51,6 +51,48 @@ string prediction_name(int prediction){
     }
 }
 
+
+/*
+    ******************************   Tune_seg_params    ********************************
+    *
+    *   Function that visualises the effect of segmentation and lets the user derive 
+    *   the best thresholds for segmentation. The thresholds found by the user must be 
+    *   updated in main.cpp
+    *********************************************************************************** 
+*/
+void tune_seg_params(string dir, int num_dir, int cr_min, int cr_max, int cb_min, int cb_max)
+{
+    vector<Mat> images;
+    vector<int> labels;
+    cout<<"Usage-\n\n\t1>\tPress <space> for next sample";
+    cout<<"\n\t2>\tPress <Esc> to exit"<<endl;
+    dir_read(dir,num_dir,images,labels,1);
+
+    cvNamedWindow("src",WINDOW_NORMAL);
+    cvNamedWindow("dst",WINDOW_NORMAL);
+    
+    createTrackbar("cr min ","dst",&cr_min,255);
+    createTrackbar("cr max ","dst",&cr_max,255);
+    createTrackbar("cb min ","dst",&cb_min,255);
+    createTrackbar("cb max ","dst",&cb_max,255);
+    
+    for(int i=0;i<images.size();i++)
+    {
+      Mat src=images[i];
+      imshow("src",src);
+        while(1)
+            {
+                Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
+                resize(dst,dst,Size(src.cols,src.rows),0,0,INTER_CUBIC);
+                imshow("dst",dst);
+                int key = cv::waitKey(0);
+                if(key==32)break;
+                if(key==27)return;
+            }
+    
+    }
+}
+
 /*
     *******************************    Model_Main   ************************************
     *
@@ -115,7 +157,7 @@ void model_main(string dir, int num_dir, bool color, int cr_min, int cr_max, int
     *   us a final measure of accuracy.
     ************************************************************************************************
 */
-int image_recognizer(string dir, int num_dir, int examples, int color, int cr_min, int cr_max, int cb_min, int cb_max){
+void image_recognizer(string dir, int num_dir, int examples, int color, int cr_min, int cr_max, int cb_min, int cb_max){
 
         vector<Mat> images;                                                                 //  All the images are loaded along with their labels
         vector<int> labels;                                                                 //  only during the start of the function. This is done
@@ -204,19 +246,21 @@ int image_recognizer(string dir, int num_dir, int examples, int color, int cr_mi
         myfile.close();                                                                     //   Close the file after writing the accuracy values
 }
 
-int video_recognizer(){
-	VideoCapture vcap;
+int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
+    VideoCapture vcap;
     Mat img,gray,sgray;
 
-    Mat black(500,500,CV_8UC3,Scalar(0,0,0));       //  Mat image to display final attendance
+    Mat black(500,500,CV_8UC3,Scalar(0,0,0));                                                       //  Mat image to display final attendance
     Mat att=black.clone();
 
     char key,name[20];
     int i=0,count=-1,skip=5,y;
-    double attendance[9];
+    int num_dir=9;                                                                                  //  Number of classes or unique identities
+    double* attendance = new double[num_dir*sizeof( double )];
+
     int frames=-1;
 
-    const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
+    string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";      //  Open the video stream and make sure it's opened
     CascadeClassifier haar_cascade;
     haar_cascade.load("../Cascades/front_alt2.xml");
 
@@ -235,116 +279,135 @@ int video_recognizer(){
 
     Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
     ef->load("ef.xml");
+    pca2d model2d;
+    rc2dpca modelrc;
+    modelrc.load("rc2dpca.xml");
+    model2d.load("2dpca.xml");
+
+
 
     while(1)
         {
-            vcap.read(img);
+            vcap.read(img);                                                                         //  Read the frame
             frames++;
-            count++;
-            if(count%skip==0)
+            count++;                                                                                //  Maintain a count of the frames processed
+
+            if(count%skip==0)                                                                       //  We do our processing only on every 5th frame
             {
-               // cv::imshow("Output Window1", img);
-                img=clahe(img);
-                //Mat black(img.rows,img.cols,CV_8UC3,Scalar(0,0,0));
-                Mat segment=img.clone();
-                segment=GetSkin(img,128,164,115,160);  //change the thresholds
-                cvtColor(img, gray, CV_BGR2GRAY);
-                cvtColor(segment, sgray, CV_BGR2GRAY);
-                vector< Rect_<int> > faces;
+                img=clahe(img);                                                                     //  Perform local histogram equalisation
+                Mat black(img.rows,img.cols,CV_8UC3,Scalar(0,0,0));                                 //  Maintain a black Mat image to display attendance
+                vector< Rect_<int> > faces;                                                         //  Initialise a vector of rectangles that store the detected faces
 
                 //--------------Start detecting the faces in a frame------------------//
-                haar_cascade.detectMultiScale(gray,faces);
-                for(int i=0;i<faces.size();i++)
+                haar_cascade.detectMultiScale(img,faces);
+
+                for(int i=0;i<faces.size();i++)                                                     //  Loop through every  face detected in a frame
                 {
-                    Rect crop=faces[i];
-                    Mat instance=sgray(crop);
-                    equalizeHist(instance,instance);
-                    //Mat instance=sgray(crop);
-                    if ( ! instance.isContinuous() )
-                        {
-                            instance = instance.clone();
-                        }
+
+                    if(faces[i].width<50||faces[i].height<50)   continue;                           //  Ignore small rectangles. They are probably false positives
+
+
+                    faces[i].x=max(faces[i].x-20,0);                                                //  Stretch the image
+                    faces[i].y=max(faces[i].y-30,0);
+                    int bottom=min(faces[i].y+faces[i].height+30,img.rows-1);
+                    int right=min(faces[i].x+faces[i].width+20,img.cols-1);
+                    faces[i].width=right-faces[i].x;
+                    faces[i].height=bottom-faces[i].y;
+                    //cout<<0<<" "<<0<<" "<<img.cols-1<<" "<<img.rows-1<<endl;
+                    //cout<< faces[i].x<< " "<< faces[i].y <<" "<< faces[i].x+faces[i].width<< " "<< faces[i].y+faces[i].height <<endl;
+
+                    Mat instance=img(faces[i]);                                                     //  Crop only the face region.
+                    if ( ! instance.isContinuous() )    instance = instance.clone();
+
+                    //equalizeHist(instance,instance);
+
+
                     //copy(instance2,black,crop);
                     //imshow("segment",black);
                     //imshow("face",instance);
-                    resize(instance,instance, Size(m,n), 1.0, 1.0, INTER_CUBIC);
 
-                    int pef=-1,pff=-1,plbp=-1;
-                    double conf_ef=0.0,conf_ff=0.0,conf_lbp=0.0;
-                    ef->predict(instance,pef,conf_ef);
+                    resize(instance,instance, Size(400,400),0,0, INTER_CUBIC);                      //  Resize the facial region to 400*400 for effective segmentation. This is required for all models
+                    instance=getBB(remove_blobs(GetSkin(instance,cr_min,cr_max,cb_min,cb_max)));
+                    resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  This is necessary for the recognition
+                    //cvtColor(instance,instance,CV_BGR2GRAY);
+                    int pef=-1,p2d=-1,prc=-1;                                                       //  The predictions of 3 models are returned
 
-                    if(pef==pff)
-                    {
-                        attendance[1+pef]+=5;
-                    }
-                    else
-                    {
-                        attendance[1+pef]+=1.67;
-                        attendance[1+pff]+=1.67;
-                    }
+                    pef=ef->predict(instance);
+                    p2d=model2d.predict(instance);
+                    prc=modelrc.predict(instance);
+                    
+                    attendance[pef-1]+=(1.0/3)*skip;                                                //  Update the attendance scores of all identified people
+                    attendance[prc-1]+=(1.0/3)*skip;
+                    attendance[p2d-1]+=(1.0/3)*skip;
+                    
+                    rectangle(img,faces[i],CV_RGB(0,255,0),2);                                      //  We draw a green rectangle around the face
 
-
-                    rectangle(img,crop,CV_RGB(0,255,0),2);
-
-
+                    //  We write the strings that are to be displayed on top of each face //
                     char ef[50];
-                    sprintf(ef," ef %s Conf- %f",prediction_name(pef).c_str(),conf_ef);
+                    sprintf(ef," ef %s", prediction_name(pef).c_str());
 
-                    int pos_x = std::max(crop.tl().x - 10, 0);
-                    int pos_y = std::max(crop.tl().y - 10, 0);
-                  //  putText(img, lbp, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-                    putText(img, ef, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                    char d2[50];
+                    sprintf(d2," 2d %s", prediction_name(p2d).c_str());
+
+                    char rc[50];
+                    sprintf(rc," rc %s", prediction_name(prc).c_str());
+
+                    //--------------------------------------------------------------------//
+
+                    int pos_x = std::max(faces[i].tl().x - 10, 0);
+                    int pos_y = std::max(faces[i].tl().y - 10, 0);
+
+                    putText(img, ef, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);    //Put the text on the image showing the name of the model and the prediction
+                    putText(img, d2, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+                    putText(img, rc, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
 
                 }
-                cv::imshow("Output Window2", img);
+
+                cvNamedWindow("Detection and Recognition",WINDOW_NORMAL);
+                cv::imshow("Detection and Recognition", img);                                       //  Show the image with detected faces and the predicted labels
 
 
+                /*
+                     *****************************   Attendance Marking  *******************************
+
+                    *   For marking attendance of the students, we check the attendance array after
+                    *   every 40 frames. This 40 can be increased or decreased. We loop through the
+                    *   array and if we find any student having an attendance score more than a certain
+                    *   threshold, we mark that student as present. We also display their names with a
+                    *   Score with somewhat represents the percentage of time they were present in the
+                    *   last 40 frames. This can cross 100 as there is a chance of false positives being
+                    *   detected as faces during the detection process.
+
+                */
 
 
-                if(frames%30==0)
-                {   int y=10;
+                if(frames%40==0)
+                {
+                    int y=10;
                     att=black.clone();
-                    attendance[0]=0;
-                    for(int i=1;i<7;i++)
+                    for(int i=0;i<num_dir;i++)
                     {
-                        if(attendance[i]>15)
+                        if(attendance[i]>18)                                                        //  Threshold for marking present. Try changing this
                         {
                             char present[50];
-                            sprintf(present,"%s confidence %f",prediction_name(i-1).c_str(),attendance[i]*3.33);
+                            sprintf(present,"%s Score %f",prediction_name(i+1).c_str(),attendance[i]*2.5);
                             putText(att, present, Point(10, y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
                             y=y+15;
                         }
                         attendance[i]=0;
                     }
-                    frames=0;
-
+                    frames=0;                                                                       //  Reinitialize frames=0 so that the same thing can be repeated
                 }
 
-                /*
-                key=cv::waitKey(40);
-                cam_movement(key,img);
-                    y=10;
-                    att=black.clone();
-                    for(int i=1;i<7;i++)
-                    {
-                        if((attendance[i]*100)/frames>70)
-                        {
-                            char present[50];
-                            sprintf(present,"%s recog rate %f",prediction_name(i-1).c_str(),(attendance[i]*100)/frames);
-                            putText(att, present, Point(10, y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-                            y=y+10;
 
-                        }
-
-
-                    }
-                */
                 imshow("attendance",att);
                 key = cv::waitKey(40);
+                if(key==27)
+                    return 0;
                 cam_movement(key,img);
             }
 
         }
-    return 0;
+return 0;
 }
 

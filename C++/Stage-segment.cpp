@@ -381,7 +381,6 @@ bool R3(float H, float S, float V){
     return (H<25) || (H > 230);
 }
 
-
 /*
 
     ******************************   Stage 1 of segmentation *****************************
@@ -463,7 +462,6 @@ Mat stage1(Mat const &src) {
     return dst;                                         //  Return Bitmap of facial region
 }
 
-
 /*
 
     ******************************   Stage 2 of segmentation *****************************
@@ -531,7 +529,6 @@ Mat stage2(Mat const &Csrc){
     return erode_dilate(dst);                                   //  We call a function to perform the noise reduction steps
 }
 
-
 //  Stage 3 is not required now
 Mat stage3(Mat const &src,Mat const &img,int thresh=2)
 {
@@ -564,7 +561,6 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
     //waitKey(0);
     return dst;
 }
-
 
 /*
     *******************************   Stage 4    ***********************************
@@ -692,7 +688,6 @@ Mat stage4(Mat const &img,int thresh=4,int remove=0)
         return dst2;
 }
 
-
 /*
     ******************************* Stage 5 ****************************************
     *
@@ -746,8 +741,6 @@ Mat stage5(Mat const &cs1,Mat const &s4)
     return dst;
 }
 
-
-
 /*  **************************  GetSkin **************************
 
     *   Function to get a segmented color image.
@@ -756,7 +749,6 @@ Mat stage5(Mat const &cs1,Mat const &s4)
     *   Output - > Coloured image with background portions blackened
     ***************************************************************
 */
-
 Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=115,int cb_max_arg=160)
 {
     //  Update the global thresholds as passed by the arguments of this function
