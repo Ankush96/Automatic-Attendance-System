@@ -1,29 +1,39 @@
- #include <stdio.h>
- #include "opencv2/core/core.hpp"
- #include "opencv2/contrib/contrib.hpp"
- #include "opencv2/highgui/highgui.hpp"
- #include "opencv2/imgproc/imgproc.hpp"
- #include "opencv2/objdetect/objdetect.hpp"
- #include "Utils.h"
- #include "rc2dpca.h"
- #include "two_d_pca.h"
- #include "Stage-segment.h"
-
- #include <iostream>
- #include <fstream>
- #include <sstream>
- #include <vector>
- #include <Eigen/Dense>
+#include <stdio.h>
+#include "opencv2/core/core.hpp"
+#include "opencv2/contrib/contrib.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/objdetect/objdetect.hpp"
+#include "Utils.h"
+#include "rc2dpca.h"
+#include "two_d_pca.h"
+#include "Stage-segment.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
 using namespace cv;
-using namespace Eigen;
 using namespace std;
 
 #define n 120
 #define m 120
 
-string prediction_name(int prediction)
-{
+
+
+/*
+    ***************************   Prediction_Name    *********************************
+    *
+    *   Function that returns the name of the subject identified. The cases provided
+    *   under the switch case needs to be changed according to needs. The numbers 
+    *   correspond to the number of associated with the folder where the images are 
+    *   stored. For example images of the person named "Ankush" are stored in the 
+    *   folder "s1". Hence "Ankush" is associated with the label "1". This is similar
+    *   for all other classes.
+    **********************************************************************************
+
+*/
+string prediction_name(int prediction){
     switch(prediction)
     {
         case -1:return "Unknown";
@@ -41,192 +51,160 @@ string prediction_name(int prediction)
     }
 }
 
-int model_main(string dir)
-{
+/*
+    *******************************    Model_Main   ************************************
+    *
+    *   This function trains different models based on the images provided in the 
+    *   directory "dir", which has "num_dir" different classes. The bool variable "color"
+    *   is set to 0 if we do not want a segmented image to be trained, and to 1 if we 
+    *   want to extract the facial region using segmentation before training the images.
+    *   The 4 parameters after "color" define the thresholds applied on the Cr and Cb
+    *   colorspace.
+    ************************************************************************************
+*/
+void model_main(string dir, int num_dir, bool color, int cr_min, int cr_max, int cb_min, int cb_max){
     vector<Mat> images;
     vector<int> labels;
-    /*
-    try {
-        read_csv(fn_csv, images, labels);
-    } catch (cv::Exception& e) {
-        cerr << "Error opening file \"" << fn_csv << "\". Reason: " << e.msg << endl;
-        exit(1);
+    dir_read(dir,num_dir,images,labels,color);
+
+    if(color)
+    {
+        for(int i=0;i<images.size();i++)
+            {
+                Mat src=images[i];
+                Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
+                resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
+                images[i]=dst;
+            }
     }
 
-    */
-    dir_read(dir,6,images,labels,0);
-    if(images.size() <= 1) {
-        string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
-        CV_Error(CV_StsError, error_message);
-    }
 
+    //Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer();
+    //Ptr<FaceRecognizer> ff =createFisherFaceRecognizer();
+    Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
+    pca2d model2d;
+    rc2dpca modelrc;
 
-
-     Ptr<FaceRecognizer> lbp = createLBPHFaceRecognizer();
-     Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
-     Ptr<FaceRecognizer> ff =createFisherFaceRecognizer();
-   //  cvNamedWindow("Face",WINDOW_NORMAL);
+    // cvNamedWindow("Face",WINDOW_NORMAL);
     // imshow("Face",images[1]);
     // cvWaitKey(0);
 
-    lbp->train(images, labels);
+    //lbp->train(images, labels);
+    //lbp->save("lbp.xml");
 
-    lbp->save("lbp.xml");
+    //ff->train(images, labels);
+    //ff->save("ff.xml");
+
     ef->train(images, labels);
-
     ef->save("ef.xml");
-    ff->train(images, labels);
 
-    ff->save("ff.xml");
-    // The following line predicts the label of a given
-    // test image:
-
-
-    //
-    // To get the confidence of a prediction call the model with:
-    //
-    //      int predictedLabel = -1;
-    //      double confidence = 0.0;
-    //      model->predict(testSample, predictedLabel, confidence);
-    //
-  //  string result_message = format("Predicted class = %d / Actual class = %d.", predictedLabel, testLabel);
-  //  cout << result_message << endl;
-    // Sometimes you'll need to get/set internal model data,
-    // which isn't exposed by the public cv::FaceRecognizer.
-    // Since each cv::FaceRecognizer is derived from a
-    // cv::Algorithm, you can query the data.
-    //
-    // First we'll use it to set the threshold of the FaceRecognizer
-    // to 0.0 without retraining the model. This can be useful if
-    // you are evaluating the model:
-    //
-    //model->set("threshold", 0.0);
-    // Now the threshold of this model is set to 0.0. A prediction
-    // now returns -1, as it's impossible to have a distance below
-    // it
-    //predictedLabel = model->predict(testSample);
-    //cout << "Predicted class = " << predictedLabel << endl;
-    // Show some informations about the model, as there's no cool
-    // Model data to display as in Eigenfaces/Fisherfaces.
-    // Due to efficiency reasons the LBP images are not stored
-    // within the model:
-    //cout << "Model Information:" << endl;
-    //string model_info = format("\tLBPH(radius=%i, neighbors=%i, grid_x=%i, grid_y=%i, threshold=%.2f)",
-     //       model->getInt("radius"),
-    //        model->getInt("neighbors"),
-     //       model->getInt("grid_x"),
-    //        model->getInt("grid_y"),
-    //        model->getDouble("threshold"));
-    //cout << model_info << endl;
-    //// We could get the histograms for example:
-   // vector<Mat> histograms = model->getMatVector("histograms");
-    // But should I really visualize it? Probably the length is interesting:
-    //cout << "Size of the histograms: " << histograms[0].total() << endl;
-
-    return 0;
+    model2d.train(images,labels,0.6,"2dpca.xml");
+    modelrc.train(images,labels,0.63,"rc2dpca.xml");
 }
 
-int image_recognizer()
-{
-    //------------------Testing using cross validation-----------------------------------------------//
+/*
+    ************************************    Image_Recognizer    ***********************************
+    *
+    *   This function lets the user evaluate the trained models by performing a series of
+    *   leave one out cross-validation on the dataset provided in the directory "dir".
+    *   In each round of cross-validation, one sample of each class is collected in the 
+    *   test set, and the remaining ("examples"-1) samples are used for training a particular 
+    *   model. The accuracies are tested on the the testing set. The k_th round of cross-validation
+    *   uses the k-th sample from each class as part of the testing set. After "examples" number
+    *   of rounds of cross-validation, the accuracies over all rounds are averaged, thus giving
+    *   us a final measure of accuracy.
+    ************************************************************************************************
+*/
+int image_recognizer(string dir, int num_dir, int examples, int color, int cr_min, int cr_max, int cb_min, int cb_max){
 
-    // {
+        vector<Mat> images;                                                                 //  All the images are loaded along with their labels
+        vector<int> labels;                                                                 //  only during the start of the function. This is done
+        dir_read(dir,num_dir,images,labels,color);                                          //  just once. Any further change in training and testing
+                                                                                            //  datasets is done by manipulating these two vectors 
+
+        pca2d model;                                                                        //  Declaring the models to be tested 
+        if(color)                                                                          
+        {                                                                                   //  If the color is 0, no segmentation is performed
+          for(int i=0;i<images.size();i++)                                                  //  Else for every image in the vector "images" 
+            {                                                                               //  Segmentation is carried out to extract only the faces
+                Mat src=images[i];
+                Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));      //  The largest blob is retained and a bounding box is put around it
+                resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);                                  //  The bounding box is resized to the same size as the images that were trained 
+                images[i]=dst;                                                              //  The vector "images" is updated to contain the segmented images
+            }
+        }
+
+        std::vector<Mat> images_test,images_train;                                          //  Declaring the vector of testing and training images for each case
+        std::vector<int> labels_train,labels_test;                                          //  Declaring the vector of labels corresponding to the training and testing images
+        double* accuracy = new double[examples*sizeof( double )];
+
+        //cvNamedWindow("src",WINDOW_NORMAL);
+        double y[101];
+        fstream myfile("Plots/o3.txt", ios::out);                                           //  The accuracies are written into a text file for plotting purposes
+        if (myfile.is_open()) cout<<"file exists"<<endl;
+        for(int i=0;i<36;i++)                                                               //  This loop controls the threshold of percentage information retained for 
+        {                                                                                   //  training. Different ranges can be tried out here.
+
+            for(int k=0;k<examples;k++)                                                     //  This loop controls the rounds of cross-validation as it goes
+            {                                                                               //  through all samples and choses 1 per class for testing
+                //cout<<" K= "<<k<<endl;
+                accuracy[k]=0;                                                              //  This stores the accuracies for every round
+                images_train.clear();
+                images_test.clear();
+                labels_train.clear();
+                labels_test.clear();
+                for(int i=0;i<images.size();i++)
+                {
+                    if(i%examples==k)                                                       // Put in testing set 
+                    {
+                        images_test.push_back(images[i]);
+                        labels_test.push_back(labels[i]);
+                    }
+                    else                                                                    // Put in training set
+                    {
+                        images_train.push_back(images[i]);
+                        labels_train.push_back(labels[i]);
+                    }
+                }
+                model.train(images_train,labels_train,(29+2*i)/100.0,"2dpca.xml");          //  Train the 2dpca model
+                //Ptr<FaceRecognizer> model = createEigenFaceRecognizer(4*(i+1));           //  Initialise a model for Eigenfaces. If this is uncommented all corresponding code related to EF has to be uncommented
+                //model->train(images_train, labels_train);                                 //  Train the Eigenfaces model
+                for(int j=0;j<images_test.size();j++)
+                {
+                    int prediction=  model.predict(images_test[j]);                         //  Prediction for 2DPCA 
+                    //int prediction=  model->predict(images_test[j]);                      //  Prediction for eigenfaces
 
 
+                    //imshow("src",images_test[j]);
+                    //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
+                    //waitKey(0);
+                    accuracy[k]+=(prediction==labels_test[j]);                              //  Accuracy is updated according to the prediction made by the model
 
-    //     vector<Mat> images;
-    //     vector<int> labels;
-    //     int num_dir=9;     //  Number of classes or unique identities
-    //     int examples=10;     //  Number of images per person
-    //     int color=0;
-    //     dir_read("../Face_db",num_dir,images,labels,color);
-    //     pca2d model;
-    //     if(color)
-    //     {
-    //       for(int i=0;i<images.size();i++)
-    //         {
-    //             Mat src=images[i];
-    //             //cvtColor(GetSkin(src,cr_min,cr_max,cb_min,cb_max),images[i],CV_BGR2GRAY);  //GetSkin returns a color image, hence we need to convert it to grayscale
-    //             Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
-    //             resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
-    //             images[i]=dst;
-    //         }
-    //     }
+                    //------Uncomment the following to see the misclassified images---------//
+                    // if(prediction!=labels_test[j])
+                    // {
+                    //     cvNamedWindow("Incorrect",WINDOW_NORMAL);
+                    //     imshow("Incorrect",images_test[j]);
+                    //     waitKey(0);
+                    // }
+                }
 
-    //     std::vector<Mat> images_test,images_train;
-    //     std::vector<int> labels_train,labels_test;
-    //     double* accuracy = new double[examples*sizeof( double )];
+                //cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
+            }
 
-    //     //cvNamedWindow("src",WINDOW_NORMAL);
-    //     double y[101];
-    //     fstream myfile("Plots/o3.txt", ios::out);         //  Uncomment to write the accuracy values onto a file
-    //     if (myfile.is_open()) cout<<"file exists"<<endl;
-    //     for(int i=0;i<36;i++)
-    //     {
-    //         for(int k=0;k<examples;k++)
-    //         {
-    //             //cout<<" K= "<<k<<endl;
-    //             accuracy[k]=0;
-    //             images_train.clear();
-    //             images_test.clear();
-    //             labels_train.clear();
-    //             labels_test.clear();
-    //             for(int i=0;i<images.size();i++)
-    //             {
-    //                 if(i%examples==k)  // Put in test set
-    //                 {
-    //                     images_test.push_back(images[i]);
-    //                     labels_test.push_back(labels[i]);
-    //                 }
-    //                 else        // Put in training set
-    //                 {
-    //                     images_train.push_back(images[i]);
-    //                     labels_train.push_back(labels[i]);
-    //                 }
-    //             }
-    //             model.train(images_train,labels_train,(29+2*i)/100.0,"2dpca.xml");
-    //             //Ptr<FaceRecognizer> model = createEigenFaceRecognizer(4*(i+1));       //  Initialise a model for Eigenfaces.If this is uncommented all corresponding code related to EF has to be uncommented
-    //             //model->train(images_train, labels_train);                             //  Train the Eigenfaces model
-    //             for(int j=0;j<images_test.size();j++)
-    //             {
-    //                 int prediction=  model.predict(images_test[j]);     //  Prediction for 2DPCA or RC2DPCA
-    //                 //int prediction=  model->predict(images_test[j]);  //  Prediction for eigenfaces
+            for(int k=1;k<examples;k++)
+            {
+                accuracy[k]+=accuracy[k-1];                                                 //  Calculating the cumulative accuracy
+            }
 
-
-    //                 //imshow("src",images_test[j]);
-    //                 //cout<<" actual -> "<<labels_test[j]<<" predicted ->"<<prediction<<endl;
-    //                 //waitKey(0);
-    //                 accuracy[k]+=(prediction==labels_test[j]);
-
-    //                 //------Uncomment the following to see the misclassified images-----------//
-    //                 // if(prediction!=labels_test[j])
-    //                 // {
-    //                 //     cvNamedWindow("Incorrect",WINDOW_NORMAL);
-    //                 //     imshow("Incorrect",images_test[j]);
-    //                 //     waitKey(0);
-    //                 // }
-    //             }
-
-    //             //cout<<" accuracy for k="<<k<<" is "<<accuracy[k]<<" "<< (accuracy[k]*100)/(labels_test.size())<<endl;
-    //         }
-
-    //         for(int k=1;k<examples;k++)
-    //         {
-    //             accuracy[k]+=accuracy[k-1];
-    //         }
-
-    //         y[i]=(accuracy[examples-1]*100)/(examples*num_dir);
-    //         cout<<endl<<"percentage"<<(29+2*i)<<" final accuracy -> "<<y[i]<<endl;
-    //         myfile<<y[i]<<endl;   //  Writing the accuracy onto the file
-    //     }
-    //     myfile.close();  //   Close the file for writing the accuracy values
-    // }
-//-----------------------------------------------------------------------------------------------//
-
+            y[i]=(accuracy[examples-1]*100)/(examples*num_dir);                             //  Normalising the accuracy value
+            cout<<endl<<"percentage"<<(29+2*i)<<" final accuracy -> "<<y[i]<<endl;
+            myfile<<y[i]<<endl;                                                             //  Writing the accuracy onto the file
+        }
+        myfile.close();                                                                     //   Close the file after writing the accuracy values
 }
 
-int video_recognizer()
-{
+int video_recognizer(){
 	VideoCapture vcap;
     Mat img,gray,sgray;
 
@@ -257,8 +235,6 @@ int video_recognizer()
 
     Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
     ef->load("ef.xml");
-
-
 
     while(1)
         {

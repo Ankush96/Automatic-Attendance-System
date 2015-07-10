@@ -5,7 +5,7 @@ std::string prediction_name(int);
 
 int video_recognizer();
 
-int model_main(std::string);
+void model_main( std::string, int, bool, int, int, int, int);
 
 int image_recognizer();
 

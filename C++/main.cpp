@@ -30,8 +30,13 @@ using namespace std;
 
 int main()
 {
+    int num_dir=9;                                      //  Number of classes or unique identities
+    int examples=10;                                    //  Number of images per person
+    bool color=1;
+    string dir="../Face_db";
+    int cr_min=126,cr_max=175,cb_min=99,cb_max=130;     //   A change in these values should be updated everywhere
 
-    int cr_min=126,cr_max=175,cb_min=99,cb_max=130;    //   A change in these values should be updated in Stage-segment.cpp
+    model_main(dir, num_dir, color, cr_min, cr_max, cb_min, cb_max);
 
     //--------------Code to update parameters of segmentation--------------------//
 {
@@ -211,195 +216,195 @@ int main()
 //-----------------------Video recognizer---------------------------//
 
 
-{
-    VideoCapture vcap;
-    Mat img,gray,sgray;
+// {
+//     VideoCapture vcap;
+//     Mat img,gray,sgray;
 
-    Mat black(500,500,CV_8UC3,Scalar(0,0,0));                                                       //  Mat image to display final attendance
-    Mat att=black.clone();
+//     Mat black(500,500,CV_8UC3,Scalar(0,0,0));                                                       //  Mat image to display final attendance
+//     Mat att=black.clone();
 
-    char key,name[20];
-    int i=0,count=-1,skip=5,y;
-    int num_dir=9;                                                                                  //  Number of classes or unique identities
-    double* attendance = new double[num_dir*sizeof( double )];
+//     char key,name[20];
+//     int i=0,count=-1,skip=5,y;
+//     int num_dir=9;                                                                                  //  Number of classes or unique identities
+//     double* attendance = new double[num_dir*sizeof( double )];
 
-    int frames=-1;
+//     int frames=-1;
 
-    const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
-    CascadeClassifier haar_cascade;
-    haar_cascade.load("../Cascades/front_alt2.xml");
-
-
-    if(!vcap.open(videoStreamAddress))
-        {
-            std::cout << "Error opening video stream or file" << std::endl;
-            return -1;
-        }
-    //vcap.read(gray);
-   // double height = vcap.get(CV_CAP_PROP_FRAME_HEIGHT);
-   // double width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
-   // cv::Size frameSize(static_cast<int>(width),static_cast<int>(height));
-   // cv::VideoWriter MyVid("/home/student/Documents/MyVideo1.avi",CV_FOURCC('P','I','M','1'),30,frameSize,true);
-    //cvNamedWindow("Face",WINDOW_NORMAL);
-
-    Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
-    ef->load("ef.xml");
-    pca2d model2d;
-    rc2dpca modelrc;
-    modelrc.load("rc2dpca.xml");
-    model2d.load("2dpca.xml");
+//     const std::string videoStreamAddress = "rtsp://root:pass123@192.168.137.89:554/axis-media/media.amp";  //open the video stream and make sure it's opened
+//     CascadeClassifier haar_cascade;
+//     haar_cascade.load("../Cascades/front_alt2.xml");
 
 
+//     if(!vcap.open(videoStreamAddress))
+//         {
+//             std::cout << "Error opening video stream or file" << std::endl;
+//             return -1;
+//         }
+//     //vcap.read(gray);
+//    // double height = vcap.get(CV_CAP_PROP_FRAME_HEIGHT);
+//    // double width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
+//    // cv::Size frameSize(static_cast<int>(width),static_cast<int>(height));
+//    // cv::VideoWriter MyVid("/home/student/Documents/MyVideo1.avi",CV_FOURCC('P','I','M','1'),30,frameSize,true);
+//     //cvNamedWindow("Face",WINDOW_NORMAL);
 
-    while(1)
-        {
-            vcap.read(img);                                                                         //  Read the frame
-            frames++;
-            count++;                                                                                //  Maintain a count of the frames processed
-
-            if(count%skip==0)                                                                       //  We do our processing only on every 5th frame
-            {
-                img=clahe(img);                                                                     //  Perform local histogram equalisation
-                Mat black(img.rows,img.cols,CV_8UC3,Scalar(0,0,0));                                 //  Maintain a black Mat image to display attendance
-                vector< Rect_<int> > faces;                                                         //  Initialise a vector of rectangles that store the detected faces
-
-                //--------------Start detecting the faces in a frame------------------//
-                haar_cascade.detectMultiScale(img,faces);
-
-                for(int i=0;i<faces.size();i++)                                                     //  Loop through every  face detected in a frame
-                {
-
-                    if(faces[i].width<50||faces[i].height<50)   continue;                           //  Ignore small rectangles. They are probably false positives
-
-
-                    faces[i].x=max(faces[i].x-20,0);                                                //  Stretch the image
-                    faces[i].y=max(faces[i].y-30,0);
-                    int bottom=min(faces[i].y+faces[i].height+30,img.rows-1);
-                    int right=min(faces[i].x+faces[i].width+20,img.cols-1);
-                    faces[i].width=right-faces[i].x;
-                    faces[i].height=bottom-faces[i].y;
-                    //cout<<0<<" "<<0<<" "<<img.cols-1<<" "<<img.rows-1<<endl;
-                    //cout<< faces[i].x<< " "<< faces[i].y <<" "<< faces[i].x+faces[i].width<< " "<< faces[i].y+faces[i].height <<endl;
-
-                    Mat instance=img(faces[i]);                                                     //  Crop only the face region.
-                    if ( ! instance.isContinuous() )    instance = instance.clone();
-
-                    //equalizeHist(instance,instance);
-
-
-                    //copy(instance2,black,crop);
-                    //imshow("segment",black);
-                    //imshow("face",instance);
-
-                    resize(instance,instance, Size(400,400),0,0, INTER_CUBIC);                      //  Resize the facial region to 400*400 for effective segmentation. This is required for all models
-                    instance=getBB(remove_blobs(GetSkin(instance,cr_min,cr_max,cb_min,cb_max)));
-                    resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  This is necessary for the recognition
-                    //cvtColor(instance,instance,CV_BGR2GRAY);
-                    int pef=-1,p2d=-1,prc=-1;                                                       //  The predictions of 3 models are returned
-
-                    pef=ef->predict(instance);
-                    p2d=model2d.predict(instance);
-                    prc=modelrc.predict(instance);
-
-                    if(pef==prc==p2d)                                                               //  If all 3 are equal we give a vote of 1 per frame to the predicted class
-                    {
-                        attendance[pef-1]+=1*skip;
-                    }
-                    else if(pef==prc&&pef!=p2d)                                                     //  If any 2 are equal, we give the major class a vote of 2/3 per frame
-                    {                                                                               //  and a vote of 1/3 per frame to the minor class
-                        attendance[pef-1]+=(2.0/3)*skip;
-                        attendance[p2d-1]+=(1.0/3)*skip;
-                    }
-                    else if(pef==p2d&&pef!=prc)
-                    {
-                        attendance[pef-1]+=(2.0/3)*skip;
-                        attendance[prc-1]+=(1.0/3)*skip;
-                    }
-                    else if(p2d==prc&&p2d!=pef)
-                    {
-                        attendance[p2d-1]+=(2.0/3)*skip;
-                        attendance[pef-1]+=(1.0/3)*skip;
-                    }
-                    else                                                                            //  If all 3 predictions are different we give each predicted class a vote of 1/3 per frame
-                    {
-                        attendance[pef-1]+=(1.0/3)*skip;
-                        attendance[prc-1]+=(1.0/3)*skip;
-                        attendance[p2d-1]+=(1.0/3)*skip;
-                    }
+//     Ptr<FaceRecognizer> ef =createEigenFaceRecognizer();
+//     ef->load("ef.xml");
+//     pca2d model2d;
+//     rc2dpca modelrc;
+//     modelrc.load("rc2dpca.xml");
+//     model2d.load("2dpca.xml");
 
 
 
-                    rectangle(img,faces[i],CV_RGB(0,255,0),2);                                       //  We draw a green rectangle around the face
+//     while(1)
+//         {
+//             vcap.read(img);                                                                         //  Read the frame
+//             frames++;
+//             count++;                                                                                //  Maintain a count of the frames processed
+
+//             if(count%skip==0)                                                                       //  We do our processing only on every 5th frame
+//             {
+//                 img=clahe(img);                                                                     //  Perform local histogram equalisation
+//                 Mat black(img.rows,img.cols,CV_8UC3,Scalar(0,0,0));                                 //  Maintain a black Mat image to display attendance
+//                 vector< Rect_<int> > faces;                                                         //  Initialise a vector of rectangles that store the detected faces
+
+//                 //--------------Start detecting the faces in a frame------------------//
+//                 haar_cascade.detectMultiScale(img,faces);
+
+//                 for(int i=0;i<faces.size();i++)                                                     //  Loop through every  face detected in a frame
+//                 {
+
+//                     if(faces[i].width<50||faces[i].height<50)   continue;                           //  Ignore small rectangles. They are probably false positives
 
 
-                    //  We write the strings that are to be displayed on top of each face //
-                    char ef[50];
-                    sprintf(ef," ef %s", prediction_name(pef).c_str());
+//                     faces[i].x=max(faces[i].x-20,0);                                                //  Stretch the image
+//                     faces[i].y=max(faces[i].y-30,0);
+//                     int bottom=min(faces[i].y+faces[i].height+30,img.rows-1);
+//                     int right=min(faces[i].x+faces[i].width+20,img.cols-1);
+//                     faces[i].width=right-faces[i].x;
+//                     faces[i].height=bottom-faces[i].y;
+//                     //cout<<0<<" "<<0<<" "<<img.cols-1<<" "<<img.rows-1<<endl;
+//                     //cout<< faces[i].x<< " "<< faces[i].y <<" "<< faces[i].x+faces[i].width<< " "<< faces[i].y+faces[i].height <<endl;
 
-                    char d2[50];
-                    sprintf(d2," 2d %s", prediction_name(p2d).c_str());
+//                     Mat instance=img(faces[i]);                                                     //  Crop only the face region.
+//                     if ( ! instance.isContinuous() )    instance = instance.clone();
 
-                    char rc[50];
-                    sprintf(rc," rc %s", prediction_name(prc).c_str());
-
-                    //--------------------------------------------------------------------//
-
-                    int pos_x = std::max(faces[i].tl().x - 10, 0);
-                    int pos_y = std::max(faces[i].tl().y - 10, 0);
-
-                    putText(img, ef, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);    //Put the text on the image showing the name of the model and the prediction
-                    putText(img, d2, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-                    putText(img, rc, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-
-                }
-
-                cvNamedWindow("Detection and Recognition",WINDOW_NORMAL);
-                cv::imshow("Detection and Recognition", img);                                       //  Show the image with detected faces and the predicted labels
+//                     //equalizeHist(instance,instance);
 
 
-                /*
-                     *****************************   Attendance Marking  *******************************
+//                     //copy(instance2,black,crop);
+//                     //imshow("segment",black);
+//                     //imshow("face",instance);
 
-                    *   For marking attendance of the students, we check the attendance array after
-                    *   every 40 frames. This 40 can be increased or decreased. We loop through the
-                    *   array and if we find any student having an attendance score more than a certain
-                    *   threshold, we mark that student as present. We also display their names with a
-                    *   Score with somewhat represents the percentage of time they were present in the
-                    *   last 40 frames. This can cross 100 as there is a chance of false positives being
-                    *   detected as faces during the detection process.
+//                     resize(instance,instance, Size(400,400),0,0, INTER_CUBIC);                      //  Resize the facial region to 400*400 for effective segmentation. This is required for all models
+//                     instance=getBB(remove_blobs(GetSkin(instance,cr_min,cr_max,cb_min,cb_max)));
+//                     resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  This is necessary for the recognition
+//                     //cvtColor(instance,instance,CV_BGR2GRAY);
+//                     int pef=-1,p2d=-1,prc=-1;                                                       //  The predictions of 3 models are returned
 
-                */
+//                     pef=ef->predict(instance);
+//                     p2d=model2d.predict(instance);
+//                     prc=modelrc.predict(instance);
 
-
-                if(frames%40==0)
-                {
-                    int y=10;
-                    att=black.clone();
-                    for(int i=0;i<num_dir;i++)
-                    {
-                        if(attendance[i]>18)                                                        //  Threshold for marking present. Try changing this
-                        {
-                            char present[50];
-                            sprintf(present,"%s Score %f",prediction_name(i+1).c_str(),attendance[i]*2.5);
-                            putText(att, present, Point(10, y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-                            y=y+15;
-                        }
-                        attendance[i]=0;
-                    }
-                    frames=0;                                                                       //  Reinitialize frames=0 so that the smae thing can be repeated
-                }
-
-
-                imshow("attendance",att);
-                key = cv::waitKey(40);
-                cam_movement(key,img);
-            }
-
-        }
-
-}
+//                     if(pef==prc==p2d)                                                               //  If all 3 are equal we give a vote of 1 per frame to the predicted class
+//                     {
+//                         attendance[pef-1]+=1*skip;
+//                     }
+//                     else if(pef==prc&&pef!=p2d)                                                     //  If any 2 are equal, we give the major class a vote of 2/3 per frame
+//                     {                                                                               //  and a vote of 1/3 per frame to the minor class
+//                         attendance[pef-1]+=(2.0/3)*skip;
+//                         attendance[p2d-1]+=(1.0/3)*skip;
+//                     }
+//                     else if(pef==p2d&&pef!=prc)
+//                     {
+//                         attendance[pef-1]+=(2.0/3)*skip;
+//                         attendance[prc-1]+=(1.0/3)*skip;
+//                     }
+//                     else if(p2d==prc&&p2d!=pef)
+//                     {
+//                         attendance[p2d-1]+=(2.0/3)*skip;
+//                         attendance[pef-1]+=(1.0/3)*skip;
+//                     }
+//                     else                                                                            //  If all 3 predictions are different we give each predicted class a vote of 1/3 per frame
+//                     {
+//                         attendance[pef-1]+=(1.0/3)*skip;
+//                         attendance[prc-1]+=(1.0/3)*skip;
+//                         attendance[p2d-1]+=(1.0/3)*skip;
+//                     }
 
 
+
+//                     rectangle(img,faces[i],CV_RGB(0,255,0),2);                                       //  We draw a green rectangle around the face
+
+
+//                     //  We write the strings that are to be displayed on top of each face //
+//                     char ef[50];
+//                     sprintf(ef," ef %s", prediction_name(pef).c_str());
+
+//                     char d2[50];
+//                     sprintf(d2," 2d %s", prediction_name(p2d).c_str());
+
+//                     char rc[50];
+//                     sprintf(rc," rc %s", prediction_name(prc).c_str());
+
+//                     //--------------------------------------------------------------------//
+
+//                     int pos_x = std::max(faces[i].tl().x - 10, 0);
+//                     int pos_y = std::max(faces[i].tl().y - 10, 0);
+
+//                     putText(img, ef, Point(pos_x, pos_y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);    //Put the text on the image showing the name of the model and the prediction
+//                     putText(img, d2, Point(pos_x, pos_y+15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+//                     putText(img, rc, Point(pos_x, pos_y+30), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+
+//                 }
+
+//                 cvNamedWindow("Detection and Recognition",WINDOW_NORMAL);
+//                 cv::imshow("Detection and Recognition", img);                                       //  Show the image with detected faces and the predicted labels
+
+
+//                 /*
+//                      *****************************   Attendance Marking  *******************************
+
+//                     *   For marking attendance of the students, we check the attendance array after
+//                     *   every 40 frames. This 40 can be increased or decreased. We loop through the
+//                     *   array and if we find any student having an attendance score more than a certain
+//                     *   threshold, we mark that student as present. We also display their names with a
+//                     *   Score with somewhat represents the percentage of time they were present in the
+//                     *   last 40 frames. This can cross 100 as there is a chance of false positives being
+//                     *   detected as faces during the detection process.
+
+//                 */
+
+
+//                 if(frames%40==0)
+//                 {
+//                     int y=10;
+//                     att=black.clone();
+//                     for(int i=0;i<num_dir;i++)
+//                     {
+//                         if(attendance[i]>18)                                                        //  Threshold for marking present. Try changing this
+//                         {
+//                             char present[50];
+//                             sprintf(present,"%s Score %f",prediction_name(i+1).c_str(),attendance[i]*2.5);
+//                             putText(att, present, Point(10, y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+//                             y=y+15;
+//                         }
+//                         attendance[i]=0;
+//                     }
+//                     frames=0;                                                                       //  Reinitialize frames=0 so that the smae thing can be repeated
+//                 }
+
+
+//                 imshow("attendance",att);
+//                 key = cv::waitKey(40);
+//                 cam_movement(key,img);
+//             }
+
+//         }
+
+// }
+
+//video_recognizer();
 
 //------------------------------------------------------------------//
 

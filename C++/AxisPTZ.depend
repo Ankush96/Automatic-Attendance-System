@@ -3,22 +3,23 @@
 	<opencv2/opencv.hpp>
 	<iostream>
 
-1436423818 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
+1436509953 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/main.cpp
 	<stdio.h>
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"
 	"opencv2/highgui/highgui.hpp"
 	"opencv2/imgproc/imgproc.hpp"
 	"opencv2/objdetect/objdetect.hpp"
-	"Utils.h"
-	"rc2dpca.h"
-	"two_d_pca.h"
-	"Stage-segment.h"
 	<iostream>
 	<fstream>
 	<sstream>
 	<vector>
 	<Eigen/Dense>
+	"Utils.h"
+	"rc2dpca.h"
+	"two_d_pca.h"
+	"Stage-segment.h"
+	"attendance.h"
 
 1433759860 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Sampler.cpp
 	<stdio.h>
@@ -54,7 +55,7 @@
 	"opencv2/opencv.hpp"
 	<iostream>
 
-1436428844 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
+1436508814 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/Stage-segment.cpp
 	<opencv2/core/core.hpp>
 	<opencv2/imgproc/imgproc.hpp>
 	<opencv2/highgui/highgui.hpp>
@@ -139,7 +140,7 @@
 	<Eigen/Dense>
 	<Eigen/Eigenvalues>
 
-1436430515 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/attendance.cpp
+1436508615 source:/home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/attendance.cpp
 	<stdio.h>
 	"opencv2/core/core.hpp"
 	"opencv2/contrib/contrib.hpp"
@@ -453,4 +454,6 @@
 	<queue>
 	"math.h"
 	<Eigen/Dense>
+
+1436509945 /home/student/Documents/Ankush Chatterjee:Project Work/Automatic-Attendance-System/C++/attendance.h
 

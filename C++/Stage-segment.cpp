@@ -331,7 +331,6 @@ Mat getBB(Mat const& img)
     top=max(top-10,0);
     right=min(right+10,src.cols-1);
     bottom=min(bottom+10,src.rows-1);
-    cout<<left<<" "<<right<<" "<<top<<" "<<bottom<<endl;
     Rect roi(left,top,right-left,bottom-top);
     
     //--------We check if the rectangle is a possible rectangle or not-----------//
