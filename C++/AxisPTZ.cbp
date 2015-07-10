@@ -55,6 +55,8 @@
 		<Unit filename="Stage-segment.h" />
 		<Unit filename="Utils.cpp" />
 		<Unit filename="Utils.h" />
+		<Unit filename="attendance.cpp" />
+		<Unit filename="attendance.h" />
 		<Unit filename="grabcut.cpp" />
 		<Unit filename="lena.jpg" />
 		<Unit filename="main.cpp" />
