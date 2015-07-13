@@ -33,13 +33,13 @@ int main()
     int num_dir=9;                                      //  Number of classes or unique identities
     int examples=10;                                    //  Number of images per person
     bool color=1;
-    string dir="../Face_db";
+    string dir="../Faces";
     int cr_min=126,cr_max=175,cb_min=99,cb_max=130;     //   A change in these values should be updated everywhere
 
     //model_main(dir, num_dir, color, cr_min, cr_max, cb_min, cb_max);
-    //image_recognizer(dir, num_dir, examples, color, cr_min, cr_max, cb_min, cb_max);
+    image_recognizer(dir, num_dir, examples, color, cr_min, cr_max, cb_min, cb_max);
     //tune_seg_params(dir, num_dir, cr_min, cr_max, cb_min, cb_max);
-    video_recognizer(cr_min, cr_max, cb_min, cb_max);
+    //video_recognizer(cr_min, cr_max, cb_min, cb_max);
 
 
     //------------------Drawing Roc curves for all the classes-------------------------//

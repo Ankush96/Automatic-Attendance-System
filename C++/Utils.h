@@ -10,4 +10,5 @@ static void read_csv(const std::string&, std::vector<cv::Mat>&, std::vector<int>
 
 int sampler_main();
 
+
 #endif

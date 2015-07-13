@@ -284,7 +284,7 @@ Mat remove_blobs(Mat const &img)
     *   we want to crop only the facial part and ignore the rest. This is done by the
     *   getBB function in an effective way. It calculates the 4 corner points of a
     *   Bounding Box on the face, stretches the rectangle by 10 pixel on all sides,
-    *   crops the new Bounding Box out of the image, and resizes the BB to m*n dimension
+    *   crops the new Bounding Box out of the image and returns the cropped section
     ************************************************************************************
 */
 Mat getBB(Mat const& img)

@@ -25,9 +25,9 @@ using namespace std;
     ***************************   Prediction_Name    *********************************
     *
     *   Function that returns the name of the subject identified. The cases provided
-    *   under the switch case needs to be changed according to needs. The numbers 
-    *   correspond to the number of associated with the folder where the images are 
-    *   stored. For example images of the person named "Ankush" are stored in the 
+    *   under the switch case needs to be changed according to needs. The numbers
+    *   correspond to the number of associated with the folder where the images are
+    *   stored. For example images of the person named "Ankush" are stored in the
     *   folder "s1". Hence "Ankush" is associated with the label "1". This is similar
     *   for all other classes.
     **********************************************************************************
@@ -55,10 +55,10 @@ string prediction_name(int prediction){
 /*
     ******************************   Tune_seg_params    ********************************
     *
-    *   Function that visualises the effect of segmentation and lets the user derive 
-    *   the best thresholds for segmentation. The thresholds found by the user must be 
+    *   Function that visualises the effect of segmentation and lets the user derive
+    *   the best thresholds for segmentation. The thresholds found by the user must be
     *   updated in main.cpp
-    *********************************************************************************** 
+    ***********************************************************************************
 */
 void tune_seg_params(string dir, int num_dir, int cr_min, int cr_max, int cb_min, int cb_max)
 {
@@ -70,12 +70,12 @@ void tune_seg_params(string dir, int num_dir, int cr_min, int cr_max, int cb_min
 
     cvNamedWindow("src",WINDOW_NORMAL);
     cvNamedWindow("dst",WINDOW_NORMAL);
-    
+
     createTrackbar("cr min ","dst",&cr_min,255);
     createTrackbar("cr max ","dst",&cr_max,255);
     createTrackbar("cb min ","dst",&cb_min,255);
     createTrackbar("cb max ","dst",&cb_max,255);
-    
+
     for(int i=0;i<images.size();i++)
     {
       Mat src=images[i];
@@ -89,16 +89,16 @@ void tune_seg_params(string dir, int num_dir, int cr_min, int cr_max, int cb_min
                 if(key==32)break;
                 if(key==27)return;
             }
-    
+
     }
 }
 
 /*
     *******************************    Model_Main   ************************************
     *
-    *   This function trains different models based on the images provided in the 
+    *   This function trains different models based on the images provided in the
     *   directory "dir", which has "num_dir" different classes. The bool variable "color"
-    *   is set to 0 if we do not want a segmented image to be trained, and to 1 if we 
+    *   is set to 0 if we do not want a segmented image to be trained, and to 1 if we
     *   want to extract the facial region using segmentation before training the images.
     *   The 4 parameters after "color" define the thresholds applied on the Cr and Cb
     *   colorspace.
@@ -117,6 +117,15 @@ void model_main(string dir, int num_dir, bool color, int cr_min, int cr_max, int
                 Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));
                 resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);
                 images[i]=dst;
+            }
+    }
+    else
+    {
+        for(int i=0;i<images.size();i++)
+            {
+                Mat src=images[i];
+                resize(src,src,Size(n,m),0,0,INTER_CUBIC);
+                images[i]=src;
             }
     }
 
@@ -149,8 +158,8 @@ void model_main(string dir, int num_dir, bool color, int cr_min, int cr_max, int
     *
     *   This function lets the user evaluate the trained models by performing a series of
     *   leave one out cross-validation on the dataset provided in the directory "dir".
-    *   In each round of cross-validation, one sample of each class is collected in the 
-    *   test set, and the remaining ("examples"-1) samples are used for training a particular 
+    *   In each round of cross-validation, one sample of each class is collected in the
+    *   test set, and the remaining ("examples"-1) samples are used for training a particular
     *   model. The accuracies are tested on the the testing set. The k_th round of cross-validation
     *   uses the k-th sample from each class as part of the testing set. After "examples" number
     *   of rounds of cross-validation, the accuracies over all rounds are averaged, thus giving
@@ -162,16 +171,16 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
         vector<Mat> images;                                                                 //  All the images are loaded along with their labels
         vector<int> labels;                                                                 //  only during the start of the function. This is done
         dir_read(dir,num_dir,images,labels,color);                                          //  just once. Any further change in training and testing
-                                                                                            //  datasets is done by manipulating these two vectors 
+                                                                                            //  datasets is done by manipulating these two vectors
 
-        pca2d model;                                                                        //  Declaring the models to be tested 
-        if(color)                                                                          
+        pca2d model;                                                                        //  Declaring the models to be tested
+        if(color)
         {                                                                                   //  If the color is 0, no segmentation is performed
-          for(int i=0;i<images.size();i++)                                                  //  Else for every image in the vector "images" 
+          for(int i=0;i<images.size();i++)                                                  //  Else for every image in the vector "images"
             {                                                                               //  Segmentation is carried out to extract only the faces
                 Mat src=images[i];
                 Mat dst=getBB(remove_blobs(GetSkin(src,cr_min,cr_max,cb_min,cb_max)));      //  The largest blob is retained and a bounding box is put around it
-                resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);                                  //  The bounding box is resized to the same size as the images that were trained 
+                resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);                                  //  The bounding box is resized to the same size as the images that were trained
                 images[i]=dst;                                                              //  The vector "images" is updated to contain the segmented images
             }
         }
@@ -184,7 +193,7 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
         double y[101];
         fstream myfile("Plots/o3.txt", ios::out);                                           //  The accuracies are written into a text file for plotting purposes
         if (myfile.is_open()) cout<<"file exists"<<endl;
-        for(int i=0;i<36;i++)                                                               //  This loop controls the threshold of percentage information retained for 
+        for(int i=0;i<36;i++)                                                               //  This loop controls the threshold of percentage information retained for
         {                                                                                   //  training. Different ranges can be tried out here.
 
             for(int k=0;k<examples;k++)                                                     //  This loop controls the rounds of cross-validation as it goes
@@ -197,7 +206,7 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
                 labels_test.clear();
                 for(int i=0;i<images.size();i++)
                 {
-                    if(i%examples==k)                                                       // Put in testing set 
+                    if(i%examples==k)                                                       // Put in testing set
                     {
                         images_test.push_back(images[i]);
                         labels_test.push_back(labels[i]);
@@ -213,7 +222,7 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
                 //model->train(images_train, labels_train);                                 //  Train the Eigenfaces model
                 for(int j=0;j<images_test.size();j++)
                 {
-                    int prediction=  model.predict(images_test[j]);                         //  Prediction for 2DPCA 
+                    int prediction=  model.predict(images_test[j]);                         //  Prediction for 2DPCA
                     //int prediction=  model->predict(images_test[j]);                      //  Prediction for eigenfaces
 
 
@@ -250,7 +259,7 @@ int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
     VideoCapture vcap;
     Mat img,gray,sgray;
 
-    Mat black(500,500,CV_8UC3,Scalar(0,0,0));                                                       //  Mat image to display final attendance
+    Mat black(200,200,CV_8UC3,Scalar(0,0,0));                                                       //  Mat image to display final attendance
     Mat att=black.clone();
 
     char key,name[20];
@@ -294,7 +303,8 @@ int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
 
             if(count%skip==0)                                                                       //  We do our processing only on every 5th frame
             {
-                img=clahe(img);                                                                     //  Perform local histogram equalisation
+                //img=clahe(img);     
+                                                                                //  Perform local histogram equalisation
                 Mat black(img.rows,img.cols,CV_8UC3,Scalar(0,0,0));                                 //  Maintain a black Mat image to display attendance
                 vector< Rect_<int> > faces;                                                         //  Initialise a vector of rectangles that store the detected faces
 
@@ -307,19 +317,16 @@ int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
                     if(faces[i].width<50||faces[i].height<50)   continue;                           //  Ignore small rectangles. They are probably false positives
 
 
-                    faces[i].x=max(faces[i].x-20,0);                                                //  Stretch the image
-                    faces[i].y=max(faces[i].y-30,0);
-                    int bottom=min(faces[i].y+faces[i].height+30,img.rows-1);
-                    int right=min(faces[i].x+faces[i].width+20,img.cols-1);
-                    faces[i].width=right-faces[i].x;
-                    faces[i].height=bottom-faces[i].y;
-                    //cout<<0<<" "<<0<<" "<<img.cols-1<<" "<<img.rows-1<<endl;
-                    //cout<< faces[i].x<< " "<< faces[i].y <<" "<< faces[i].x+faces[i].width<< " "<< faces[i].y+faces[i].height <<endl;
-
+                    // faces[i].x=max(faces[i].x-20,0);                                                //  Stretch the image
+                    // faces[i].y=max(faces[i].y-30,0);
+                    // int bottom=min(faces[i].y+faces[i].height+30,img.rows-1);
+                    // int right=min(faces[i].x+faces[i].width+20,img.cols-1);
+                    // faces[i].width=right-faces[i].x;
+                    // faces[i].height=bottom-faces[i].y;
+                    
                     Mat instance=img(faces[i]);                                                     //  Crop only the face region.
                     if ( ! instance.isContinuous() )    instance = instance.clone();
 
-                    //equalizeHist(instance,instance);
 
 
                     //copy(instance2,black,crop);
@@ -329,17 +336,19 @@ int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
                     resize(instance,instance, Size(400,400),0,0, INTER_CUBIC);                      //  Resize the facial region to 400*400 for effective segmentation. This is required for all models
                     instance=getBB(remove_blobs(GetSkin(instance,cr_min,cr_max,cb_min,cb_max)));
                     resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  This is necessary for the recognition
+                    
+                    equalizeHist(instance,instance);
                     //cvtColor(instance,instance,CV_BGR2GRAY);
                     int pef=-1,p2d=-1,prc=-1;                                                       //  The predictions of 3 models are returned
 
                     pef=ef->predict(instance);
                     p2d=model2d.predict(instance);
                     prc=modelrc.predict(instance);
-                    
+
                     attendance[pef-1]+=(1.0/3)*skip;                                                //  Update the attendance scores of all identified people
                     attendance[prc-1]+=(1.0/3)*skip;
                     attendance[p2d-1]+=(1.0/3)*skip;
-                    
+
                     rectangle(img,faces[i],CV_RGB(0,255,0),2);                                      //  We draw a green rectangle around the face
 
                     //  We write the strings that are to be displayed on top of each face //
@@ -383,7 +392,7 @@ int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
 
                 if(frames%40==0)
                 {
-                    int y=10;
+                    int y=30;
                     att=black.clone();
                     for(int i=0;i<num_dir;i++)
                     {
@@ -391,15 +400,15 @@ int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
                         {
                             char present[50];
                             sprintf(present,"%s Score %f",prediction_name(i+1).c_str(),attendance[i]*2.5);
-                            putText(att, present, Point(10, y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-                            y=y+15;
+                            putText(att, present, Point(30, y), FONT_HERSHEY_PLAIN, 3.0, CV_RGB(0,255,0), 2.0);
+                            y=y+45;
                         }
                         attendance[i]=0;
                     }
                     frames=0;                                                                       //  Reinitialize frames=0 so that the same thing can be repeated
                 }
 
-
+                cvNamedWindow("attendance",WINDOW_NORMAL);
                 imshow("attendance",att);
                 key = cv::waitKey(40);
                 if(key==27)
