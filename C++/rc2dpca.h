@@ -13,7 +13,7 @@ class rc2dpca
 		cv::Mat eigenvectors_U;
 
 	public:
-		void train(std::vector<cv::Mat>,std::vector<int>,double,std::string);
+		void train(std::vector<cv::Mat>,std::vector<int>,int,std::string);
 		void load(std::string);
 		int predict(cv::Mat,double distance_thresh=200000000);
 

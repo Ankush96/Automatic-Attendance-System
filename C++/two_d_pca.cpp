@@ -119,7 +119,7 @@ Mat pca2d::copy_eigen2cv(MatrixXf src,int type=0)
 	return dst;
 }
 
-void pca2d::train(vector<Mat> images,vector<int> labels,int e_vec_thresh,string filename)
+void pca2d::train(vector<Mat> images,vector<int> labels,int num_evecs,string filename)
 {
 	int num_images=images.size();
 	Mat input;
@@ -185,9 +185,8 @@ void pca2d::train(vector<Mat> images,vector<int> labels,int e_vec_thresh,string 
     quicksort(evals,0,evals.size()-1,evals.size(),initial_evec);
     double total_sum=evals.sum(),sum=0;
     //cout<<endl<<"sum"<<total_sum;
-    int num_evecs=1;
     MatrixXf X,temp;
-    X=initial_evec.block(0,0,initial_evec.rows(),e_vec_thresh);
+    X=initial_evec.block(0,0,initial_evec.rows(),num_evecs);
     //cout<<"Building X...\nAdding 1st eigenvector. Eigenvalue is "<< evals(0)<<" percentage is"<<evals(0)/total_sum<<endl;
     // X=initial_evec.col(0);
     // sum+=evals(0);

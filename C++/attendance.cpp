@@ -150,7 +150,7 @@ void model_main(string dir, int num_dir, bool color, int cr_min, int cr_max, int
     ef->save("ef.xml");
 
     model2d.train(images,labels,10,"2dpca.xml");
-    modelrc.train(images,labels,0.65,"rc2dpca.xml");
+    modelrc.train(images,labels,6,"rc2dpca.xml");
 }
 
 /*
@@ -172,7 +172,7 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
         vector<int> labels;                                                                 //  only during the start of the function. This is done
         dir_read(dir,num_dir,images,labels,color);                                          //  just once. Any further change in training and testing
                                                                                             //  datasets is done by manipulating these two vectors
-
+        cout<<"here"<<endl;
         pca2d model;                                                                        //  Declaring the models to be tested
         if(color)
         {                                                                                   //  If the color is 0, no segmentation is performed
@@ -193,14 +193,14 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
                 images[i]=dst;                                                    
             }
         }
-
+        cout<<"here"<<endl;
         std::vector<Mat> images_test,images_train;                                          //  Declaring the vector of testing and training images for each case
         std::vector<int> labels_train,labels_test;                                          //  Declaring the vector of labels corresponding to the training and testing images
         double* accuracy = new double[examples*sizeof( double )];
 
         //cvNamedWindow("src",WINDOW_NORMAL);
         double y[101];
-        fstream myfile("Plots/new_cvl_2d_1.txt", ios::out);                                           //  The accuracies are written into a text file for plotting purposes
+        fstream myfile("Plots/new_cvl_2d_3.txt", ios::out);                                           //  The accuracies are written into a text file for plotting purposes
         if (myfile.is_open()) cout<<"file exists"<<endl;
         for(int i=1;i<80;i++)                                                               //  This loop controls the number of eigenvectors retained for
         {                                                                                   //  training. Different ranges can be tried out here.

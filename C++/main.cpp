@@ -32,8 +32,8 @@ int main()
 {
     int num_dir=13;                                      //  Number of classes or unique identities
     int examples=7;                                    //  Number of images per person
-    bool color=1;
-    string dir="../cvl";
+    bool color=0;
+    string dir="../CVL";
     int cr_min=127,cr_max=175,cb_min=99,cb_max=127;     //   A change in these values should be updated everywhere
 
     //model_main(dir, num_dir, color, cr_min, cr_max, cb_min, cb_max);

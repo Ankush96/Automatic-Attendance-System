@@ -69,7 +69,7 @@ Mat rc2dpca::copy_eigen2cv(MatrixXf src,int type=0)
 	return dst;
 }
 
-void rc2dpca::train(vector<Mat> images,vector<int> labels,double e_val_thresh,string filename)
+void rc2dpca::train(vector<Mat> images,vector<int> labels,int num_evecs,string filename)
 {
 	int num_images=images.size();
 	Mat input;
@@ -133,22 +133,22 @@ void rc2dpca::train(vector<Mat> images,vector<int> labels,double e_val_thresh,st
     quicksort(evals,0,evals.size()-1,evals.size(),initial_evec);
     double total_sum=evals.sum(),sum=0;
     //cout<<endl<<"sum"<<total_sum;
-    int num_evecs=1;
     MatrixXf X,temp;
-
+    X=initial_evec.block(0,0,initial_evec.rows(),num_evecs);
     //cout<<"Building X...\nAdding 1st eigenvector. Eigenvalue is "<< evals(0)<<" percentage is"<<evals(0)/total_sum<<endl;
-    X=initial_evec.col(0);
-    sum+=evals(0);
-    while((sum/total_sum)<e_val_thresh)
-    {
+    // X=initial_evec.col(0);
+    // sum+=evals(0);
+    // while((sum/total_sum)<e_val_thresh)
+    // {
 
-    	temp.resize(X.rows(),X.cols()+1);
-        temp<<X,initial_evec.col(num_evecs);
-        X=temp;
-        sum+=evals(num_evecs);
-        num_evecs++;
-        //cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
-    }
+    // 	temp.resize(X.rows(),X.cols()+1);
+    //     temp<<X,initial_evec.col(num_evecs);
+    //     X=temp;
+    //     sum+=evals(num_evecs);
+    //     num_evecs++;
+    //     //cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
+    // }
+
 
     //cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
     //cout<<" number of eigenvectors in X is "<<num_evecs<<endl;
@@ -246,22 +246,21 @@ void rc2dpca::train(vector<Mat> images,vector<int> labels,double e_val_thresh,st
     total_sum=evals.sum();
     sum=0;
     // cout<<endl<<"sum"<<total_sum;
-    num_evecs=1;
-    MatrixXf U;
+    MatrixXf U=initial_evec.block(0,0,initial_evec.rows(),num_evecs);
 
     //cout<<"Building U...\nAdding 1st eigenvector. Eigenvalue is "<< evals(0)<<" percentage is"<<evals(0)/total_sum<<endl;
-    U=initial_evec.col(0);
-    sum+=evals(0);
-    while((sum/total_sum)<e_val_thresh)
-    {
+    // U=initial_evec.col(0);
+    // sum+=evals(0);
+    // while((sum/total_sum)<e_val_thresh)
+    // {
 
-        temp.resize(U.rows(),U.cols()+1);
-        temp<<U,initial_evec.col(num_evecs);
-        U=temp;
-        sum+=evals(num_evecs);
-        num_evecs++;
-        //cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
-    }
+    //     temp.resize(U.rows(),U.cols()+1);
+    //     temp<<U,initial_evec.col(num_evecs);
+    //     U=temp;
+    //     sum+=evals(num_evecs);
+    //     num_evecs++;
+    //     //cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
+    // }
 
     //cout<<endl<<"final U size is "<<endl<<U.rows()<<"*"<<U.cols()<<endl;
     //cout<<" number of eigenvectors in U is "<<num_evecs<<endl;
