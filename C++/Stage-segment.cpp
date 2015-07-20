@@ -272,9 +272,10 @@ Mat remove_blobs(Mat const &img)
 
         }
      }
-    namedWindow("Remove_blobs",WINDOW_NORMAL);
-    imshow("Remove_blobs",src);
-    waitKey(30);
+    //namedWindow("Remove_blobs",WINDOW_NORMAL);
+    //imshow("Remove_blobs",src);
+    //imwrite("remove_blob.jpg",src);
+    //waitKey(30);
     return src;
 }
 
@@ -326,15 +327,15 @@ Mat getBB(Mat const& img)
     //int bb_height=bottom-top, bb_width= right-left;
 
     //-------We include some space beacuse we dont require an exact bounding box-----------//
-    
+
     left=max(left-10,0);
     top=max(top-10,0);
     right=min(right+10,src.cols-1);
     bottom=min(bottom+10,src.rows-1);
     Rect roi(left,top,right-left,bottom-top);
-    
-    //--------We check if the rectangle is a possible rectangle or not-----------//
 
+    //--------We check if the rectangle is a possible rectangle or not-----------//
+    //imwrite("getBB.jpg",src(roi));
     if(left>=right||top>=bottom)    return src;
     else    return src(roi);
 }
@@ -582,7 +583,7 @@ Mat stage3(Mat const &src,Mat const &img,int thresh=2)
 */
 Mat stage4(Mat const &img,int thresh=4,int remove=0)
 {
-    
+
     Mat dst=img.clone();
 
     int i,j,start,k,l,count;
@@ -679,7 +680,7 @@ Mat stage4(Mat const &img,int thresh=4,int remove=0)
     }
     // namedWindow("Stage4 geo correct",WINDOW_NORMAL);
     // imshow("Stage4 geo correct",dst2);
-    // imwrite("s5.jpg",dst);
+    // imwrite("s3.jpg",dst2);
     // waitKey(0);
     //cout<<"sTAGE 4 EXIT"<<dst2.rows<<" "<<dst2.cols<<endl;
     if(remove)
@@ -736,7 +737,7 @@ Mat stage5(Mat const &cs1,Mat const &s4)
     }
     // namedWindow("contour stage 5",WINDOW_AUTOSIZE);
     // imshow("contour stage 5",dst);
-    // imwrite("s6.jpg",dst);
+    // imwrite("s4.jpg",dst);
     // waitKey(0);
     return dst;
 }
@@ -775,6 +776,7 @@ Mat GetSkin(Mat const &src,int cr_min_arg=128,int cr_max_arg=164,int cb_min_arg=
     }
     // namedWindow("GetSkin",WINDOW_NORMAL);
     // imshow("GetSkin",dst);
+    // imwrite("Getskin.jpg",dst);
     // waitKey(0);
     return dst;
 }

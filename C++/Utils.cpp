@@ -69,7 +69,7 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
         if(!path.empty() && !classlabel.empty()) {
             Mat tmp1=imread(path, 0);
             Mat tmp2;
-            resize(tmp1, tmp2, Size(m, n), 1.0, 1.0, INTER_CUBIC);
+            resize(tmp1, tmp2, Size(m, n), 0.0, 0.0, INTER_CUBIC);
             ///tmp2=clahe(tmp2);
             equalizeHist(tmp2,tmp2);
             //cvNamedWindow("image",WINDOW_NORMAL);

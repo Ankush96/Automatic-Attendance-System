@@ -149,8 +149,8 @@ void model_main(string dir, int num_dir, bool color, int cr_min, int cr_max, int
     ef->train(images, labels);
     ef->save("ef.xml");
 
-    model2d.train(images,labels,0.6,"2dpca.xml");
-    modelrc.train(images,labels,0.63,"rc2dpca.xml");
+    model2d.train(images,labels,10,"2dpca.xml");
+    modelrc.train(images,labels,0.65,"rc2dpca.xml");
 }
 
 /*
@@ -184,6 +184,15 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
                 images[i]=dst;                                                              //  The vector "images" is updated to contain the segmented images
             }
         }
+        else
+        {
+            for(int i=0;i<images.size();i++)                                                  
+            {                                                                               
+                Mat dst=images[i];
+                resize(dst,dst,Size(n,m),0,0,INTER_CUBIC);                                  
+                images[i]=dst;                                                    
+            }
+        }
 
         std::vector<Mat> images_test,images_train;                                          //  Declaring the vector of testing and training images for each case
         std::vector<int> labels_train,labels_test;                                          //  Declaring the vector of labels corresponding to the training and testing images
@@ -191,9 +200,9 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
 
         //cvNamedWindow("src",WINDOW_NORMAL);
         double y[101];
-        fstream myfile("Plots/o3.txt", ios::out);                                           //  The accuracies are written into a text file for plotting purposes
+        fstream myfile("Plots/new_cvl_2d_1.txt", ios::out);                                           //  The accuracies are written into a text file for plotting purposes
         if (myfile.is_open()) cout<<"file exists"<<endl;
-        for(int i=0;i<36;i++)                                                               //  This loop controls the threshold of percentage information retained for
+        for(int i=1;i<80;i++)                                                               //  This loop controls the number of eigenvectors retained for
         {                                                                                   //  training. Different ranges can be tried out here.
 
             for(int k=0;k<examples;k++)                                                     //  This loop controls the rounds of cross-validation as it goes
@@ -217,7 +226,7 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
                         labels_train.push_back(labels[i]);
                     }
                 }
-                model.train(images_train,labels_train,(29+2*i)/100.0,"2dpca.xml");          //  Train the 2dpca model
+                model.train(images_train,labels_train,i,"2dpca.xml");          //  Train the 2dpca model
                 //Ptr<FaceRecognizer> model = createEigenFaceRecognizer(4*(i+1));           //  Initialise a model for Eigenfaces. If this is uncommented all corresponding code related to EF has to be uncommented
                 //model->train(images_train, labels_train);                                 //  Train the Eigenfaces model
                 for(int j=0;j<images_test.size();j++)
@@ -249,7 +258,7 @@ void image_recognizer(string dir, int num_dir, int examples, int color, int cr_m
             }
 
             y[i]=(accuracy[examples-1]*100)/(examples*num_dir);                             //  Normalising the accuracy value
-            cout<<endl<<"percentage"<<(29+2*i)<<" final accuracy -> "<<y[i]<<endl;
+            cout<<endl<<"eigenvectors "<<i<<" final accuracy -> "<<y[i]<<endl;
             myfile<<y[i]<<endl;                                                             //  Writing the accuracy onto the file
         }
         myfile.close();                                                                     //   Close the file after writing the accuracy values
@@ -263,7 +272,7 @@ int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
     Mat att=black.clone();
 
     char key,name[20];
-    int i=0,count=-1,skip=5,y;
+    int i=0,count=-1,skip=10,y;
     int num_dir=9;                                                                                  //  Number of classes or unique identities
     double* attendance = new double[num_dir*sizeof( double )];
 
@@ -337,14 +346,17 @@ int video_recognizer(int cr_min, int cr_max, int cb_min, int cb_max){
                     instance=getBB(remove_blobs(GetSkin(instance,cr_min,cr_max,cb_min,cb_max)));
                     resize(instance,instance, Size(n,m),0,0, INTER_CUBIC);                          //  This is necessary for the recognition
                     
-                    equalizeHist(instance,instance);
+                    //equalizeHist(instance,instance);
+                    cvNamedWindow("face",WINDOW_NORMAL);
+                    imshow("face",instance);
+                    waitKey(30);
                     //cvtColor(instance,instance,CV_BGR2GRAY);
                     int pef=-1,p2d=-1,prc=-1;                                                       //  The predictions of 3 models are returned
 
                     pef=ef->predict(instance);
                     p2d=model2d.predict(instance);
                     prc=modelrc.predict(instance);
-
+                    cout<<" pef "<<pef<<" p2d "<<p2d<<" prc "<<prc<<endl;
                     attendance[pef-1]+=(1.0/3)*skip;                                                //  Update the attendance scores of all identified people
                     attendance[prc-1]+=(1.0/3)*skip;
                     attendance[p2d-1]+=(1.0/3)*skip;

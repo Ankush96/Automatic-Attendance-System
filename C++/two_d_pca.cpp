@@ -119,7 +119,7 @@ Mat pca2d::copy_eigen2cv(MatrixXf src,int type=0)
 	return dst;
 }
 
-void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,string filename)
+void pca2d::train(vector<Mat> images,vector<int> labels,int e_vec_thresh,string filename)
 {
 	int num_images=images.size();
 	Mat input;
@@ -137,7 +137,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n){
-            resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
+            resize(input,input, Size(n,m) , 0.0, 0.0, INTER_CUBIC);
             images[i]=input;
 		}
 		A=copy_cv2eigen(input);
@@ -158,7 +158,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n){
-            resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
+            resize(input,input, Size(n,m) , 0.0, 0.0, INTER_CUBIC);
         }
 		A=copy_cv2eigen(input);
 		A=A-mean;
@@ -187,20 +187,20 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
     //cout<<endl<<"sum"<<total_sum;
     int num_evecs=1;
     MatrixXf X,temp;
-
+    X=initial_evec.block(0,0,initial_evec.rows(),e_vec_thresh);
     //cout<<"Building X...\nAdding 1st eigenvector. Eigenvalue is "<< evals(0)<<" percentage is"<<evals(0)/total_sum<<endl;
-    X=initial_evec.col(0);
-    sum+=evals(0);
-    while((sum/total_sum)<e_val_thresh)
-    {
+    // X=initial_evec.col(0);
+    // sum+=evals(0);
+    // while((sum/total_sum)<e_val_thresh)
+    // {
 
-    	temp.resize(X.rows(),X.cols()+1);
-        temp<<X,initial_evec.col(num_evecs);
-        X=temp;
-        sum+=evals(num_evecs);
-        num_evecs++;
-        //cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
-    }
+    // 	temp.resize(X.rows(),X.cols()+1);
+    //     temp<<X,initial_evec.col(num_evecs);
+    //     X=temp;
+    //     sum+=evals(num_evecs);
+    //     num_evecs++;
+    //     //cout<<"Adding "<<num_evecs<<"th eigenvector. Eigenvalue is "<<evals(num_evecs)<<" percentage is "<<sum/total_sum<<endl;
+    // }
 
     //cout<<endl<<"final x size is "<<endl<<X.rows()<<"*"<<X.cols()<<endl;
     //cout<<" number of eigenvectors in 2dpca is "<<num_evecs<<endl;
@@ -209,7 +209,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 
     //***********Visualisation of Reconstruction***********//
     //Mat src=images[1];
-    //if(src.rows!=m||src.cols!=n)     resize(src,src, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
+    //if(src.rows!=m||src.cols!=n)     resize(src,src, Size(n,m) , 0.0, 0.0, INTER_CUBIC);
     // cvNamedWindow("Source",WINDOW_NORMAL);
     // imshow("Source",src);
     // cvNamedWindow("Reconstructed",WINDOW_NORMAL);
@@ -241,7 +241,7 @@ void pca2d::train(vector<Mat> images,vector<int> labels,double e_val_thresh,stri
 		if(input.channels()==3)
 			cvtColor(input,input,CV_BGR2GRAY);
 		if(input.rows!=m||input.cols!=n){
-            resize(input,input, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
+            resize(input,input, Size(n,m) , 0.0, 0.0, INTER_CUBIC);
         }
 		MatrixXf A,B;
 		A=copy_cv2eigen(input);
@@ -288,7 +288,7 @@ int pca2d::predict(Mat test,double distance_thresh)
     // cout<<" Calculating Euclidean distances..."<<endl;
 
     if(test.channels()==3)  cvtColor(test,test,CV_BGR2GRAY);
-    if(!((test.rows==m)&&(test.cols==n)))  resize(test,test, Size(n,m) , 1.0, 1.0, INTER_CUBIC);
+    if(!((test.rows==m)&&(test.cols==n)))  resize(test,test, Size(n,m) , 0.0, 0.0, INTER_CUBIC);
     vector<distances>eucl_dist_vec;
     distances temp={0,0,0};
     MatrixXf mean=copy_cv2eigen(this->mean_img,5);
@@ -302,7 +302,7 @@ int pca2d::predict(Mat test,double distance_thresh)
     MatrixXf A_reconstruct=B*X.transpose()+mean;
     // cvNamedWindow("Reconstructed",WINDOW_NORMAL);
     // imshow("Reconstructed",copy_eigen2cv(A_reconstruct));
-    // waitKey(100);
+    // waitKey(30);
     //cout<<"\n Sum of all elements in B is "<<B.sum()<<endl;
     MatrixXf Bclass;
     for(int i=0;i<classes.size();i++)
